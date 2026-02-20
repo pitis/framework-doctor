@@ -1,0 +1,7 @@
+{
+  "name": "fixture-svelte5-app",
+  "private": true,
+  "dependencies": {
+    "svelte": "^5.0.0"
+  }
+}
