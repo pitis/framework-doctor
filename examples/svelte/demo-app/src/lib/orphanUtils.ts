@@ -1,0 +1,10 @@
+/**
+ * INTENTIONAL: Unused file for svelte-doctor testing.
+ * This file is not imported anywhere - knip will report it as unused.
+ */
+
+export const ORPHAN_CONSTANT = 42;
+
+export function orphanHelper(x: number): number {
+  return x * 2;
+}
