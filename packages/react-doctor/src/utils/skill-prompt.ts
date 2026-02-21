@@ -27,7 +27,7 @@ npx -y @framework-doctor/react@latest . --verbose --diff
 Or use the unified CLI (auto-detects React):
 
 \`\`\`bash
-npx -y @framework-doctor . --verbose --diff
+npx -y @framework-doctor/cli . --verbose --diff
 \`\`\`
 
 ## Workflow

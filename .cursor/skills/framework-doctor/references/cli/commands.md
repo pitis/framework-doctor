@@ -2,18 +2,18 @@
 
 ## Common Flags
 
-| Flag            | Description                              | Example                                         |
-| --------------- | ---------------------------------------- | ----------------------------------------------- |
-| `--verbose`     | Show file-level details per rule         | `npx -y @framework-doctor . --verbose`          |
-| `--diff`        | Scan only changed files (vs base branch) | `npx -y @framework-doctor . --diff`             |
-| `--diff <base>` | Scan only changed files vs specific base | `npx -y @framework-doctor . --diff origin/main` |
-| `--score`       | Output only the score (no details)       | `npx -y @framework-doctor . --score`            |
+| Flag            | Description                              | Example                                             |
+| --------------- | ---------------------------------------- | --------------------------------------------------- |
+| `--verbose`     | Show file-level details per rule         | `npx -y @framework-doctor/cli . --verbose`          |
+| `--diff`        | Scan only changed files (vs base branch) | `npx -y @framework-doctor/cli . --diff`             |
+| `--diff <base>` | Scan only changed files vs specific base | `npx -y @framework-doctor/cli . --diff origin/main` |
+| `--score`       | Output only the score (no details)       | `npx -y @framework-doctor/cli . --score`            |
 
 ## Recommended Usage
 
 ```bash
 # Full scan with details
-npx -y @framework-doctor . --verbose --diff
+npx -y @framework-doctor/cli . --verbose --diff
 ```
 
 Use `--diff` to speed up scans by only checking changed files. Use `--verbose` to see which files trigger each rule.

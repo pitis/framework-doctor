@@ -1,5 +1,5 @@
 {
-  "name": "@framework-doctor",
+  "name": "@framework-doctor/cli",
   "version": "1.0.0",
   "description": "Auto-detect framework and run the right doctor",
   "author": {

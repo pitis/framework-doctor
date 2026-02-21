@@ -32,13 +32,13 @@ pnpm exec svelte-doctor examples/svelte/demo-app
 # After cloning, from repo root
 cd framework-doctor
 pnpm install
-npx -y @framework-doctor examples/svelte/demo-app
+npx -y @framework-doctor/cli examples/svelte/demo-app
 ```
 
 Or from anywhere with an absolute path:
 
 ```bash
-npx -y @framework-doctor /path/to/framework-doctor/examples/svelte/demo-app
+npx -y @framework-doctor/cli /path/to/framework-doctor/examples/svelte/demo-app
 ```
 
 ### What to expect

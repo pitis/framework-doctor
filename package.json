@@ -9,7 +9,7 @@
   "scripts": {
     "build": "turbo run build",
     "build:svelte": "turbo run build --filter=@framework-doctor/svelte",
-    "build:cli": "turbo run build --filter=@framework-doctor",
+    "build:cli": "turbo run build --filter=@framework-doctor/cli",
     "demo": "pnpm build && pnpm exec framework-doctor examples/svelte/demo-app",
     "dev": "turbo run dev",
     "dev:doctor": "turbo run dev --filter=@framework-doctor/svelte",
@@ -28,7 +28,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@framework-doctor": "workspace:*",
+    "@framework-doctor/cli": "workspace:*",
     "@changesets/cli": "catalog:",
     "@types/node": "catalog:",
     "husky": "^9.1.7",

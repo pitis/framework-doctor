@@ -26,7 +26,7 @@ Run the doctor after refactoring, adding features, or fixing bugs. Fix errors fi
 
 ```
 Scan project?
-├─ Auto-detect framework → npx -y @framework-doctor . --verbose --diff
+├─ Auto-detect framework → npx -y @framework-doctor/cli . --verbose --diff
 ├─ Svelte only → npx -y @framework-doctor/svelte . --verbose --diff
 ├─ React only → npx -y @framework-doctor/react . --verbose --diff
 ├─ Flags (verbose, diff, score) → references/cli/commands.md

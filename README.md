@@ -1,7 +1,7 @@
 # Framework Doctor
 
-[![npm version](https://img.shields.io/npm/v/@framework-doctor.svg)](https://www.npmjs.com/package/@framework-doctor)
-[![npm downloads](https://img.shields.io/npm/dm/@framework-doctor.svg)](https://www.npmjs.com/package/@framework-doctor)
+[![npm version](https://img.shields.io/npm/v/@framework-doctor/cli.svg)](https://www.npmjs.com/package/@framework-doctor/cli)
+[![npm downloads](https://img.shields.io/npm/dm/@framework-doctor/cli.svg)](https://www.npmjs.com/package/@framework-doctor/cli)
 
 Framework Doctor auto-detects your framework and runs the right health check. Currently supports Svelte; React, Vue, and Angular coming soon.
 
@@ -10,7 +10,7 @@ Framework Doctor auto-detects your framework and runs the right health check. Cu
 Run in a project root (auto-detects Svelte, React, Vue, Angular from `package.json`):
 
 ```bash
-npx -y @framework-doctor .
+npx -y @framework-doctor/cli .
 ```
 
 Or run a specific doctor directly:
@@ -36,8 +36,8 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 
 **Unified (auto-detect):**
 
-- `npx -y @framework-doctor .` - auto-detect framework and run the right doctor
-- `npx -y @framework-doctor ./path/to/project` - scan a specific project directory
+- `npx -y @framework-doctor/cli .` - auto-detect framework and run the right doctor
+- `npx -y @framework-doctor/cli ./path/to/project` - scan a specific project directory
 
 **Svelte (direct):**
 

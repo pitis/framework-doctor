@@ -65,7 +65,7 @@ importers:
       '@changesets/cli':
         specifier: 'catalog:'
         version: 2.29.8(@types/node@25.3.0)
-      '@framework-doctor':
+      '@framework-doctor/cli':
         specifier: workspace:*
         version: link:packages/cli
       '@types/node':

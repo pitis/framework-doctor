@@ -11,7 +11,7 @@ npx -y @framework-doctor/svelte . --verbose --diff
 Or use the unified CLI (auto-detects Svelte):
 
 ```bash
-npx -y @framework-doctor . --verbose --diff
+npx -y @framework-doctor/cli . --verbose --diff
 ```
 
 ## What Gets Checked

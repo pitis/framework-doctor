@@ -11,7 +11,7 @@ npx -y @framework-doctor/react . --verbose --diff
 Or use the unified CLI (auto-detects React):
 
 ```bash
-npx -y @framework-doctor . --verbose --diff
+npx -y @framework-doctor/cli . --verbose --diff
 ```
 
 ## What Gets Checked

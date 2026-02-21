@@ -7,7 +7,7 @@ Framework Doctor provides a unified CLI that auto-detects your framework from `p
 Auto-detects Svelte, React from `package.json`:
 
 ```bash
-npx -y @framework-doctor . --verbose --diff
+npx -y @framework-doctor/cli . --verbose --diff
 ```
 
 Detects: `svelte`, `@sveltejs/kit`, `react`, `next`, `remix`, `vue`, `nuxt`, `@angular/core`.
@@ -25,7 +25,7 @@ npx -y @framework-doctor/react .
 
 | Scenario                           | Command                             |
 | ---------------------------------- | ----------------------------------- |
-| General project, unknown framework | `npx -y @framework-doctor .`        |
+| General project, unknown framework | `npx -y @framework-doctor/cli .`    |
 | Svelte project                     | `npx -y @framework-doctor/svelte .` |
 | React project                      | `npx -y @framework-doctor/react .`  |
 | Monorepo with multiple frameworks  | Run framework-specific per package  |
