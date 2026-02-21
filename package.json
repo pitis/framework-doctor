@@ -1,6 +1,7 @@
 {
   "name": "framework-doctor",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.30.0",
   "homepage": "https://github.com/pitis/framework-doctor#readme",
   "license": "MIT",
@@ -12,21 +13,30 @@
     "demo": "pnpm build && pnpm exec framework-doctor examples/svelte/demo-app",
     "dev": "turbo run dev",
     "dev:doctor": "turbo run dev --filter=@framework-doctor/svelte",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "turbo run lint",
     "lint:doctor": "turbo run lint --filter=@framework-doctor/svelte",
     "lint:fix": "turbo run lint:fix --filter=@framework-doctor/svelte",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:doctor": "turbo run test --filter=@framework-doctor/svelte --concurrency=1",
-    "quality:check": "turbo run lint typecheck test",
+    "quality:check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "pnpm build && changeset publish"
+    "release": "pnpm build && changeset publish",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@framework-doctor": "workspace:*",
     "@changesets/cli": "catalog:",
     "@types/node": "catalog:",
+    "husky": "^9.1.7",
+    "lint-staged": "catalog:",
     "oxlint": "catalog:",
+    "prettier": "catalog:",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "prettier-plugin-svelte": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:"
   }

@@ -1,0 +1,59 @@
+# Package manager files
+pnpm-lock.yaml
+.pnpm-store/
+.pnp/
+.pnp.js
+
+# Dependencies
+node_modules/
+
+# Turborepo
+.turbo/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Generated files
+*.min.js
+*.min.css
+*.bundle.js
+
+# Package files (already formatted)
+package-lock.json
+yarn.lock
