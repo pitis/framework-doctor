@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
@@ -29,8 +28,8 @@ const detectFramework = (directory: string): Framework => {
 
 const resolveDoctorCli = (pkg: string): string => {
   const require = createRequire(import.meta.url);
-  const pkgPath = require.resolve(`${pkg}/package.json`);
-  return path.join(path.dirname(pkgPath), "dist", "cli.js");
+  const indexPath = require.resolve(pkg);
+  return path.join(path.dirname(indexPath), "cli.js");
 };
 
 const runDoctor = (framework: Framework, args: string[]): number => {
