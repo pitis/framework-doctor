@@ -1,28 +1,116 @@
 ---
 name: framework-doctor
-description: Run after making frontend changes to catch issues early. Auto-detects Svelte, React (and more). Use when reviewing code, finishing a feature, or fixing bugs.
-version: 1.0.0
+description: |
+  Framework Doctor scans Svelte and React projects for security, performance, correctness, and architecture issues. Outputs a 0-100 score with actionable diagnostics.
+
+  Use when: reviewing code, finishing a feature, fixing bugs, handling user input or HTML rendering, using eval/dynamic code, or when the user mentions XSS, dead code, svelte-check, knip, oxlint, framework-doctor, react-doctor, svelte-doctor.
+
+  Triggers on: security patterns, {@html}, eval(), new Function(), svelte-check, knip, oxlint, Svelte 5 migration, React best practices.
+metadata:
+  version: 1.0.0
 ---
 
 # Framework Doctor
 
-Auto-detects your framework and runs the right doctor. Scans for security, performance, correctness, and architecture issues. Outputs a 0-100 score with actionable diagnostics.
+Scans your frontend codebase for security, performance, correctness, and architecture issues. Auto-detects Svelte or React from `package.json`. Outputs a 0-100 score with actionable diagnostics.
 
-## Usage
+**Supported:** Svelte, React (Vue, Angular coming soon)
 
-```bash
-npx -y @framework-doctor . --verbose --diff
+## IMPORTANT: Run After Making Changes
+
+Run the doctor after refactoring, adding features, or fixing bugs. Fix errors first, then re-run to verify the score improved.
+
+## Quick Decision Trees
+
+### "I need to scan my project"
+
+```
+Scan project?
+├─ Auto-detect framework → npx -y @framework-doctor . --verbose --diff
+├─ Svelte only → npx -y @framework-doctor/svelte . --verbose --diff
+├─ React only → npx -y @framework-doctor/react . --verbose --diff
+├─ Flags (verbose, diff, score) → references/cli/commands.md
+└─ What gets checked → references/checks/RULE.md
 ```
 
-Supported: Svelte, React (Vue, Angular coming soon). Detects from `package.json` dependencies.
+### "I'm working with Svelte"
 
-## Direct doctor
-
-```bash
-npx -y @framework-doctor/svelte .
-npx -y @framework-doctor/react .
+```
+Svelte guidance?
+├─ Run doctor → npx -y @framework-doctor/svelte . --verbose --diff
+├─ Security concerns → references/security/svelte.md
+├─ Svelte 5 migration → references/svelte/migration.md
+├─ General Svelte patterns → references/svelte/RULE.md
+└─ What doctor checks → references/checks/RULE.md
 ```
 
-## Workflow
+### "I'm working with React"
 
-Run after making changes to catch issues early. Fix errors first, then re-run to verify the score improved.
+```
+React guidance?
+├─ Run doctor → npx -y @framework-doctor/react . --verbose --diff
+├─ React patterns → references/react/RULE.md
+└─ What doctor checks → references/checks/RULE.md
+```
+
+### "I'm handling user input or HTML"
+
+```
+User input / HTML?
+├─ Rendering user content → references/security/patterns.md
+├─ {@html} in Svelte → references/security/svelte.md
+├─ Dynamic URLs → references/security/patterns.md#url-validation
+├─ Dynamic code (eval, new Function) → references/security/patterns.md
+└─ Safe patterns overview → references/security/RULE.md
+```
+
+## Critical Anti-Patterns
+
+### {@html} with Unsanitized User Content
+
+```svelte
+<!-- WRONG - XSS vulnerability -->
+{@html userInput}
+
+<!-- CORRECT - render as text -->
+{userInput}
+
+<!-- CORRECT - sanitize first if HTML required -->
+{@html sanitizeHtml(userProvidedHtml)}
+```
+
+See references/security/svelte.md for details.
+
+### String-Based setTimeout/setInterval
+
+```javascript
+// WRONG - implied eval
+setTimeout('refreshData()', 5000);
+
+// CORRECT - callback function
+setTimeout(refreshData, 5000);
+```
+
+### Trusting href Without Validation
+
+```svelte
+<!-- WRONG -->
+<a href={userProvidedUrl}>Visit</a>
+
+<!-- CORRECT -->
+<a href={validateUrl(userProvidedUrl) ?? '#'}>Visit</a>
+```
+
+## Reference Index
+
+| Topic                                                     | Purpose                                                       |
+| --------------------------------------------------------- | ------------------------------------------------------------- |
+| [cli/RULE.md](./references/cli/RULE.md)                   | Usage overview, unified vs framework-specific CLI             |
+| [cli/commands.md](./references/cli/commands.md)           | Flags: --verbose, --diff, --score                             |
+| [checks/RULE.md](./references/checks/RULE.md)             | What the doctor checks (security, svelte-check, knip, oxlint) |
+| [security/RULE.md](./references/security/RULE.md)         | Security patterns overview                                    |
+| [security/svelte.md](./references/security/svelte.md)     | Svelte-specific security ({@html}, javascript: URLs)          |
+| [security/patterns.md](./references/security/patterns.md) | WRONG/CORRECT patterns (eval, URLs, sanitization)             |
+| [svelte/RULE.md](./references/svelte/RULE.md)             | Svelte guidance overview                                      |
+| [svelte/migration.md](./references/svelte/migration.md)   | Svelte 5 migration ($props, $effect, {@render})               |
+| [react/RULE.md](./references/react/RULE.md)               | React guidance overview                                       |

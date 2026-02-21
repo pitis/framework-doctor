@@ -1,0 +1,15 @@
+{
+  "version": 3,
+  "skills": {
+    "turborepo": {
+      "source": "vercel/turborepo",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel/turborepo.git",
+      "skillPath": "skills/turborepo/SKILL.md",
+      "skillFolderHash": "61f9c091013688601faf2cea335dc77d822efc4e",
+      "installedAt": "2026-02-21T17:54:06.531Z",
+      "updatedAt": "2026-02-21T17:54:06.531Z"
+    }
+  },
+  "dismissed": {}
+}
