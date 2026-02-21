@@ -1,5 +1,7 @@
 'use client';
 
+// organize-imports-ignore
+import Head from 'next/head';
 import { useEffect } from 'react';
 
 const useSearchParams = () => new URLSearchParams();

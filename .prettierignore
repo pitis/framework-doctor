@@ -57,3 +57,4 @@ coverage/
 # Package files (already formatted)
 package-lock.json
 yarn.lock
+examples
