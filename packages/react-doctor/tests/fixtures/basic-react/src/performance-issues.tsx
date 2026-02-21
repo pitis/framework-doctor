@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { memo, useEffect, useMemo, useState } from 'react';
 
 const MemoChild = memo(({ onClick }: { onClick: () => void }) => (
   <button onClick={onClick}>click</button>
 ));
 
-const ParentWithInlinePropOnMemo = () => <MemoChild onClick={() => console.log("inline")} />;
+const ParentWithInlinePropOnMemo = () => <MemoChild onClick={() => console.log('inline')} />;
 
 const SimpleMemoComponent = ({ count }: { count: number }) => {
   const doubled = useMemo(() => count * 2, [count]);
@@ -13,13 +13,13 @@ const SimpleMemoComponent = ({ count }: { count: number }) => {
 
 const LayoutAnimationComponent = () => <div animate={{ width: 100, height: 200 }}>animated</div>;
 
-const TransitionAllComponent = () => <div style={{ transition: "all 0.3s ease" }}>styled</div>;
+const TransitionAllComponent = () => <div style={{ transition: 'all 0.3s ease' }}>styled</div>;
 
-const LargeBlurComponent = () => <div style={{ filter: "blur(20px)" }}>blurred</div>;
+const LargeBlurComponent = () => <div style={{ filter: 'blur(20px)' }}>blurred</div>;
 
 const ScaleFromZeroComponent = () => <div initial={{ scale: 0 }}>scale</div>;
 
-const PermanentWillChangeComponent = () => <div style={{ willChange: "transform" }}>permanent</div>;
+const PermanentWillChangeComponent = () => <div style={{ willChange: 'transform' }}>permanent</div>;
 
 const DefaultPropComponent = ({ items = [] }: { items?: string[] }) => (
   <ul>
@@ -37,7 +37,7 @@ const SvgAnimationComponent = () => (
 
 const LoadingStateComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
-  return <div>{isLoading ? "Loading..." : "Done"}</div>;
+  return <div>{isLoading ? 'Loading...' : 'Done'}</div>;
 };
 
 const HydrationFlickerComponent = () => {
@@ -45,28 +45,28 @@ const HydrationFlickerComponent = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
-  return <div>{mounted ? "client" : "server"}</div>;
+  return <div>{mounted ? 'client' : 'server'}</div>;
 };
 
 const GlobalCssVarComponent = () => {
   requestAnimationFrame(() => {
-    document.documentElement.style.setProperty("--scroll-y", "100px");
+    document.documentElement.style.setProperty('--scroll-y', '100px');
   });
   return <div />;
 };
 
 export {
+  DefaultPropComponent,
+  GlobalCssVarComponent,
+  HydrationFlickerComponent,
+  LargeBlurComponent,
+  LayoutAnimationComponent,
+  LoadingStateComponent,
   MemoChild,
   ParentWithInlinePropOnMemo,
-  SimpleMemoComponent,
-  LayoutAnimationComponent,
-  TransitionAllComponent,
-  LargeBlurComponent,
-  ScaleFromZeroComponent,
   PermanentWillChangeComponent,
-  DefaultPropComponent,
+  ScaleFromZeroComponent,
+  SimpleMemoComponent,
   SvgAnimationComponent,
-  LoadingStateComponent,
-  HydrationFlickerComponent,
-  GlobalCssVarComponent,
+  TransitionAllComponent,
 };

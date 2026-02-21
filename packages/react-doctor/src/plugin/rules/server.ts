@@ -1,11 +1,6 @@
-import {
-  AUTH_CHECK_LOOKAHEAD_STATEMENTS,
-  AUTH_FUNCTION_NAMES,
-  SERVER_ACTION_DIRECTORY_PATTERN,
-  SERVER_ACTION_FILE_PATTERN,
-} from "../constants.js";
-import { hasDirective, hasUseServerDirective, walkAst } from "../helpers.js";
-import type { EsTreeNode, Rule, RuleContext } from "../types.js";
+import { AUTH_CHECK_LOOKAHEAD_STATEMENTS, AUTH_FUNCTION_NAMES } from '../constants.js';
+import { hasDirective, hasUseServerDirective, walkAst } from '../helpers.js';
+import type { EsTreeNode, Rule, RuleContext } from '../types.js';
 
 const containsAuthCheck = (statements: EsTreeNode[]): boolean => {
   let foundAuthCall = false;
@@ -13,14 +8,14 @@ const containsAuthCheck = (statements: EsTreeNode[]): boolean => {
     walkAst(statement, (child: EsTreeNode) => {
       if (foundAuthCall) return;
       let callNode: EsTreeNode | null = null;
-      if (child.type === "CallExpression") {
+      if (child.type === 'CallExpression') {
         callNode = child;
-      } else if (child.type === "AwaitExpression" && child.argument?.type === "CallExpression") {
+      } else if (child.type === 'AwaitExpression' && child.argument?.type === 'CallExpression') {
         callNode = child.argument;
       }
 
       if (
-        callNode?.callee?.type === "Identifier" &&
+        callNode?.callee?.type === 'Identifier' &&
         AUTH_FUNCTION_NAMES.has(callNode.callee.name)
       ) {
         foundAuthCall = true;
@@ -36,11 +31,11 @@ export const serverAuthActions: Rule = {
 
     return {
       Program(programNode: EsTreeNode) {
-        fileHasUseServerDirective = hasDirective(programNode, "use server");
+        fileHasUseServerDirective = hasDirective(programNode, 'use server');
       },
       ExportNamedDeclaration(node: EsTreeNode) {
         const declaration = node.declaration;
-        if (declaration?.type !== "FunctionDeclaration" || !declaration?.async) return;
+        if (declaration?.type !== 'FunctionDeclaration' || !declaration?.async) return;
 
         const isServerAction = fileHasUseServerDirective || hasUseServerDirective(declaration);
         if (!isServerAction) return;
@@ -50,7 +45,7 @@ export const serverAuthActions: Rule = {
           AUTH_CHECK_LOOKAHEAD_STATEMENTS,
         );
         if (!containsAuthCheck(firstStatements)) {
-          const functionName = declaration.id?.name ?? "anonymous";
+          const functionName = declaration.id?.name ?? 'anonymous';
           context.report({
             node: declaration.id ?? node,
             message: `Server action "${functionName}" — add auth check (auth(), getSession(), etc.) at the top`,
@@ -67,23 +62,23 @@ export const serverAfterNonblocking: Rule = {
 
     return {
       Program(programNode: EsTreeNode) {
-        fileHasUseServerDirective = hasDirective(programNode, "use server");
+        fileHasUseServerDirective = hasDirective(programNode, 'use server');
       },
       CallExpression(node: EsTreeNode) {
         if (!fileHasUseServerDirective) return;
-        if (node.callee?.type !== "MemberExpression") return;
-        if (node.callee.property?.type !== "Identifier") return;
+        if (node.callee?.type !== 'MemberExpression') return;
+        if (node.callee.property?.type !== 'Identifier') return;
 
         const objectName =
-          node.callee.object?.type === "Identifier" ? node.callee.object.name : null;
+          node.callee.object?.type === 'Identifier' ? node.callee.object.name : null;
         if (!objectName) return;
 
         const methodName = node.callee.property.name;
         const isLoggingCall =
-          (objectName === "console" &&
-            (methodName === "log" || methodName === "info" || methodName === "warn")) ||
-          (objectName === "analytics" &&
-            (methodName === "track" || methodName === "identify" || methodName === "page"));
+          (objectName === 'console' &&
+            (methodName === 'log' || methodName === 'info' || methodName === 'warn')) ||
+          (objectName === 'analytics' &&
+            (methodName === 'track' || methodName === 'identify' || methodName === 'page'));
         if (!isLoggingCall) return;
 
         context.report({

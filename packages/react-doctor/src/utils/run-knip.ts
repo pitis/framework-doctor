@@ -1,30 +1,30 @@
-import fs from "node:fs";
-import path from "node:path";
-import { main } from "knip";
-import { createOptions } from "knip/session";
-import { MAX_KNIP_RETRIES } from "../constants.js";
-import type { Diagnostic, KnipIssueRecords, KnipResults } from "../types.js";
-import { findMonorepoRoot } from "./find-monorepo-root.js";
+import { main } from 'knip';
+import { createOptions } from 'knip/session';
+import fs from 'node:fs';
+import path from 'node:path';
+import { MAX_KNIP_RETRIES } from '../constants.js';
+import type { Diagnostic, KnipIssueRecords, KnipResults } from '../types.js';
+import { findMonorepoRoot } from './find-monorepo-root.js';
 
 const KNIP_CATEGORY_MAP: Record<string, string> = {
-  files: "Dead Code",
-  exports: "Dead Code",
-  types: "Dead Code",
-  duplicates: "Dead Code",
+  files: 'Dead Code',
+  exports: 'Dead Code',
+  types: 'Dead Code',
+  duplicates: 'Dead Code',
 };
 
 const KNIP_MESSAGE_MAP: Record<string, string> = {
-  files: "Unused file",
-  exports: "Unused export",
-  types: "Unused type",
-  duplicates: "Duplicate export",
+  files: 'Unused file',
+  exports: 'Unused export',
+  types: 'Unused type',
+  duplicates: 'Duplicate export',
 };
 
-const KNIP_SEVERITY_MAP: Record<string, "error" | "warning"> = {
-  files: "warning",
-  exports: "warning",
-  types: "warning",
-  duplicates: "warning",
+const KNIP_SEVERITY_MAP: Record<string, 'error' | 'warning'> = {
+  files: 'warning',
+  exports: 'warning',
+  types: 'warning',
+  duplicates: 'warning',
 };
 
 const collectIssueRecords = (
@@ -38,14 +38,14 @@ const collectIssueRecords = (
     for (const issue of Object.values(issues)) {
       diagnostics.push({
         filePath: path.relative(rootDirectory, issue.filePath),
-        plugin: "knip",
+        plugin: 'knip',
         rule: issueType,
-        severity: KNIP_SEVERITY_MAP[issueType] ?? "warning",
+        severity: KNIP_SEVERITY_MAP[issueType] ?? 'warning',
         message: `${KNIP_MESSAGE_MAP[issueType]}: ${issue.symbol}`,
-        help: "",
+        help: '',
         line: 0,
         column: 0,
-        category: KNIP_CATEGORY_MAP[issueType] ?? "Dead Code",
+        category: KNIP_CATEGORY_MAP[issueType] ?? 'Dead Code',
         weight: 1,
       });
     }
@@ -107,11 +107,11 @@ const runKnipWithOptions = async (
     }
   }
 
-  throw new Error("Unreachable");
+  throw new Error('Unreachable');
 };
 
 const hasNodeModules = (directory: string): boolean => {
-  const nodeModulesPath = path.join(directory, "node_modules");
+  const nodeModulesPath = path.join(directory, 'node_modules');
   return fs.existsSync(nodeModulesPath) && fs.statSync(nodeModulesPath).isDirectory();
 };
 
@@ -127,9 +127,9 @@ export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
   let knipResult: KnipResults;
 
   if (monorepoRoot) {
-    const packageJsonPath = path.join(rootDirectory, "package.json");
+    const packageJsonPath = path.join(rootDirectory, 'package.json');
     const packageJson = fs.existsSync(packageJsonPath)
-      ? JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"))
+      ? JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
       : {};
     const workspaceName = packageJson.name ?? path.basename(rootDirectory);
 
@@ -148,19 +148,19 @@ export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
   for (const unusedFile of issues.files) {
     diagnostics.push({
       filePath: path.relative(rootDirectory, unusedFile),
-      plugin: "knip",
-      rule: "files",
-      severity: KNIP_SEVERITY_MAP["files"],
-      message: KNIP_MESSAGE_MAP["files"],
-      help: "This file is not imported by any other file in the project.",
+      plugin: 'knip',
+      rule: 'files',
+      severity: KNIP_SEVERITY_MAP['files'],
+      message: KNIP_MESSAGE_MAP['files'],
+      help: 'This file is not imported by any other file in the project.',
       line: 0,
       column: 0,
-      category: KNIP_CATEGORY_MAP["files"],
+      category: KNIP_CATEGORY_MAP['files'],
       weight: 1,
     });
   }
 
-  const recordTypes = ["exports", "types", "duplicates"] as const;
+  const recordTypes = ['exports', 'types', 'duplicates'] as const;
 
   for (const issueType of recordTypes) {
     diagnostics.push(...collectIssueRecords(issues[issueType], issueType, rootDirectory));

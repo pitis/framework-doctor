@@ -7,7 +7,7 @@ import {
   LOADING_STATE_PATTERN,
   MOTION_ANIMATE_PROPS,
   SETTER_PATTERN,
-} from "../constants.js";
+} from '../constants.js';
 import {
   getEffectCallback,
   isComponentAssignment,
@@ -16,18 +16,18 @@ import {
   isSimpleExpression,
   isUppercaseName,
   walkAst,
-} from "../helpers.js";
-import type { EsTreeNode, Rule, RuleContext } from "../types.js";
+} from '../helpers.js';
+import type { EsTreeNode, Rule, RuleContext } from '../types.js';
 
 const isMemoCall = (node: EsTreeNode): boolean => {
-  if (node.type !== "CallExpression") return false;
-  if (node.callee?.type === "Identifier" && node.callee.name === "memo") return true;
+  if (node.type !== 'CallExpression') return false;
+  if (node.callee?.type === 'Identifier' && node.callee.name === 'memo') return true;
   if (
-    node.callee?.type === "MemberExpression" &&
-    node.callee.object?.type === "Identifier" &&
-    node.callee.object.name === "React" &&
-    node.callee.property?.type === "Identifier" &&
-    node.callee.property.name === "memo"
+    node.callee?.type === 'MemberExpression' &&
+    node.callee.object?.type === 'Identifier' &&
+    node.callee.object.name === 'React' &&
+    node.callee.property?.type === 'Identifier' &&
+    node.callee.property.name === 'memo'
   )
     return true;
   return false;
@@ -35,17 +35,17 @@ const isMemoCall = (node: EsTreeNode): boolean => {
 
 const isInlineReference = (node: EsTreeNode): string | null => {
   if (
-    node.type === "ArrowFunctionExpression" ||
-    node.type === "FunctionExpression" ||
-    (node.type === "CallExpression" &&
-      node.callee?.type === "MemberExpression" &&
-      node.callee.property?.name === "bind")
+    node.type === 'ArrowFunctionExpression' ||
+    node.type === 'FunctionExpression' ||
+    (node.type === 'CallExpression' &&
+      node.callee?.type === 'MemberExpression' &&
+      node.callee.property?.name === 'bind')
   )
-    return "functions";
+    return 'functions';
 
-  if (node.type === "ObjectExpression") return "objects";
-  if (node.type === "ArrayExpression") return "Arrays";
-  if (node.type === "JSXElement" || node.type === "JSXFragment") return "JSX";
+  if (node.type === 'ObjectExpression') return 'objects';
+  if (node.type === 'ArrayExpression') return 'Arrays';
+  if (node.type === 'JSXElement' || node.type === 'JSXFragment') return 'JSX';
 
   return null;
 };
@@ -56,7 +56,7 @@ export const noInlinePropOnMemoComponent: Rule = {
 
     return {
       VariableDeclarator(node: EsTreeNode) {
-        if (node.id?.type !== "Identifier" || !node.init) return;
+        if (node.id?.type !== 'Identifier' || !node.init) return;
         if (isMemoCall(node.init)) {
           memoizedComponentNames.add(node.id.name);
         }
@@ -64,19 +64,19 @@ export const noInlinePropOnMemoComponent: Rule = {
       ExportDefaultDeclaration(node: EsTreeNode) {
         if (node.declaration && isMemoCall(node.declaration)) {
           const innerArgument = node.declaration.arguments?.[0];
-          if (innerArgument?.type === "Identifier") {
+          if (innerArgument?.type === 'Identifier') {
             memoizedComponentNames.add(innerArgument.name);
           }
         }
       },
       JSXAttribute(node: EsTreeNode) {
-        if (!node.value || node.value.type !== "JSXExpressionContainer") return;
+        if (!node.value || node.value.type !== 'JSXExpressionContainer') return;
 
         const openingElement = node.parent;
-        if (!openingElement || openingElement.type !== "JSXOpeningElement") return;
+        if (!openingElement || openingElement.type !== 'JSXOpeningElement') return;
 
         let elementName: string | null = null;
-        if (openingElement.name?.type === "JSXIdentifier") {
+        if (openingElement.name?.type === 'JSXIdentifier') {
           elementName = openingElement.name.name;
         }
         if (!elementName || !memoizedComponentNames.has(elementName)) return;
@@ -96,19 +96,19 @@ export const noInlinePropOnMemoComponent: Rule = {
 export const noUsememoSimpleExpression: Rule = {
   create: (context: RuleContext) => ({
     CallExpression(node: EsTreeNode) {
-      if (!isHookCall(node, "useMemo")) return;
+      if (!isHookCall(node, 'useMemo')) return;
 
       const callback = node.arguments?.[0];
       if (!callback) return;
-      if (callback.type !== "ArrowFunctionExpression" && callback.type !== "FunctionExpression")
+      if (callback.type !== 'ArrowFunctionExpression' && callback.type !== 'FunctionExpression')
         return;
 
       let returnExpression = null;
-      if (callback.body?.type !== "BlockStatement") {
+      if (callback.body?.type !== 'BlockStatement') {
         returnExpression = callback.body;
       } else if (
         callback.body.body?.length === 1 &&
-        callback.body.body[0].type === "ReturnStatement"
+        callback.body.body[0].type === 'ReturnStatement'
       ) {
         returnExpression = callback.body.body[0].argument;
       }
@@ -117,7 +117,7 @@ export const noUsememoSimpleExpression: Rule = {
         context.report({
           node,
           message:
-            "useMemo wrapping a trivially cheap expression — memo overhead exceeds the computation",
+            'useMemo wrapping a trivially cheap expression — memo overhead exceeds the computation',
         });
       }
     },
@@ -126,17 +126,17 @@ export const noUsememoSimpleExpression: Rule = {
 
 const isMotionElement = (attributeNode: EsTreeNode): boolean => {
   const openingElement = attributeNode.parent;
-  if (!openingElement || openingElement.type !== "JSXOpeningElement") return false;
+  if (!openingElement || openingElement.type !== 'JSXOpeningElement') return false;
 
   const elementName = openingElement.name;
   if (
-    elementName?.type === "JSXMemberExpression" &&
-    elementName.object?.type === "JSXIdentifier" &&
-    (elementName.object.name === "motion" || elementName.object.name === "m")
+    elementName?.type === 'JSXMemberExpression' &&
+    elementName.object?.type === 'JSXIdentifier' &&
+    (elementName.object.name === 'motion' || elementName.object.name === 'm')
   )
     return true;
 
-  if (elementName?.type === "JSXIdentifier" && elementName.name.startsWith("Motion")) return true;
+  if (elementName?.type === 'JSXIdentifier' && elementName.name.startsWith('Motion')) return true;
 
   return false;
 };
@@ -144,19 +144,19 @@ const isMotionElement = (attributeNode: EsTreeNode): boolean => {
 export const noLayoutPropertyAnimation: Rule = {
   create: (context: RuleContext) => ({
     JSXAttribute(node: EsTreeNode) {
-      if (node.name?.type !== "JSXIdentifier" || !MOTION_ANIMATE_PROPS.has(node.name.name)) return;
-      if (!node.value || node.value.type !== "JSXExpressionContainer") return;
+      if (node.name?.type !== 'JSXIdentifier' || !MOTION_ANIMATE_PROPS.has(node.name.name)) return;
+      if (!node.value || node.value.type !== 'JSXExpressionContainer') return;
       if (isMotionElement(node)) return;
 
       const expression = node.value.expression;
-      if (expression?.type !== "ObjectExpression") return;
+      if (expression?.type !== 'ObjectExpression') return;
 
       for (const property of expression.properties ?? []) {
-        if (property.type !== "Property") continue;
+        if (property.type !== 'Property') continue;
         let propertyName = null;
-        if (property.key?.type === "Identifier") {
+        if (property.key?.type === 'Identifier') {
           propertyName = property.key.name;
-        } else if (property.key?.type === "Literal") {
+        } else if (property.key?.type === 'Literal') {
           propertyName = property.key.value;
         }
 
@@ -174,21 +174,21 @@ export const noLayoutPropertyAnimation: Rule = {
 export const noTransitionAll: Rule = {
   create: (context: RuleContext) => ({
     JSXAttribute(node: EsTreeNode) {
-      if (node.name?.type !== "JSXIdentifier" || node.name.name !== "style") return;
-      if (node.value?.type !== "JSXExpressionContainer") return;
+      if (node.name?.type !== 'JSXIdentifier' || node.name.name !== 'style') return;
+      if (node.value?.type !== 'JSXExpressionContainer') return;
 
       const expression = node.value.expression;
-      if (expression?.type !== "ObjectExpression") return;
+      if (expression?.type !== 'ObjectExpression') return;
 
       for (const property of expression.properties ?? []) {
-        if (property.type !== "Property") continue;
-        const key = property.key?.type === "Identifier" ? property.key.name : null;
-        if (key !== "transition") continue;
+        if (property.type !== 'Property') continue;
+        const key = property.key?.type === 'Identifier' ? property.key.name : null;
+        if (key !== 'transition') continue;
 
         if (
-          property.value?.type === "Literal" &&
-          typeof property.value.value === "string" &&
-          property.value.value.startsWith("all")
+          property.value?.type === 'Literal' &&
+          typeof property.value.value === 'string' &&
+          property.value.value.startsWith('all')
         ) {
           context.report({
             node: property,
@@ -204,7 +204,7 @@ export const noTransitionAll: Rule = {
 export const noGlobalCssVariableAnimation: Rule = {
   create: (context: RuleContext) => ({
     CallExpression(node: EsTreeNode) {
-      if (node.callee?.type !== "Identifier") return;
+      if (node.callee?.type !== 'Identifier') return;
       if (!ANIMATION_CALLBACK_NAMES.has(node.callee.name)) return;
 
       const callback = node.arguments?.[0];
@@ -212,12 +212,12 @@ export const noGlobalCssVariableAnimation: Rule = {
 
       const calleeName = node.callee.name;
       walkAst(callback, (child: EsTreeNode) => {
-        if (child.type !== "CallExpression") return;
-        if (!isMemberProperty(child.callee, "setProperty")) return;
-        if (child.arguments?.[0]?.type !== "Literal") return;
+        if (child.type !== 'CallExpression') return;
+        if (!isMemberProperty(child.callee, 'setProperty')) return;
+        if (child.arguments?.[0]?.type !== 'Literal') return;
 
         const variableName = child.arguments[0].value;
-        if (typeof variableName !== "string" || !variableName.startsWith("--")) return;
+        if (typeof variableName !== 'string' || !variableName.startsWith('--')) return;
 
         context.report({
           node: child,
@@ -231,19 +231,19 @@ export const noGlobalCssVariableAnimation: Rule = {
 export const noLargeAnimatedBlur: Rule = {
   create: (context: RuleContext) => ({
     JSXAttribute(node: EsTreeNode) {
-      if (node.name?.type !== "JSXIdentifier") return;
-      if (node.name.name !== "style" && !MOTION_ANIMATE_PROPS.has(node.name.name)) return;
-      if (node.value?.type !== "JSXExpressionContainer") return;
+      if (node.name?.type !== 'JSXIdentifier') return;
+      if (node.name.name !== 'style' && !MOTION_ANIMATE_PROPS.has(node.name.name)) return;
+      if (node.value?.type !== 'JSXExpressionContainer') return;
 
       const expression = node.value.expression;
-      if (expression?.type !== "ObjectExpression") return;
+      if (expression?.type !== 'ObjectExpression') return;
 
       for (const property of expression.properties ?? []) {
-        if (property.type !== "Property") continue;
-        const key = property.key?.type === "Identifier" ? property.key.name : null;
-        if (key !== "filter" && key !== "backdropFilter" && key !== "WebkitBackdropFilter")
+        if (property.type !== 'Property') continue;
+        const key = property.key?.type === 'Identifier' ? property.key.name : null;
+        if (key !== 'filter' && key !== 'backdropFilter' && key !== 'WebkitBackdropFilter')
           continue;
-        if (property.value?.type !== "Literal" || typeof property.value.value !== "string")
+        if (property.value?.type !== 'Literal' || typeof property.value.value !== 'string')
           continue;
 
         const match = BLUR_VALUE_PATTERN.exec(property.value.value);
@@ -264,23 +264,23 @@ export const noLargeAnimatedBlur: Rule = {
 export const noScaleFromZero: Rule = {
   create: (context: RuleContext) => ({
     JSXAttribute(node: EsTreeNode) {
-      if (node.name?.type !== "JSXIdentifier") return;
-      if (node.name.name !== "initial" && node.name.name !== "exit") return;
-      if (node.value?.type !== "JSXExpressionContainer") return;
+      if (node.name?.type !== 'JSXIdentifier') return;
+      if (node.name.name !== 'initial' && node.name.name !== 'exit') return;
+      if (node.value?.type !== 'JSXExpressionContainer') return;
 
       const expression = node.value.expression;
-      if (expression?.type !== "ObjectExpression") return;
+      if (expression?.type !== 'ObjectExpression') return;
 
       for (const property of expression.properties ?? []) {
-        if (property.type !== "Property") continue;
-        const key = property.key?.type === "Identifier" ? property.key.name : null;
-        if (key !== "scale") continue;
+        if (property.type !== 'Property') continue;
+        const key = property.key?.type === 'Identifier' ? property.key.name : null;
+        if (key !== 'scale') continue;
 
-        if (property.value?.type === "Literal" && property.value.value === 0) {
+        if (property.value?.type === 'Literal' && property.value.value === 0) {
           context.report({
             node: property,
             message:
-              "scale: 0 makes elements appear from nowhere — use scale: 0.95 with opacity: 0 for natural entrance",
+              'scale: 0 makes elements appear from nowhere — use scale: 0.95 with opacity: 0 for natural entrance',
           });
         }
       }
@@ -291,21 +291,21 @@ export const noScaleFromZero: Rule = {
 export const noPermanentWillChange: Rule = {
   create: (context: RuleContext) => ({
     JSXAttribute(node: EsTreeNode) {
-      if (node.name?.type !== "JSXIdentifier" || node.name.name !== "style") return;
-      if (node.value?.type !== "JSXExpressionContainer") return;
+      if (node.name?.type !== 'JSXIdentifier' || node.name.name !== 'style') return;
+      if (node.value?.type !== 'JSXExpressionContainer') return;
 
       const expression = node.value.expression;
-      if (expression?.type !== "ObjectExpression") return;
+      if (expression?.type !== 'ObjectExpression') return;
 
       for (const property of expression.properties ?? []) {
-        if (property.type !== "Property") continue;
-        const key = property.key?.type === "Identifier" ? property.key.name : null;
-        if (key !== "willChange") continue;
+        if (property.type !== 'Property') continue;
+        const key = property.key?.type === 'Identifier' ? property.key.name : null;
+        if (key !== 'willChange') continue;
 
         context.report({
           node: property,
           message:
-            "Permanent will-change wastes GPU memory — apply only during active animation and remove after",
+            'Permanent will-change wastes GPU memory — apply only during active animation and remove after',
         });
       }
     },
@@ -316,23 +316,23 @@ export const rerenderMemoWithDefaultValue: Rule = {
   create: (context: RuleContext) => {
     const checkDefaultProps = (params: EsTreeNode[]): void => {
       for (const param of params) {
-        if (param.type !== "ObjectPattern") continue;
+        if (param.type !== 'ObjectPattern') continue;
         for (const property of param.properties ?? []) {
-          if (property.type !== "Property" || property.value?.type !== "AssignmentPattern")
+          if (property.type !== 'Property' || property.value?.type !== 'AssignmentPattern')
             continue;
           const defaultValue = property.value.right;
-          if (defaultValue?.type === "ObjectExpression" && defaultValue.properties?.length === 0) {
+          if (defaultValue?.type === 'ObjectExpression' && defaultValue.properties?.length === 0) {
             context.report({
               node: defaultValue,
               message:
-                "Default prop value {} creates a new object reference every render — extract to a module-level constant",
+                'Default prop value {} creates a new object reference every render — extract to a module-level constant',
             });
           }
-          if (defaultValue?.type === "ArrayExpression" && defaultValue.elements?.length === 0) {
+          if (defaultValue?.type === 'ArrayExpression' && defaultValue.elements?.length === 0) {
             context.report({
               node: defaultValue,
               message:
-                "Default prop value [] creates a new array reference every render — extract to a module-level constant",
+                'Default prop value [] creates a new array reference every render — extract to a module-level constant',
             });
           }
         }
@@ -355,12 +355,12 @@ export const rerenderMemoWithDefaultValue: Rule = {
 export const renderingAnimateSvgWrapper: Rule = {
   create: (context: RuleContext) => ({
     JSXOpeningElement(node: EsTreeNode) {
-      if (node.name?.type !== "JSXIdentifier" || node.name.name !== "svg") return;
+      if (node.name?.type !== 'JSXIdentifier' || node.name.name !== 'svg') return;
 
       const hasAnimationProp = node.attributes?.some(
         (attribute: EsTreeNode) =>
-          attribute.type === "JSXAttribute" &&
-          attribute.name?.type === "JSXIdentifier" &&
+          attribute.type === 'JSXAttribute' &&
+          attribute.name?.type === 'JSXIdentifier' &&
           MOTION_ANIMATE_PROPS.has(attribute.name.name),
       );
 
@@ -368,7 +368,7 @@ export const renderingAnimateSvgWrapper: Rule = {
         context.report({
           node,
           message:
-            "Animation props directly on <svg> — wrap in a <div> or <motion.div> for better rendering performance",
+            'Animation props directly on <svg> — wrap in a <div> or <motion.div> for better rendering performance',
         });
       }
     },
@@ -378,12 +378,12 @@ export const renderingAnimateSvgWrapper: Rule = {
 export const renderingUsetransitionLoading: Rule = {
   create: (context: RuleContext) => ({
     VariableDeclarator(node: EsTreeNode) {
-      if (node.id?.type !== "ArrayPattern" || !node.id.elements?.length) return;
-      if (!node.init || !isHookCall(node.init, "useState")) return;
+      if (node.id?.type !== 'ArrayPattern' || !node.id.elements?.length) return;
+      if (!node.init || !isHookCall(node.init, 'useState')) return;
       if (!node.init.arguments?.length) return;
 
       const initializer = node.init.arguments[0];
-      if (initializer.type !== "Literal" || initializer.value !== false) return;
+      if (initializer.type !== 'Literal' || initializer.value !== false) return;
 
       const stateVariableName = node.id.elements[0]?.name;
       if (!stateVariableName || !LOADING_STATE_PATTERN.test(stateVariableName)) return;
@@ -402,26 +402,26 @@ export const renderingHydrationNoFlicker: Rule = {
       if (!isHookCall(node, EFFECT_HOOK_NAMES) || node.arguments?.length < 2) return;
 
       const depsNode = node.arguments[1];
-      if (depsNode.type !== "ArrayExpression" || depsNode.elements?.length !== 0) return;
+      if (depsNode.type !== 'ArrayExpression' || depsNode.elements?.length !== 0) return;
 
       const callback = getEffectCallback(node);
       if (!callback) return;
 
       const bodyStatements =
-        callback.body?.type === "BlockStatement" ? callback.body.body : [callback.body];
+        callback.body?.type === 'BlockStatement' ? callback.body.body : [callback.body];
       if (!bodyStatements || bodyStatements.length !== 1) return;
 
       const soleStatement = bodyStatements[0];
       if (
-        soleStatement?.type === "ExpressionStatement" &&
-        soleStatement.expression?.type === "CallExpression" &&
-        soleStatement.expression.callee?.type === "Identifier" &&
+        soleStatement?.type === 'ExpressionStatement' &&
+        soleStatement.expression?.type === 'CallExpression' &&
+        soleStatement.expression.callee?.type === 'Identifier' &&
         SETTER_PATTERN.test(soleStatement.expression.callee.name)
       ) {
         context.report({
           node,
           message:
-            "useEffect(setState, []) on mount causes a flash — consider useSyncExternalStore or suppressHydrationWarning",
+            'useEffect(setState, []) on mount causes a flash — consider useSyncExternalStore or suppressHydrationWarning',
         });
       }
     },

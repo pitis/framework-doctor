@@ -1,7 +1,7 @@
-import { JSX_FILE_PATTERN } from "../constants.js";
-import type { Diagnostic, ReactDoctorConfig } from "../types.js";
-import { checkReducedMotion } from "./check-reduced-motion.js";
-import { filterIgnoredDiagnostics } from "./filter-diagnostics.js";
+import { JSX_FILE_PATTERN } from '../constants.js';
+import type { Diagnostic, ReactDoctorConfig } from '../types.js';
+import { checkReducedMotion } from './check-reduced-motion.js';
+import { filterIgnoredDiagnostics } from './filter-diagnostics.js';
 
 export const computeJsxIncludePaths = (includePaths: string[]): string[] | undefined =>
   includePaths.length > 0

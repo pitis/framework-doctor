@@ -1,11 +1,11 @@
-import type { Diagnostic, ScanOptions, ScanResult, SvelteDoctorConfig } from "./types.js";
-import { discoverProject } from "./utils/discover-project.js";
-import { filterIgnoredDiagnostics } from "./utils/filter-diagnostics.js";
-import { loadConfig } from "./utils/load-config.js";
-import { runKnip } from "./utils/run-knip.js";
-import { runOxlint } from "./utils/run-oxlint.js";
-import { runSvelteCheck } from "./utils/run-svelte-check.js";
-import { calculateScore } from "./utils/score.js";
+import type { Diagnostic, ScanOptions, ScanResult, SvelteDoctorConfig } from './types.js';
+import { discoverProject } from './utils/discover-project.js';
+import { filterIgnoredDiagnostics } from './utils/filter-diagnostics.js';
+import { loadConfig } from './utils/load-config.js';
+import { runKnip } from './utils/run-knip.js';
+import { runOxlint } from './utils/run-oxlint.js';
+import { runSvelteCheck } from './utils/run-svelte-check.js';
+import { calculateScore } from './utils/score.js';
 
 interface ResolvedScanOptions {
   lint: boolean;
@@ -27,7 +27,7 @@ const resolveOptions = (
 export const scan = async (directory: string, options: ScanOptions = {}): Promise<ScanResult> => {
   const projectInfo = discoverProject(directory);
   if (!projectInfo.svelteVersion) {
-    throw new Error("No Svelte dependency found in package.json");
+    throw new Error('No Svelte dependency found in package.json');
   }
 
   const userConfig = loadConfig(directory);
@@ -43,7 +43,7 @@ export const scan = async (directory: string, options: ScanOptions = {}): Promis
         projectInfo.svelteVersion,
       );
     } catch {
-      skippedChecks.push("lint");
+      skippedChecks.push('lint');
     }
   }
 
@@ -56,7 +56,7 @@ export const scan = async (directory: string, options: ScanOptions = {}): Promis
         resolved.includePaths,
       );
     } catch {
-      skippedChecks.push("js/ts lint");
+      skippedChecks.push('js/ts lint');
     }
   }
 
@@ -65,7 +65,7 @@ export const scan = async (directory: string, options: ScanOptions = {}): Promis
     try {
       deadCodeDiagnostics = await runKnip(directory);
     } catch {
-      skippedChecks.push("dead code");
+      skippedChecks.push('dead code');
     }
   }
 

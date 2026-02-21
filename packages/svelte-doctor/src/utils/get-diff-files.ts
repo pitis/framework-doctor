@@ -1,5 +1,5 @@
-import { spawnSync } from "node:child_process";
-import path from "node:path";
+import { spawnSync } from 'node:child_process';
+import path from 'node:path';
 
 export interface DiffInfo {
   baseBranch: string;
@@ -7,20 +7,20 @@ export interface DiffInfo {
 }
 
 const runGit = (cwd: string, args: string[]): string | null => {
-  const result = spawnSync("git", args, { cwd, encoding: "utf-8" });
+  const result = spawnSync('git', args, { cwd, encoding: 'utf-8' });
   if (result.status !== 0 || result.error) return null;
   return result.stdout.trim();
 };
 
-export const getDiffInfo = (rootDirectory: string, base = "main"): DiffInfo | null => {
-  const insideWorkTree = runGit(rootDirectory, ["rev-parse", "--is-inside-work-tree"]);
-  if (insideWorkTree !== "true") return null;
+export const getDiffInfo = (rootDirectory: string, base = 'main'): DiffInfo | null => {
+  const insideWorkTree = runGit(rootDirectory, ['rev-parse', '--is-inside-work-tree']);
+  if (insideWorkTree !== 'true') return null;
 
-  const branchDiff = runGit(rootDirectory, ["diff", "--name-only", `${base}...HEAD`]);
+  const branchDiff = runGit(rootDirectory, ['diff', '--name-only', `${base}...HEAD`]);
   if (branchDiff === null) return null;
 
   const changedFiles = branchDiff
-    .split("\n")
+    .split('\n')
     .map((filePath) => filePath.trim())
     .filter(Boolean)
     .map((filePath) => path.resolve(rootDirectory, filePath));

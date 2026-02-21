@@ -1,13 +1,13 @@
-import { execSync } from "node:child_process";
-import { FETCH_TIMEOUT_MS } from "../constants.js";
+import { execSync } from 'node:child_process';
+import { FETCH_TIMEOUT_MS } from '../constants.js';
 
 const readNpmConfigValue = (key: string): string | undefined => {
   try {
     const value = execSync(`npm config get ${key}`, {
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "ignore"],
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'ignore'],
     }).trim();
-    if (value && value !== "null" && value !== "undefined") return value;
+    if (value && value !== 'null' && value !== 'undefined') return value;
   } catch {}
   return undefined;
 };
@@ -17,8 +17,8 @@ const resolveProxyUrl = (): string | undefined =>
   process.env.https_proxy ??
   process.env.HTTP_PROXY ??
   process.env.http_proxy ??
-  readNpmConfigValue("https-proxy") ??
-  readNpmConfigValue("proxy");
+  readNpmConfigValue('https-proxy') ??
+  readNpmConfigValue('proxy');
 
 let isProxyUrlResolved = false;
 let resolvedProxyUrl: string | undefined;
@@ -33,7 +33,7 @@ const getProxyUrl = (): string | undefined => {
 const createProxyDispatcher = async (proxyUrl: string): Promise<object | null> => {
   try {
     // @ts-expect-error undici is bundled with Node.js 18+ but lacks standalone type declarations
-    const { ProxyAgent } = await import("undici");
+    const { ProxyAgent } = await import('undici');
     return new ProxyAgent(proxyUrl);
   } catch {
     return null;

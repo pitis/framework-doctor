@@ -1,4 +1,4 @@
-export type SvelteFramework = "sveltekit" | "svelte";
+export type SvelteFramework = 'sveltekit' | 'svelte';
 
 export interface ProjectInfo {
   rootDirectory: string;
@@ -13,12 +13,12 @@ export interface Diagnostic {
   filePath: string;
   plugin: string;
   rule: string;
-  severity: "error" | "warning";
+  severity: 'error' | 'warning';
   message: string;
   help: string;
   line: number;
   column: number;
-  category: "correctness" | "performance" | "maintainability" | "accessibility" | "security";
+  category: 'correctness' | 'performance' | 'maintainability' | 'accessibility' | 'security';
   weight?: number;
 }
 

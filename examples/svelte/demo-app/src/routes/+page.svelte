@@ -36,9 +36,7 @@
 
     <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />
 
-    <div role="button" onclick={() => (darkMode = !darkMode)}>
-      Toggle (div, no keyboard)
-    </div>
+    <div role="button" onclick={() => (darkMode = !darkMode)}>Toggle (div, no keyboard)</div>
 
     <a href="#"> </a>
 

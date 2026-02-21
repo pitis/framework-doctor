@@ -1,10 +1,10 @@
-import ora from "ora";
+import ora from 'ora';
 
 let sharedInstance: ReturnType<typeof ora> | null = null;
 let activeCount = 0;
 const pendingTexts = new Set<string>();
 
-const finalize = (method: "succeed" | "fail", originalText: string, displayText: string) => {
+const finalize = (method: 'succeed' | 'fail', originalText: string, displayText: string) => {
   pendingTexts.delete(originalText);
   activeCount -= 1;
 
@@ -38,8 +38,8 @@ export const spinner = (text: string) => ({
     }
 
     return {
-      succeed: (displayText: string) => finalize("succeed", text, displayText),
-      fail: (displayText: string) => finalize("fail", text, displayText),
+      succeed: (displayText: string) => finalize('succeed', text, displayText),
+      fail: (displayText: string) => finalize('fail', text, displayText),
     };
   },
 });

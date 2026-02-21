@@ -1,4 +1,4 @@
-export type Framework = "nextjs" | "vite" | "cra" | "remix" | "gatsby" | "unknown";
+export type Framework = 'nextjs' | 'vite' | 'cra' | 'remix' | 'gatsby' | 'unknown';
 
 export interface ProjectInfo {
   rootDirectory: string;
@@ -25,7 +25,7 @@ export interface OxlintLabel {
 export interface OxlintDiagnostic {
   message: string;
   code: string;
-  severity: "warning" | "error";
+  severity: 'warning' | 'error';
   causes: string[];
   url: string;
   help: string;
@@ -44,7 +44,7 @@ export interface Diagnostic {
   filePath: string;
   plugin: string;
   rule: string;
-  severity: "error" | "warning";
+  severity: 'error' | 'warning';
   message: string;
   help: string;
   line: number;

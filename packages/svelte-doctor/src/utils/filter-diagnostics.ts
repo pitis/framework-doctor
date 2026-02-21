@@ -1,7 +1,7 @@
-import path from "node:path";
-import type { Diagnostic, SvelteDoctorConfig } from "../types.js";
+import path from 'node:path';
+import type { Diagnostic, SvelteDoctorConfig } from '../types.js';
 
-const normalizePath = (filePath: string): string => filePath.split(path.sep).join("/");
+const normalizePath = (filePath: string): string => filePath.split(path.sep).join('/');
 
 export const filterIgnoredDiagnostics = (
   diagnostics: Diagnostic[],
@@ -15,7 +15,7 @@ export const filterIgnoredDiagnostics = (
     if (ignoredRules.has(ruleName)) return false;
 
     const normalized = normalizePath(diagnostic.filePath);
-    if (ignoredFileSubstrings.some((pattern) => normalized.includes(pattern.replace("/**", "")))) {
+    if (ignoredFileSubstrings.some((pattern) => normalized.includes(pattern.replace('/**', '')))) {
       return false;
     }
     return true;

@@ -40,7 +40,9 @@
   "bin": {
     "react-doctor": "./dist/cli.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/cli.d.ts",

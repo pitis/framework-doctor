@@ -1,30 +1,30 @@
-name: "Svelte Doctor"
-description: "Scan Svelte codebases for security, performance, and correctness issues"
+name: 'Svelte Doctor'
+description: 'Scan Svelte codebases for security, performance, and correctness issues'
 branding:
-  icon: "activity"
-  color: "blue"
+  icon: 'activity'
+  color: 'blue'
 
 inputs:
   directory:
-    description: "Project directory to scan"
-    default: "."
+    description: 'Project directory to scan'
+    default: '.'
   verbose:
-    description: "Show file details per rule"
-    default: "true"
+    description: 'Show file details per rule'
+    default: 'true'
   project:
-    description: "Workspace project(s) to scan (comma-separated)"
+    description: 'Workspace project(s) to scan (comma-separated)'
     required: false
   node-version:
-    description: "Node.js version to use"
-    default: "20"
+    description: 'Node.js version to use'
+    default: '20'
 
 outputs:
   score:
-    description: "Health score (0-100)"
+    description: 'Health score (0-100)'
     value: ${{ steps.score.outputs.score }}
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - uses: actions/setup-node@v4
       with:

@@ -1,4 +1,4 @@
-import type { PromptMultiselectChoiceState } from "../types.js";
+import type { PromptMultiselectChoiceState } from '../types.js';
 
 export const shouldAutoSelectCurrentChoice = (
   choiceStates: PromptMultiselectChoiceState[],

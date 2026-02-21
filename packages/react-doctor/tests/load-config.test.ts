@@ -1,146 +1,146 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { loadConfig } from "../src/utils/load-config.js";
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { loadConfig } from '../src/utils/load-config.js';
 
-const tempRootDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "react-doctor-config-test-"));
+const tempRootDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'react-doctor-config-test-'));
 
 afterAll(() => {
   fs.rmSync(tempRootDirectory, { recursive: true, force: true });
 });
 
-describe("loadConfig", () => {
-  describe("react-doctor.config.json", () => {
+describe('loadConfig', () => {
+  describe('react-doctor.config.json', () => {
     let configDirectory: string;
 
     beforeAll(() => {
-      configDirectory = path.join(tempRootDirectory, "with-config-file");
+      configDirectory = path.join(tempRootDirectory, 'with-config-file');
       fs.mkdirSync(configDirectory, { recursive: true });
       fs.writeFileSync(
-        path.join(configDirectory, "react-doctor.config.json"),
+        path.join(configDirectory, 'react-doctor.config.json'),
         JSON.stringify({
           ignore: {
-            rules: ["react/no-danger", "knip/exports"],
-            files: ["src/generated/**"],
+            rules: ['react/no-danger', 'knip/exports'],
+            files: ['src/generated/**'],
           },
         }),
       );
     });
 
-    it("loads config from react-doctor.config.json", () => {
+    it('loads config from react-doctor.config.json', () => {
       const config = loadConfig(configDirectory);
       expect(config).toEqual({
         ignore: {
-          rules: ["react/no-danger", "knip/exports"],
-          files: ["src/generated/**"],
+          rules: ['react/no-danger', 'knip/exports'],
+          files: ['src/generated/**'],
         },
       });
     });
   });
 
-  describe("package.json reactDoctor key", () => {
+  describe('package.json reactDoctor key', () => {
     let packageJsonDirectory: string;
 
     beforeAll(() => {
-      packageJsonDirectory = path.join(tempRootDirectory, "with-package-json-config");
+      packageJsonDirectory = path.join(tempRootDirectory, 'with-package-json-config');
       fs.mkdirSync(packageJsonDirectory, { recursive: true });
       fs.writeFileSync(
-        path.join(packageJsonDirectory, "package.json"),
+        path.join(packageJsonDirectory, 'package.json'),
         JSON.stringify({
-          name: "test-project",
+          name: 'test-project',
           reactDoctor: {
             ignore: {
-              rules: ["jsx-a11y/no-autofocus"],
+              rules: ['jsx-a11y/no-autofocus'],
             },
           },
         }),
       );
     });
 
-    it("loads config from package.json reactDoctor key", () => {
+    it('loads config from package.json reactDoctor key', () => {
       const config = loadConfig(packageJsonDirectory);
       expect(config).toEqual({
         ignore: {
-          rules: ["jsx-a11y/no-autofocus"],
+          rules: ['jsx-a11y/no-autofocus'],
         },
       });
     });
   });
 
-  describe("config file takes precedence", () => {
+  describe('config file takes precedence', () => {
     let precedenceDirectory: string;
 
     beforeAll(() => {
-      precedenceDirectory = path.join(tempRootDirectory, "precedence");
+      precedenceDirectory = path.join(tempRootDirectory, 'precedence');
       fs.mkdirSync(precedenceDirectory, { recursive: true });
       fs.writeFileSync(
-        path.join(precedenceDirectory, "react-doctor.config.json"),
-        JSON.stringify({ ignore: { rules: ["from-config-file"] } }),
+        path.join(precedenceDirectory, 'react-doctor.config.json'),
+        JSON.stringify({ ignore: { rules: ['from-config-file'] } }),
       );
       fs.writeFileSync(
-        path.join(precedenceDirectory, "package.json"),
+        path.join(precedenceDirectory, 'package.json'),
         JSON.stringify({
-          name: "test",
-          reactDoctor: { ignore: { rules: ["from-package-json"] } },
+          name: 'test',
+          reactDoctor: { ignore: { rules: ['from-package-json'] } },
         }),
       );
     });
 
-    it("prefers react-doctor.config.json over package.json", () => {
+    it('prefers react-doctor.config.json over package.json', () => {
       const config = loadConfig(precedenceDirectory);
-      expect(config?.ignore?.rules).toEqual(["from-config-file"]);
+      expect(config?.ignore?.rules).toEqual(['from-config-file']);
     });
   });
 
-  describe("no config", () => {
+  describe('no config', () => {
     let emptyDirectory: string;
 
     beforeAll(() => {
-      emptyDirectory = path.join(tempRootDirectory, "no-config");
+      emptyDirectory = path.join(tempRootDirectory, 'no-config');
       fs.mkdirSync(emptyDirectory, { recursive: true });
     });
 
-    it("returns null when no config is found", () => {
+    it('returns null when no config is found', () => {
       const config = loadConfig(emptyDirectory);
       expect(config).toBeNull();
     });
   });
 
-  describe("scan options in config", () => {
+  describe('scan options in config', () => {
     let optionsDirectory: string;
 
     beforeAll(() => {
-      optionsDirectory = path.join(tempRootDirectory, "with-scan-options");
+      optionsDirectory = path.join(tempRootDirectory, 'with-scan-options');
       fs.mkdirSync(optionsDirectory, { recursive: true });
       fs.writeFileSync(
-        path.join(optionsDirectory, "react-doctor.config.json"),
+        path.join(optionsDirectory, 'react-doctor.config.json'),
         JSON.stringify({
-          ignore: { rules: ["react/no-danger"] },
+          ignore: { rules: ['react/no-danger'] },
           lint: true,
           deadCode: false,
           verbose: true,
-          diff: "main",
+          diff: 'main',
         }),
       );
     });
 
-    it("loads scan options alongside ignore config", () => {
+    it('loads scan options alongside ignore config', () => {
       const config = loadConfig(optionsDirectory);
       expect(config).toEqual({
-        ignore: { rules: ["react/no-danger"] },
+        ignore: { rules: ['react/no-danger'] },
         lint: true,
         deadCode: false,
         verbose: true,
-        diff: "main",
+        diff: 'main',
       });
     });
 
-    it("loads diff as boolean", () => {
-      const boolDiffDirectory = path.join(tempRootDirectory, "with-bool-diff");
+    it('loads diff as boolean', () => {
+      const boolDiffDirectory = path.join(tempRootDirectory, 'with-bool-diff');
       fs.mkdirSync(boolDiffDirectory, { recursive: true });
       fs.writeFileSync(
-        path.join(boolDiffDirectory, "react-doctor.config.json"),
+        path.join(boolDiffDirectory, 'react-doctor.config.json'),
         JSON.stringify({ diff: true }),
       );
       const config = loadConfig(boolDiffDirectory);
@@ -148,48 +148,48 @@ describe("loadConfig", () => {
     });
   });
 
-  describe("invalid config", () => {
+  describe('invalid config', () => {
     let invalidJsonDirectory: string;
     let nonObjectDirectory: string;
 
     beforeAll(() => {
-      invalidJsonDirectory = path.join(tempRootDirectory, "invalid-json");
+      invalidJsonDirectory = path.join(tempRootDirectory, 'invalid-json');
       fs.mkdirSync(invalidJsonDirectory, { recursive: true });
       fs.writeFileSync(
-        path.join(invalidJsonDirectory, "react-doctor.config.json"),
-        "not valid json{{{",
+        path.join(invalidJsonDirectory, 'react-doctor.config.json'),
+        'not valid json{{{',
       );
 
-      nonObjectDirectory = path.join(tempRootDirectory, "non-object-config");
+      nonObjectDirectory = path.join(tempRootDirectory, 'non-object-config');
       fs.mkdirSync(nonObjectDirectory, { recursive: true });
       fs.writeFileSync(
-        path.join(nonObjectDirectory, "react-doctor.config.json"),
+        path.join(nonObjectDirectory, 'react-doctor.config.json'),
         JSON.stringify([1, 2, 3]),
       );
     });
 
-    it("returns null and warns for malformed JSON", () => {
-      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    it('returns null and warns for malformed JSON', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const config = loadConfig(invalidJsonDirectory);
       expect(config).toBeNull();
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Failed to parse"));
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to parse'));
       warnSpy.mockRestore();
     });
 
-    it("returns null and warns when config is not an object", () => {
-      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    it('returns null and warns when config is not an object', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const config = loadConfig(nonObjectDirectory);
       expect(config).toBeNull();
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("must be a JSON object"));
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('must be a JSON object'));
       warnSpy.mockRestore();
     });
 
-    it("ignores non-object reactDoctor key in package.json", () => {
-      const arrayConfigDirectory = path.join(tempRootDirectory, "array-pkg-config");
+    it('ignores non-object reactDoctor key in package.json', () => {
+      const arrayConfigDirectory = path.join(tempRootDirectory, 'array-pkg-config');
       fs.mkdirSync(arrayConfigDirectory, { recursive: true });
       fs.writeFileSync(
-        path.join(arrayConfigDirectory, "package.json"),
-        JSON.stringify({ name: "test", reactDoctor: "not-an-object" }),
+        path.join(arrayConfigDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', reactDoctor: 'not-an-object' }),
       );
       const config = loadConfig(arrayConfigDirectory);
       expect(config).toBeNull();

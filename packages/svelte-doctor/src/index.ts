@@ -1,20 +1,20 @@
-import path from "node:path";
-import { performance } from "node:perf_hooks";
-import type { DiagnoseOptions, DiagnoseResult } from "./types.js";
-import { discoverProject } from "./utils/discover-project.js";
-import { scan } from "./scan.js";
+import path from 'node:path';
+import { performance } from 'node:perf_hooks';
+import { scan } from './scan.js';
+import type { DiagnoseOptions, DiagnoseResult } from './types.js';
+import { discoverProject } from './utils/discover-project.js';
 
 export type {
-  Diagnostic,
   DiagnoseOptions,
   DiagnoseResult,
+  Diagnostic,
   ProjectInfo,
   ScanOptions,
   ScoreResult,
   SvelteDoctorConfig,
-} from "./types.js";
-export { ruleEnabledForVersion } from "./utils/version-rules.js";
-export { getDiffInfo, filterSourceFiles } from "./utils/get-diff-files.js";
+} from './types.js';
+export { filterSourceFiles, getDiffInfo } from './utils/get-diff-files.js';
+export { ruleEnabledForVersion } from './utils/version-rules.js';
 
 export const diagnose = async (
   directory: string,

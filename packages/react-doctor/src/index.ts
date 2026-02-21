@@ -1,15 +1,15 @@
-import path from "node:path";
-import { performance } from "node:perf_hooks";
-import type { Diagnostic, DiffInfo, ProjectInfo, ReactDoctorConfig, ScoreResult } from "./types.js";
-import { calculateScore } from "./utils/calculate-score.js";
-import { combineDiagnostics, computeJsxIncludePaths } from "./utils/combine-diagnostics.js";
-import { discoverProject } from "./utils/discover-project.js";
-import { loadConfig } from "./utils/load-config.js";
-import { runKnip } from "./utils/run-knip.js";
-import { runOxlint } from "./utils/run-oxlint.js";
+import path from 'node:path';
+import { performance } from 'node:perf_hooks';
+import type { Diagnostic, DiffInfo, ProjectInfo, ReactDoctorConfig, ScoreResult } from './types.js';
+import { calculateScore } from './utils/calculate-score.js';
+import { combineDiagnostics, computeJsxIncludePaths } from './utils/combine-diagnostics.js';
+import { discoverProject } from './utils/discover-project.js';
+import { loadConfig } from './utils/load-config.js';
+import { runKnip } from './utils/run-knip.js';
+import { runOxlint } from './utils/run-oxlint.js';
 
+export { filterSourceFiles, getDiffInfo } from './utils/get-diff-files.js';
 export type { Diagnostic, DiffInfo, ProjectInfo, ReactDoctorConfig, ScoreResult };
-export { getDiffInfo, filterSourceFiles } from "./utils/get-diff-files.js";
 
 export interface DiagnoseOptions {
   lint?: boolean;
@@ -40,7 +40,7 @@ export const diagnose = async (
   const effectiveDeadCode = options.deadCode ?? userConfig?.deadCode ?? true;
 
   if (!projectInfo.reactVersion) {
-    throw new Error("No React dependency found in package.json");
+    throw new Error('No React dependency found in package.json');
   }
 
   const jsxIncludePaths = computeJsxIncludePaths(includePaths);
@@ -55,7 +55,7 @@ export const diagnose = async (
         projectInfo.hasReactCompiler,
         jsxIncludePaths,
       ).catch((error: unknown) => {
-        console.error("Lint failed:", error);
+        console.error('Lint failed:', error);
         return emptyDiagnostics;
       })
     : Promise.resolve(emptyDiagnostics);
@@ -63,7 +63,7 @@ export const diagnose = async (
   const deadCodePromise =
     effectiveDeadCode && !isDiffMode
       ? runKnip(resolvedDirectory).catch((error: unknown) => {
-          console.error("Dead code analysis failed:", error);
+          console.error('Dead code analysis failed:', error);
           return emptyDiagnostics;
         })
       : Promise.resolve(emptyDiagnostics);

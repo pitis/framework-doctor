@@ -1,13 +1,13 @@
-import { createRequire } from "node:module";
-import basePrompts, { type PromptObject, type Answers } from "prompts";
-import type { PromptMultiselectContext } from "../types.js";
-import { logger } from "./logger.js";
-import { shouldAutoSelectCurrentChoice } from "./should-auto-select-current-choice.js";
-import { shouldSelectAllChoices } from "./should-select-all-choices.js";
+import { createRequire } from 'node:module';
+import basePrompts, { type Answers, type PromptObject } from 'prompts';
+import type { PromptMultiselectContext } from '../types.js';
+import { logger } from './logger.js';
+import { shouldAutoSelectCurrentChoice } from './should-auto-select-current-choice.js';
+import { shouldSelectAllChoices } from './should-select-all-choices.js';
 
 const require = createRequire(import.meta.url);
-const PROMPTS_MULTISELECT_MODULE_PATH = "prompts/lib/elements/multiselect";
-const PROMPTS_SELECT_MODULE_PATH = "prompts/lib/elements/select";
+const PROMPTS_MULTISELECT_MODULE_PATH = 'prompts/lib/elements/multiselect';
+const PROMPTS_SELECT_MODULE_PATH = 'prompts/lib/elements/select';
 let didPatchMultiselectToggleAll = false;
 let didPatchMultiselectSubmit = false;
 let didPatchSelectBanner = false;
@@ -24,8 +24,8 @@ export const clearSelectBanner = (): void => {
 
 const onCancel = () => {
   logger.break();
-  logger.log("Cancelled.");
-  logger.dim("Run `npx react-doctor@latest --fix` to fix issues.");
+  logger.log('Cancelled.');
+  logger.dim('Run `npx react-doctor@latest --fix` to fix issues.');
   logger.break();
   process.exit(0);
 };
@@ -85,7 +85,7 @@ const patchSelectBanner = (): void => {
   didPatchSelectBanner = true;
 
   const selectConstructor = require(PROMPTS_SELECT_MODULE_PATH);
-  const promptsClear = require("prompts/lib/util/clear");
+  const promptsClear = require('prompts/lib/util/clear');
   const originalRender = selectConstructor.prototype.render;
 
   selectConstructor.prototype.render = function (this: SelectPromptInstance): void {

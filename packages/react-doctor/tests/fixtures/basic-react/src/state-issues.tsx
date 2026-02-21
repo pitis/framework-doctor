@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 const DerivedStateComponent = ({ items }: { items: string[] }) => {
   const [filteredItems, setFilteredItems] = useState<string[]>([]);
@@ -7,13 +7,13 @@ const DerivedStateComponent = ({ items }: { items: string[] }) => {
     setFilteredItems(items);
   }, [items]);
 
-  return <div>{filteredItems.join(",")}</div>;
+  return <div>{filteredItems.join(',')}</div>;
 };
 
 const StateResetComponent = ({ visible }: { visible: boolean }) => {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   useEffect(() => {
-    setInputValue("");
+    setInputValue('');
   }, [visible]);
   return <input value={inputValue} onChange={(event) => setInputValue(event.target.value)} />;
 };
@@ -22,7 +22,7 @@ const FetchInEffectComponent = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch("/api/data")
+    fetch('/api/data')
       .then((response) => response.json())
       .then((json) => setData(json));
   }, []);
@@ -31,18 +31,18 @@ const FetchInEffectComponent = () => {
 };
 
 const LazyInitComponent = () => {
-  const [value, setValue] = useState(JSON.parse("{}"));
+  const [value, setValue] = useState(JSON.parse('{}'));
   return <div>{JSON.stringify(value)}</div>;
 };
 
 const CascadingSetStateComponent = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [age, setAge] = useState(0);
 
   useEffect(() => {
-    setName("John");
-    setEmail("john@example.com");
+    setName('John');
+    setEmail('john@example.com');
     setAge(30);
   }, []);
 
@@ -56,7 +56,7 @@ const CascadingSetStateComponent = () => {
 const EffectEventHandlerComponent = ({ isOpen }: { isOpen: boolean }) => {
   useEffect(() => {
     if (isOpen) {
-      document.body.classList.add("modal-open");
+      document.body.classList.add('modal-open');
     }
   }, [isOpen]);
 
@@ -69,11 +69,11 @@ const DerivedUseStateComponent = ({ initialName }: { initialName: string }) => {
 };
 
 const PreferUseReducerComponent = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [age, setAge] = useState(0);
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState('');
 
   return (
     <div>
@@ -98,14 +98,14 @@ const DependencyLiteralComponent = () => {
 };
 
 export {
-  DerivedStateComponent,
-  StateResetComponent,
-  FetchInEffectComponent,
-  LazyInitComponent,
   CascadingSetStateComponent,
-  EffectEventHandlerComponent,
-  DerivedUseStateComponent,
-  PreferUseReducerComponent,
-  FunctionalSetStateComponent,
   DependencyLiteralComponent,
+  DerivedStateComponent,
+  DerivedUseStateComponent,
+  EffectEventHandlerComponent,
+  FetchInEffectComponent,
+  FunctionalSetStateComponent,
+  LazyInitComponent,
+  PreferUseReducerComponent,
+  StateResetComponent,
 };

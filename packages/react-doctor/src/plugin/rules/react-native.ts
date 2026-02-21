@@ -5,15 +5,15 @@ import {
   RAW_TEXT_PREVIEW_MAX_CHARS,
   REACT_NATIVE_LIST_COMPONENTS,
   REACT_NATIVE_TEXT_COMPONENTS,
-} from "../constants.js";
-import { hasDirective, isMemberProperty } from "../helpers.js";
-import type { EsTreeNode, Rule, RuleContext } from "../types.js";
+} from '../constants.js';
+import { hasDirective, isMemberProperty } from '../helpers.js';
+import type { EsTreeNode, Rule, RuleContext } from '../types.js';
 
 const resolveJsxElementName = (openingElement: EsTreeNode): string | null => {
   const elementName = openingElement?.name;
   if (!elementName) return null;
-  if (elementName.type === "JSXIdentifier") return elementName.name;
-  if (elementName.type === "JSXMemberExpression") return elementName.property?.name ?? null;
+  if (elementName.type === 'JSXIdentifier') return elementName.name;
+  if (elementName.type === 'JSXMemberExpression') return elementName.property?.name ?? null;
   return null;
 };
 
@@ -23,34 +23,34 @@ const truncateText = (text: string): string =>
     : text;
 
 const isRawTextContent = (child: EsTreeNode): boolean => {
-  if (child.type === "JSXText") return Boolean(child.value?.trim());
-  if (child.type !== "JSXExpressionContainer" || !child.expression) return false;
+  if (child.type === 'JSXText') return Boolean(child.value?.trim());
+  if (child.type !== 'JSXExpressionContainer' || !child.expression) return false;
 
   const expression = child.expression;
   return (
-    (expression.type === "Literal" &&
-      (typeof expression.value === "string" || typeof expression.value === "number")) ||
-    expression.type === "TemplateLiteral"
+    (expression.type === 'Literal' &&
+      (typeof expression.value === 'string' || typeof expression.value === 'number')) ||
+    expression.type === 'TemplateLiteral'
   );
 };
 
 const getRawTextDescription = (child: EsTreeNode): string => {
-  if (child.type === "JSXText") {
+  if (child.type === 'JSXText') {
     return `"${truncateText(child.value.trim())}"`;
   }
 
-  if (child.type === "JSXExpressionContainer" && child.expression) {
+  if (child.type === 'JSXExpressionContainer' && child.expression) {
     const expression = child.expression;
-    if (expression.type === "Literal" && typeof expression.value === "string") {
+    if (expression.type === 'Literal' && typeof expression.value === 'string') {
       return `"${truncateText(expression.value)}"`;
     }
-    if (expression.type === "Literal" && typeof expression.value === "number") {
+    if (expression.type === 'Literal' && typeof expression.value === 'number') {
       return `{${expression.value}}`;
     }
-    if (expression.type === "TemplateLiteral") return "template literal";
+    if (expression.type === 'TemplateLiteral') return 'template literal';
   }
 
-  return "text content";
+  return 'text content';
 };
 
 export const rnNoRawText: Rule = {
@@ -59,7 +59,7 @@ export const rnNoRawText: Rule = {
 
     return {
       Program(programNode: EsTreeNode) {
-        isDomComponentFile = hasDirective(programNode, "use dom");
+        isDomComponentFile = hasDirective(programNode, 'use dom');
       },
       JSXElement(node: EsTreeNode) {
         if (isDomComponentFile) return;
@@ -83,10 +83,10 @@ export const rnNoRawText: Rule = {
 export const rnNoDeprecatedModules: Rule = {
   create: (context: RuleContext) => ({
     ImportDeclaration(node: EsTreeNode) {
-      if (node.source?.value !== "react-native") return;
+      if (node.source?.value !== 'react-native') return;
 
       for (const specifier of node.specifiers ?? []) {
-        if (specifier.type !== "ImportSpecifier") continue;
+        if (specifier.type !== 'ImportSpecifier') continue;
         const importedName = specifier.imported?.name;
         if (!importedName) continue;
 
@@ -106,7 +106,7 @@ export const rnNoLegacyExpoPackages: Rule = {
   create: (context: RuleContext) => ({
     ImportDeclaration(node: EsTreeNode) {
       const source = node.source?.value;
-      if (typeof source !== "string") return;
+      if (typeof source !== 'string') return;
 
       for (const [packageName, replacement] of Object.entries(LEGACY_EXPO_PACKAGE_REPLACEMENTS)) {
         if (source === packageName || source.startsWith(`${packageName}/`)) {
@@ -124,23 +124,23 @@ export const rnNoLegacyExpoPackages: Rule = {
 export const rnNoDimensionsGet: Rule = {
   create: (context: RuleContext) => ({
     CallExpression(node: EsTreeNode) {
-      if (node.callee?.type !== "MemberExpression") return;
-      if (node.callee.object?.type !== "Identifier" || node.callee.object.name !== "Dimensions")
+      if (node.callee?.type !== 'MemberExpression') return;
+      if (node.callee.object?.type !== 'Identifier' || node.callee.object.name !== 'Dimensions')
         return;
 
-      if (isMemberProperty(node.callee, "get")) {
+      if (isMemberProperty(node.callee, 'get')) {
         context.report({
           node,
           message:
-            "Dimensions.get() does not update on screen rotation or resize — use useWindowDimensions() for reactive layout",
+            'Dimensions.get() does not update on screen rotation or resize — use useWindowDimensions() for reactive layout',
         });
       }
 
-      if (isMemberProperty(node.callee, "addEventListener")) {
+      if (isMemberProperty(node.callee, 'addEventListener')) {
         context.report({
           node,
           message:
-            "Dimensions.addEventListener() was removed in React Native 0.72 — use useWindowDimensions() instead",
+            'Dimensions.addEventListener() was removed in React Native 0.72 — use useWindowDimensions() instead',
         });
       }
     },
@@ -150,19 +150,19 @@ export const rnNoDimensionsGet: Rule = {
 export const rnNoInlineFlatlistRenderitem: Rule = {
   create: (context: RuleContext) => ({
     JSXAttribute(node: EsTreeNode) {
-      if (node.name?.type !== "JSXIdentifier" || node.name.name !== "renderItem") return;
-      if (!node.value || node.value.type !== "JSXExpressionContainer") return;
+      if (node.name?.type !== 'JSXIdentifier' || node.name.name !== 'renderItem') return;
+      if (!node.value || node.value.type !== 'JSXExpressionContainer') return;
 
       const openingElement = node.parent;
-      if (!openingElement || openingElement.type !== "JSXOpeningElement") return;
+      if (!openingElement || openingElement.type !== 'JSXOpeningElement') return;
 
       const listComponentName = resolveJsxElementName(openingElement);
       if (!listComponentName || !REACT_NATIVE_LIST_COMPONENTS.has(listComponentName)) return;
 
       const expression = node.value.expression;
       if (
-        expression?.type !== "ArrowFunctionExpression" &&
-        expression?.type !== "FunctionExpression"
+        expression?.type !== 'ArrowFunctionExpression' &&
+        expression?.type !== 'FunctionExpression'
       )
         return;
 
@@ -178,8 +178,8 @@ const reportLegacyShadowProperties = (objectExpression: EsTreeNode, context: Rul
   const legacyShadowPropertyNames: string[] = [];
 
   for (const property of objectExpression.properties ?? []) {
-    if (property.type !== "Property") continue;
-    const propertyName = property.key?.type === "Identifier" ? property.key.name : null;
+    if (property.type !== 'Property') continue;
+    const propertyName = property.key?.type === 'Identifier' ? property.key.name : null;
     if (propertyName && LEGACY_SHADOW_STYLE_PROPERTIES.has(propertyName)) {
       legacyShadowPropertyNames.push(propertyName);
     }
@@ -187,43 +187,43 @@ const reportLegacyShadowProperties = (objectExpression: EsTreeNode, context: Rul
 
   if (legacyShadowPropertyNames.length === 0) return;
 
-  const quotedPropertyNames = legacyShadowPropertyNames.map((name) => `"${name}"`).join(", ");
+  const quotedPropertyNames = legacyShadowPropertyNames.map((name) => `"${name}"`).join(', ');
   context.report({
     node: objectExpression,
-    message: `Legacy shadow style${legacyShadowPropertyNames.length > 1 ? "s" : ""} ${quotedPropertyNames} — use boxShadow for cross-platform shadows on the new architecture`,
+    message: `Legacy shadow style${legacyShadowPropertyNames.length > 1 ? 's' : ''} ${quotedPropertyNames} — use boxShadow for cross-platform shadows on the new architecture`,
   });
 };
 
 export const rnNoLegacyShadowStyles: Rule = {
   create: (context: RuleContext) => ({
     JSXAttribute(node: EsTreeNode) {
-      if (node.name?.type !== "JSXIdentifier" || node.name.name !== "style") return;
-      if (node.value?.type !== "JSXExpressionContainer") return;
+      if (node.name?.type !== 'JSXIdentifier' || node.name.name !== 'style') return;
+      if (node.value?.type !== 'JSXExpressionContainer') return;
 
       const expression = node.value.expression;
 
-      if (expression?.type === "ObjectExpression") {
+      if (expression?.type === 'ObjectExpression') {
         reportLegacyShadowProperties(expression, context);
-      } else if (expression?.type === "ArrayExpression") {
+      } else if (expression?.type === 'ArrayExpression') {
         for (const element of expression.elements ?? []) {
-          if (element?.type === "ObjectExpression") {
+          if (element?.type === 'ObjectExpression') {
             reportLegacyShadowProperties(element, context);
           }
         }
       }
     },
     CallExpression(node: EsTreeNode) {
-      if (node.callee?.type !== "MemberExpression") return;
-      if (node.callee.object?.type !== "Identifier" || node.callee.object.name !== "StyleSheet")
+      if (node.callee?.type !== 'MemberExpression') return;
+      if (node.callee.object?.type !== 'Identifier' || node.callee.object.name !== 'StyleSheet')
         return;
-      if (!isMemberProperty(node.callee, "create")) return;
+      if (!isMemberProperty(node.callee, 'create')) return;
 
       const stylesArgument = node.arguments?.[0];
-      if (stylesArgument?.type !== "ObjectExpression") return;
+      if (stylesArgument?.type !== 'ObjectExpression') return;
 
       for (const styleDefinition of stylesArgument.properties ?? []) {
-        if (styleDefinition.type !== "Property") continue;
-        if (styleDefinition.value?.type !== "ObjectExpression") continue;
+        if (styleDefinition.type !== 'Property') continue;
+        if (styleDefinition.value?.type !== 'ObjectExpression') continue;
         reportLegacyShadowProperties(styleDefinition.value, context);
       }
     },
@@ -233,16 +233,16 @@ export const rnNoLegacyShadowStyles: Rule = {
 export const rnPreferReanimated: Rule = {
   create: (context: RuleContext) => ({
     ImportDeclaration(node: EsTreeNode) {
-      if (node.source?.value !== "react-native") return;
+      if (node.source?.value !== 'react-native') return;
 
       for (const specifier of node.specifiers ?? []) {
-        if (specifier.type !== "ImportSpecifier") continue;
-        if (specifier.imported?.name !== "Animated") continue;
+        if (specifier.type !== 'ImportSpecifier') continue;
+        if (specifier.imported?.name !== 'Animated') continue;
 
         context.report({
           node: specifier,
           message:
-            "Animated from react-native runs animations on the JS thread — use react-native-reanimated for performant UI-thread animations",
+            'Animated from react-native runs animations on the JS thread — use react-native-reanimated for performant UI-thread animations',
         });
       }
     },
@@ -252,13 +252,13 @@ export const rnPreferReanimated: Rule = {
 export const rnNoSingleElementStyleArray: Rule = {
   create: (context: RuleContext) => ({
     JSXAttribute(node: EsTreeNode) {
-      const propName = node.name?.type === "JSXIdentifier" ? node.name.name : null;
+      const propName = node.name?.type === 'JSXIdentifier' ? node.name.name : null;
       if (!propName) return;
-      if (propName !== "style" && !propName.endsWith("Style")) return;
-      if (node.value?.type !== "JSXExpressionContainer") return;
+      if (propName !== 'style' && !propName.endsWith('Style')) return;
+      if (node.value?.type !== 'JSXExpressionContainer') return;
 
       const expression = node.value.expression;
-      if (expression?.type !== "ArrayExpression") return;
+      if (expression?.type !== 'ArrayExpression') return;
       if (expression.elements?.length !== 1) return;
 
       context.report({

@@ -1,5 +1,5 @@
-import type { Diagnostic, ReactDoctorConfig } from "../types.js";
-import { compileGlobPattern } from "./match-glob-pattern.js";
+import type { Diagnostic, ReactDoctorConfig } from '../types.js';
+import { compileGlobPattern } from './match-glob-pattern.js';
 
 export const filterIgnoredDiagnostics = (
   diagnostics: Diagnostic[],
@@ -20,7 +20,7 @@ export const filterIgnoredDiagnostics = (
       return false;
     }
 
-    const normalizedPath = diagnostic.filePath.replace(/\\/g, "/").replace(/^\.\//, "");
+    const normalizedPath = diagnostic.filePath.replace(/\\/g, '/').replace(/^\.\//, '');
     if (ignoredFilePatterns.some((pattern) => pattern.test(normalizedPath))) {
       return false;
     }

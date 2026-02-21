@@ -1,8 +1,8 @@
-import { randomUUID } from "node:crypto";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { performance } from "node:perf_hooks";
+import { randomUUID } from 'node:crypto';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { performance } from 'node:perf_hooks';
 import {
   MILLISECONDS_PER_SECOND,
   OFFLINE_FLAG_MESSAGE,
@@ -14,7 +14,7 @@ import {
   SCORE_GOOD_THRESHOLD,
   SCORE_OK_THRESHOLD,
   SHARE_BASE_URL,
-} from "./constants.js";
+} from './constants.js';
 import type {
   Diagnostic,
   ProjectInfo,
@@ -22,39 +22,39 @@ import type {
   ScanOptions,
   ScanResult,
   ScoreResult,
-} from "./types.js";
-import { calculateScore } from "./utils/calculate-score.js";
-import { colorizeByScore } from "./utils/colorize-by-score.js";
-import { combineDiagnostics, computeJsxIncludePaths } from "./utils/combine-diagnostics.js";
-import { discoverProject, formatFrameworkName } from "./utils/discover-project.js";
-import { type FramedLine, createFramedLine, printFramedBox } from "./utils/framed-box.js";
-import { groupBy } from "./utils/group-by.js";
-import { highlighter } from "./utils/highlighter.js";
-import { indentMultilineText } from "./utils/indent-multiline-text.js";
-import { loadConfig } from "./utils/load-config.js";
-import { logger } from "./utils/logger.js";
-import { prompts } from "./utils/prompts.js";
+} from './types.js';
+import { calculateScore } from './utils/calculate-score.js';
+import { colorizeByScore } from './utils/colorize-by-score.js';
+import { combineDiagnostics, computeJsxIncludePaths } from './utils/combine-diagnostics.js';
+import { discoverProject, formatFrameworkName } from './utils/discover-project.js';
+import { type FramedLine, createFramedLine, printFramedBox } from './utils/framed-box.js';
+import { groupBy } from './utils/group-by.js';
+import { highlighter } from './utils/highlighter.js';
+import { indentMultilineText } from './utils/indent-multiline-text.js';
+import { loadConfig } from './utils/load-config.js';
+import { logger } from './utils/logger.js';
+import { prompts } from './utils/prompts.js';
 import {
   installNodeViaNvm,
   isNvmInstalled,
   resolveNodeForOxlint,
-} from "./utils/resolve-compatible-node.js";
-import { runKnip } from "./utils/run-knip.js";
-import { runOxlint } from "./utils/run-oxlint.js";
-import { spinner } from "./utils/spinner.js";
+} from './utils/resolve-compatible-node.js';
+import { runKnip } from './utils/run-knip.js';
+import { runOxlint } from './utils/run-oxlint.js';
+import { spinner } from './utils/spinner.js';
 
 interface ScoreBarSegments {
   filledSegment: string;
   emptySegment: string;
 }
 
-const SEVERITY_ORDER: Record<Diagnostic["severity"], number> = {
+const SEVERITY_ORDER: Record<Diagnostic['severity'], number> = {
   error: 0,
   warning: 1,
 };
 
-const colorizeBySeverity = (text: string, severity: Diagnostic["severity"]): string =>
-  severity === "error" ? highlighter.error(text) : highlighter.warn(text);
+const colorizeBySeverity = (text: string, severity: Diagnostic['severity']): string =>
+  severity === 'error' ? highlighter.error(text) : highlighter.warn(text);
 
 const sortBySeverity = (diagnosticGroups: [string, Diagnostic[]][]): [string, Diagnostic[]][] =>
   diagnosticGroups.toSorted(([, diagnosticsA], [, diagnosticsB]) => {
@@ -88,21 +88,21 @@ const printDiagnostics = (diagnostics: Diagnostic[], isVerbose: boolean): void =
 
   for (const [, ruleDiagnostics] of sortedRuleGroups) {
     const firstDiagnostic = ruleDiagnostics[0];
-    const severitySymbol = firstDiagnostic.severity === "error" ? "✗" : "⚠";
+    const severitySymbol = firstDiagnostic.severity === 'error' ? '✗' : '⚠';
     const icon = colorizeBySeverity(severitySymbol, firstDiagnostic.severity);
     const count = ruleDiagnostics.length;
-    const countLabel = count > 1 ? colorizeBySeverity(` (${count})`, firstDiagnostic.severity) : "";
+    const countLabel = count > 1 ? colorizeBySeverity(` (${count})`, firstDiagnostic.severity) : '';
 
     logger.log(`  ${icon} ${firstDiagnostic.message}${countLabel}`);
     if (firstDiagnostic.help) {
-      logger.dim(indentMultilineText(firstDiagnostic.help, "    "));
+      logger.dim(indentMultilineText(firstDiagnostic.help, '    '));
     }
 
     if (isVerbose) {
       const fileLines = buildFileLineMap(ruleDiagnostics);
 
       for (const [filePath, lines] of fileLines) {
-        const lineLabel = lines.length > 0 ? `: ${lines.join(", ")}` : "";
+        const lineLabel = lines.length > 0 ? `: ${lines.join(', ')}` : '';
         logger.dim(`    ${filePath}${lineLabel}`);
       }
     }
@@ -127,21 +127,21 @@ const formatRuleSummary = (ruleKey: string, ruleDiagnostics: Diagnostic[]): stri
     `Severity: ${firstDiagnostic.severity}`,
     `Category: ${firstDiagnostic.category}`,
     `Count: ${ruleDiagnostics.length}`,
-    "",
+    '',
     firstDiagnostic.message,
   ];
 
   if (firstDiagnostic.help) {
-    sections.push("", `Suggestion: ${firstDiagnostic.help}`);
+    sections.push('', `Suggestion: ${firstDiagnostic.help}`);
   }
 
-  sections.push("", "Files:");
+  sections.push('', 'Files:');
   for (const [filePath, lines] of fileLines) {
-    const lineLabel = lines.length > 0 ? `: ${lines.join(", ")}` : "";
+    const lineLabel = lines.length > 0 ? `: ${lines.join(', ')}` : '';
     sections.push(`  ${filePath}${lineLabel}`);
   }
 
-  return sections.join("\n") + "\n";
+  return sections.join('\n') + '\n';
 };
 
 const writeDiagnosticsDirectory = (diagnostics: Diagnostic[]): string => {
@@ -155,11 +155,11 @@ const writeDiagnosticsDirectory = (diagnostics: Diagnostic[]): string => {
   const sortedRuleGroups = sortBySeverity([...ruleGroups.entries()]);
 
   for (const [ruleKey, ruleDiagnostics] of sortedRuleGroups) {
-    const fileName = ruleKey.replace(/\//g, "--") + ".txt";
+    const fileName = ruleKey.replace(/\//g, '--') + '.txt';
     writeFileSync(join(outputDirectory, fileName), formatRuleSummary(ruleKey, ruleDiagnostics));
   }
 
-  writeFileSync(join(outputDirectory, "diagnostics.json"), JSON.stringify(diagnostics, null, 2));
+  writeFileSync(join(outputDirectory, 'diagnostics.json'), JSON.stringify(diagnostics, null, 2));
 
   return outputDirectory;
 };
@@ -169,8 +169,8 @@ const buildScoreBarSegments = (score: number): ScoreBarSegments => {
   const emptyCount = SCORE_BAR_WIDTH_CHARS - filledCount;
 
   return {
-    filledSegment: "█".repeat(filledCount),
-    emptySegment: "░".repeat(emptyCount),
+    filledSegment: '█'.repeat(filledCount),
+    emptySegment: '░'.repeat(emptyCount),
   };
 };
 
@@ -194,21 +194,21 @@ const printScoreGauge = (score: number, label: string): void => {
 };
 
 const getDoctorFace = (score: number): string[] => {
-  if (score >= SCORE_GOOD_THRESHOLD) return ["◠ ◠", " ▽ "];
-  if (score >= SCORE_OK_THRESHOLD) return ["• •", " ─ "];
-  return ["x x", " ▽ "];
+  if (score >= SCORE_GOOD_THRESHOLD) return ['◠ ◠', ' ▽ '];
+  if (score >= SCORE_OK_THRESHOLD) return ['• •', ' ─ '];
+  return ['x x', ' ▽ '];
 };
 
 const printBranding = (score?: number): void => {
   if (score !== undefined) {
     const [eyes, mouth] = getDoctorFace(score);
     const colorize = (text: string) => colorizeByScore(text, score);
-    logger.log(colorize("  ┌─────┐"));
+    logger.log(colorize('  ┌─────┐'));
     logger.log(colorize(`  │ ${eyes} │`));
     logger.log(colorize(`  │ ${mouth} │`));
-    logger.log(colorize("  └─────┘"));
+    logger.log(colorize('  └─────┘'));
   }
-  logger.log(`  React Doctor ${highlighter.dim("(www.react.doctor)")}`);
+  logger.log(`  React Doctor ${highlighter.dim('(www.react.doctor)')}`);
   logger.break();
 };
 
@@ -217,16 +217,16 @@ const buildShareUrl = (
   scoreResult: ScoreResult | null,
   projectName: string,
 ): string => {
-  const errorCount = diagnostics.filter((diagnostic) => diagnostic.severity === "error").length;
-  const warningCount = diagnostics.filter((diagnostic) => diagnostic.severity === "warning").length;
+  const errorCount = diagnostics.filter((diagnostic) => diagnostic.severity === 'error').length;
+  const warningCount = diagnostics.filter((diagnostic) => diagnostic.severity === 'warning').length;
   const affectedFileCount = collectAffectedFiles(diagnostics).size;
 
   const params = new URLSearchParams();
-  params.set("p", projectName);
-  if (scoreResult) params.set("s", String(scoreResult.score));
-  if (errorCount > 0) params.set("e", String(errorCount));
-  if (warningCount > 0) params.set("w", String(warningCount));
-  if (affectedFileCount > 0) params.set("f", String(affectedFileCount));
+  params.set('p', projectName);
+  if (scoreResult) params.set('s', String(scoreResult.score));
+  if (errorCount > 0) params.set('e', String(errorCount));
+  if (warningCount > 0) params.set('w', String(warningCount));
+  if (affectedFileCount > 0) params.set('f', String(affectedFileCount));
 
   return `${SHARE_BASE_URL}?${params.toString()}`;
 };
@@ -241,36 +241,36 @@ const buildBrandingLines = (
     const [eyes, mouth] = getDoctorFace(scoreResult.score);
     const scoreColorizer = (text: string): string => colorizeByScore(text, scoreResult.score);
 
-    lines.push(createFramedLine("┌─────┐", scoreColorizer("┌─────┐")));
+    lines.push(createFramedLine('┌─────┐', scoreColorizer('┌─────┐')));
     lines.push(createFramedLine(`│ ${eyes} │`, scoreColorizer(`│ ${eyes} │`)));
     lines.push(createFramedLine(`│ ${mouth} │`, scoreColorizer(`│ ${mouth} │`)));
-    lines.push(createFramedLine("└─────┘", scoreColorizer("└─────┘")));
+    lines.push(createFramedLine('└─────┘', scoreColorizer('└─────┘')));
     lines.push(
       createFramedLine(
-        "React Doctor (www.react.doctor)",
-        `React Doctor ${highlighter.dim("(www.react.doctor)")}`,
+        'React Doctor (www.react.doctor)',
+        `React Doctor ${highlighter.dim('(www.react.doctor)')}`,
       ),
     );
-    lines.push(createFramedLine(""));
+    lines.push(createFramedLine(''));
 
     const scoreLinePlainText = `${scoreResult.score} / ${PERFECT_SCORE}  ${scoreResult.label}`;
     const scoreLineRenderedText = `${colorizeByScore(String(scoreResult.score), scoreResult.score)} / ${PERFECT_SCORE}  ${colorizeByScore(scoreResult.label, scoreResult.score)}`;
     lines.push(createFramedLine(scoreLinePlainText, scoreLineRenderedText));
-    lines.push(createFramedLine(""));
+    lines.push(createFramedLine(''));
     lines.push(
       createFramedLine(buildPlainScoreBar(scoreResult.score), buildScoreBar(scoreResult.score)),
     );
-    lines.push(createFramedLine(""));
+    lines.push(createFramedLine(''));
   } else {
     lines.push(
       createFramedLine(
-        "React Doctor (www.react.doctor)",
-        `React Doctor ${highlighter.dim("(www.react.doctor)")}`,
+        'React Doctor (www.react.doctor)',
+        `React Doctor ${highlighter.dim('(www.react.doctor)')}`,
       ),
     );
-    lines.push(createFramedLine(""));
+    lines.push(createFramedLine(''));
     lines.push(createFramedLine(noScoreMessage, highlighter.dim(noScoreMessage)));
-    lines.push(createFramedLine(""));
+    lines.push(createFramedLine(''));
   }
 
   return lines;
@@ -281,8 +281,8 @@ const buildCountsSummaryLine = (
   totalSourceFileCount: number,
   elapsedMilliseconds: number,
 ): FramedLine => {
-  const errorCount = diagnostics.filter((diagnostic) => diagnostic.severity === "error").length;
-  const warningCount = diagnostics.filter((diagnostic) => diagnostic.severity === "warning").length;
+  const errorCount = diagnostics.filter((diagnostic) => diagnostic.severity === 'error').length;
+  const warningCount = diagnostics.filter((diagnostic) => diagnostic.severity === 'warning').length;
   const affectedFileCount = collectAffectedFiles(diagnostics).size;
   const elapsed = formatElapsedTime(elapsedMilliseconds);
 
@@ -290,12 +290,12 @@ const buildCountsSummaryLine = (
   const renderedParts: string[] = [];
 
   if (errorCount > 0) {
-    const errorText = `✗ ${errorCount} error${errorCount === 1 ? "" : "s"}`;
+    const errorText = `✗ ${errorCount} error${errorCount === 1 ? '' : 's'}`;
     plainParts.push(errorText);
     renderedParts.push(highlighter.error(errorText));
   }
   if (warningCount > 0) {
-    const warningText = `⚠ ${warningCount} warning${warningCount === 1 ? "" : "s"}`;
+    const warningText = `⚠ ${warningCount} warning${warningCount === 1 ? '' : 's'}`;
     plainParts.push(warningText);
     renderedParts.push(highlighter.warn(warningText));
   }
@@ -303,13 +303,13 @@ const buildCountsSummaryLine = (
   const fileCountText =
     totalSourceFileCount > 0
       ? `across ${affectedFileCount}/${totalSourceFileCount} files`
-      : `across ${affectedFileCount} file${affectedFileCount === 1 ? "" : "s"}`;
+      : `across ${affectedFileCount} file${affectedFileCount === 1 ? '' : 's'}`;
   const elapsedTimeText = `in ${elapsed}`;
 
   plainParts.push(fileCountText, elapsedTimeText);
   renderedParts.push(highlighter.dim(fileCountText), highlighter.dim(elapsedTimeText));
 
-  return createFramedLine(plainParts.join("  "), renderedParts.join("  "));
+  return createFramedLine(plainParts.join('  '), renderedParts.join('  '));
 };
 
 const printSummary = (
@@ -365,8 +365,8 @@ const resolveOxlintNode = async (
 
   if (isNvmInstalled() && process.stdin.isTTY) {
     const { shouldInstallNode } = await prompts({
-      type: "confirm",
-      name: "shouldInstallNode",
+      type: 'confirm',
+      name: 'shouldInstallNode',
       message: `Install Node ${OXLINT_RECOMMENDED_NODE_MAJOR} via nvm to enable lint checks?`,
       initial: true,
     });
@@ -381,7 +381,7 @@ const resolveOxlintNode = async (
         return freshResolution.binaryPath;
       }
       logger.break();
-      logger.warn("Failed to install Node via nvm. Skipping lint checks.");
+      logger.warn('Failed to install Node via nvm. Skipping lint checks.');
       logger.break();
       return null;
     }
@@ -425,7 +425,7 @@ const printProjectDetection = (
   includePaths: string[],
 ): void => {
   const frameworkLabel = formatFrameworkName(projectInfo.framework);
-  const languageLabel = projectInfo.hasTypeScript ? "TypeScript" : "JavaScript";
+  const languageLabel = projectInfo.hasTypeScript ? 'TypeScript' : 'JavaScript';
 
   const completeStep = (message: string) => {
     spinner(message).start().succeed(message);
@@ -437,7 +437,7 @@ const printProjectDetection = (
   );
   completeStep(`Detecting language. Found ${highlighter.info(languageLabel)}.`);
   completeStep(
-    `Detecting React Compiler. ${projectInfo.hasReactCompiler ? highlighter.info("Found React Compiler.") : "Not found."}`,
+    `Detecting React Compiler. ${projectInfo.hasReactCompiler ? highlighter.info('Found React Compiler.') : 'Not found.'}`,
   );
 
   if (isDiffMode) {
@@ -447,7 +447,7 @@ const printProjectDetection = (
   }
 
   if (userConfig) {
-    completeStep(`Loaded ${highlighter.info("react-doctor config")}.`);
+    completeStep(`Loaded ${highlighter.info('react-doctor config')}.`);
   }
 
   logger.break();
@@ -465,7 +465,7 @@ export const scan = async (
   const isDiffMode = includePaths.length > 0;
 
   if (!projectInfo.reactVersion) {
-    throw new Error("No React dependency found in package.json");
+    throw new Error('No React dependency found in package.json');
   }
 
   if (!options.scoreOnly) {
@@ -482,7 +482,7 @@ export const scan = async (
 
   const lintPromise = resolvedNodeBinaryPath
     ? (async () => {
-        const lintSpinner = options.scoreOnly ? null : spinner("Running lint checks...").start();
+        const lintSpinner = options.scoreOnly ? null : spinner('Running lint checks...').start();
         try {
           const lintDiagnostics = await runOxlint(
             directory,
@@ -492,12 +492,12 @@ export const scan = async (
             jsxIncludePaths,
             resolvedNodeBinaryPath,
           );
-          lintSpinner?.succeed("Running lint checks.");
+          lintSpinner?.succeed('Running lint checks.');
           return lintDiagnostics;
         } catch (error) {
           didLintFail = true;
           const errorMessage = error instanceof Error ? error.message : String(error);
-          const isNativeBindingError = errorMessage.includes("native binding");
+          const isNativeBindingError = errorMessage.includes('native binding');
 
           if (isNativeBindingError) {
             lintSpinner?.fail(
@@ -507,7 +507,7 @@ export const scan = async (
               `  Upgrade to Node ${OXLINT_NODE_REQUIREMENT} or run: npx -p oxlint@latest react-doctor@latest`,
             );
           } else {
-            lintSpinner?.fail("Lint checks failed (non-fatal, skipping).");
+            lintSpinner?.fail('Lint checks failed (non-fatal, skipping).');
             logger.error(errorMessage);
           }
           return [];
@@ -520,14 +520,14 @@ export const scan = async (
       ? (async () => {
           const deadCodeSpinner = options.scoreOnly
             ? null
-            : spinner("Detecting dead code...").start();
+            : spinner('Detecting dead code...').start();
           try {
             const knipDiagnostics = await runKnip(directory);
-            deadCodeSpinner?.succeed("Detecting dead code.");
+            deadCodeSpinner?.succeed('Detecting dead code.');
             return knipDiagnostics;
           } catch (error) {
             didDeadCodeFail = true;
-            deadCodeSpinner?.fail("Dead code detection failed (non-fatal, skipping).");
+            deadCodeSpinner?.fail('Dead code detection failed (non-fatal, skipping).');
             logger.error(String(error));
             return [];
           }
@@ -546,8 +546,8 @@ export const scan = async (
   const elapsedMilliseconds = performance.now() - startTime;
 
   const skippedChecks: string[] = [];
-  if (didLintFail) skippedChecks.push("lint");
-  if (didDeadCodeFail) skippedChecks.push("dead code");
+  if (didLintFail) skippedChecks.push('lint');
+  if (didDeadCodeFail) skippedChecks.push('dead code');
   const hasSkippedChecks = skippedChecks.length > 0;
 
   const scoreResult = options.offline ? null : await calculateScore(diagnostics);
@@ -564,17 +564,17 @@ export const scan = async (
 
   if (diagnostics.length === 0) {
     if (hasSkippedChecks) {
-      const skippedLabel = skippedChecks.join(" and ");
+      const skippedLabel = skippedChecks.join(' and ');
       logger.warn(
         `No issues detected, but ${skippedLabel} checks failed — results are incomplete.`,
       );
     } else {
-      logger.success("No issues found!");
+      logger.success('No issues found!');
     }
     logger.break();
     if (hasSkippedChecks) {
       printBranding();
-      logger.dim("  Score not shown — some checks could not complete.");
+      logger.dim('  Score not shown — some checks could not complete.');
     } else if (scoreResult) {
       printBranding(scoreResult.score);
       printScoreGauge(scoreResult.score, scoreResult.label);
@@ -598,7 +598,7 @@ export const scan = async (
   );
 
   if (hasSkippedChecks) {
-    const skippedLabel = skippedChecks.join(" and ");
+    const skippedLabel = skippedChecks.join(' and ');
     logger.break();
     logger.warn(`  Note: ${skippedLabel} checks failed — score may be incomplete.`);
   }

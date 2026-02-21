@@ -1,30 +1,30 @@
-import { execSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { Command } from "commander";
-import { AMI_INSTALL_URL, AMI_RELEASES_URL, AMI_WEBSITE_URL, OPEN_BASE_URL } from "./constants.js";
-import { scan } from "./scan.js";
+import { Command } from 'commander';
+import { execSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { AMI_INSTALL_URL, AMI_RELEASES_URL, AMI_WEBSITE_URL, OPEN_BASE_URL } from './constants.js';
+import { scan } from './scan.js';
 import type {
   Diagnostic,
   DiffInfo,
   EstimatedScoreResult,
   ReactDoctorConfig,
   ScanOptions,
-} from "./types.js";
-import { fetchEstimatedScore } from "./utils/calculate-score.js";
-import { colorizeByScore } from "./utils/colorize-by-score.js";
-import { createFramedLine, renderFramedBoxString } from "./utils/framed-box.js";
-import { filterSourceFiles, getDiffInfo } from "./utils/get-diff-files.js";
-import { handleError } from "./utils/handle-error.js";
-import { highlighter } from "./utils/highlighter.js";
-import { loadConfig } from "./utils/load-config.js";
-import { logger } from "./utils/logger.js";
-import { clearSelectBanner, prompts, setSelectBanner } from "./utils/prompts.js";
-import { selectProjects } from "./utils/select-projects.js";
-import { maybePromptSkillInstall } from "./utils/skill-prompt.js";
+} from './types.js';
+import { fetchEstimatedScore } from './utils/calculate-score.js';
+import { colorizeByScore } from './utils/colorize-by-score.js';
+import { createFramedLine, renderFramedBoxString } from './utils/framed-box.js';
+import { filterSourceFiles, getDiffInfo } from './utils/get-diff-files.js';
+import { handleError } from './utils/handle-error.js';
+import { highlighter } from './utils/highlighter.js';
+import { loadConfig } from './utils/load-config.js';
+import { logger } from './utils/logger.js';
+import { clearSelectBanner, prompts, setSelectBanner } from './utils/prompts.js';
+import { selectProjects } from './utils/select-projects.js';
+import { maybePromptSkillInstall } from './utils/skill-prompt.js';
 
-const VERSION = process.env.VERSION ?? "0.0.0";
+const VERSION = process.env.VERSION ?? '0.0.0';
 
 interface CliFlags {
   lint: boolean;
@@ -41,23 +41,23 @@ interface CliFlags {
 
 const exitWithFixHint = () => {
   logger.break();
-  logger.log("Cancelled.");
-  logger.dim("Run `npx react-doctor@latest --fix` to fix issues.");
+  logger.log('Cancelled.');
+  logger.dim('Run `npx react-doctor@latest --fix` to fix issues.');
   logger.break();
   process.exit(0);
 };
 
-process.on("SIGINT", exitWithFixHint);
-process.on("SIGTERM", exitWithFixHint);
+process.on('SIGINT', exitWithFixHint);
+process.on('SIGTERM', exitWithFixHint);
 
 const AUTOMATED_ENVIRONMENT_VARIABLES = [
-  "CI",
-  "CLAUDECODE",
-  "CURSOR_AGENT",
-  "CODEX_CI",
-  "OPENCODE",
-  "AMP_HOME",
-  "AMI",
+  'CI',
+  'CLAUDECODE',
+  'CURSOR_AGENT',
+  'CODEX_CI',
+  'OPENCODE',
+  'AMP_HOME',
+  'AMI',
 ];
 
 const isAutomatedEnvironment = (): boolean =>
@@ -69,12 +69,12 @@ const resolveCliScanOptions = (
   programInstance: Command,
 ): ScanOptions => {
   const isCliOverride = (optionName: string) =>
-    programInstance.getOptionValueSource(optionName) === "cli";
+    programInstance.getOptionValueSource(optionName) === 'cli';
 
   return {
-    lint: isCliOverride("lint") ? flags.lint : (userConfig?.lint ?? flags.lint),
-    deadCode: isCliOverride("deadCode") ? flags.deadCode : (userConfig?.deadCode ?? flags.deadCode),
-    verbose: isCliOverride("verbose") ? Boolean(flags.verbose) : (userConfig?.verbose ?? false),
+    lint: isCliOverride('lint') ? flags.lint : (userConfig?.lint ?? flags.lint),
+    deadCode: isCliOverride('deadCode') ? flags.deadCode : (userConfig?.deadCode ?? flags.deadCode),
+    verbose: isCliOverride('verbose') ? Boolean(flags.verbose) : (userConfig?.verbose ?? false),
     scoreOnly: flags.score,
     offline: flags.offline,
   };
@@ -89,7 +89,7 @@ const resolveDiffMode = async (
   if (effectiveDiff !== undefined && effectiveDiff !== false) {
     if (diffInfo) return true;
     if (!isScoreOnly) {
-      logger.warn("No feature branch or uncommitted changes detected. Running full scan.");
+      logger.warn('No feature branch or uncommitted changes detected. Running full scan.');
       logger.break();
     }
     return false;
@@ -107,8 +107,8 @@ const resolveDiffMode = async (
     : `On branch ${diffInfo.currentBranch} (${changedSourceFiles.length} changed files vs ${diffInfo.baseBranch}). Only scan this branch?`;
 
   const { shouldScanChangedOnly } = await prompts({
-    type: "confirm",
-    name: "shouldScanChangedOnly",
+    type: 'confirm',
+    name: 'shouldScanChangedOnly',
     message: promptMessage,
     initial: true,
   });
@@ -116,20 +116,20 @@ const resolveDiffMode = async (
 };
 
 const program = new Command()
-  .name("react-doctor")
-  .description("Diagnose React codebase health")
-  .version(VERSION, "-v, --version", "display the version number")
-  .argument("[directory]", "project directory to scan", ".")
-  .option("--no-lint", "skip linting")
-  .option("--no-dead-code", "skip dead code detection")
-  .option("--verbose", "show file details per rule")
-  .option("--score", "output only the score")
-  .option("-y, --yes", "skip prompts, scan all workspace projects")
-  .option("--project <name>", "select workspace project (comma-separated for multiple)")
-  .option("--diff [base]", "scan only files changed vs base branch")
-  .option("--offline", "skip telemetry (anonymous, not stored, only used to calculate score)")
-  .option("--no-ami", "skip Ami-related prompts")
-  .option("--fix", "open Ami to auto-fix all issues")
+  .name('react-doctor')
+  .description('Diagnose React codebase health')
+  .version(VERSION, '-v, --version', 'display the version number')
+  .argument('[directory]', 'project directory to scan', '.')
+  .option('--no-lint', 'skip linting')
+  .option('--no-dead-code', 'skip dead code detection')
+  .option('--verbose', 'show file details per rule')
+  .option('--score', 'output only the score')
+  .option('-y, --yes', 'skip prompts, scan all workspace projects')
+  .option('--project <name>', 'select workspace project (comma-separated for multiple)')
+  .option('--diff [base]', 'scan only files changed vs base branch')
+  .option('--offline', 'skip telemetry (anonymous, not stored, only used to calculate score)')
+  .option('--no-ami', 'skip Ami-related prompts')
+  .option('--fix', 'open Ami to auto-fix all issues')
   .action(async (directory: string, flags: CliFlags) => {
     const isScoreOnly = flags.score;
 
@@ -151,9 +151,9 @@ const program = new Command()
         shouldSkipPrompts,
       );
 
-      const isDiffCliOverride = program.getOptionValueSource("diff") === "cli";
+      const isDiffCliOverride = program.getOptionValueSource('diff') === 'cli';
       const effectiveDiff = isDiffCliOverride ? flags.diff : userConfig?.diff;
-      const explicitBaseBranch = typeof effectiveDiff === "string" ? effectiveDiff : undefined;
+      const explicitBaseBranch = typeof effectiveDiff === 'string' ? effectiveDiff : undefined;
       const diffInfo = getDiffInfo(resolvedDirectory, explicitBaseBranch);
       const isDiffMode = await resolveDiffMode(
         diffInfo,
@@ -164,7 +164,7 @@ const program = new Command()
 
       if (isDiffMode && diffInfo && !isScoreOnly) {
         if (diffInfo.isCurrentChanges) {
-          logger.log("Scanning uncommitted changes");
+          logger.log('Scanning uncommitted changes');
         } else {
           logger.log(
             `Scanning changes: ${highlighter.info(diffInfo.currentBranch)} → ${highlighter.info(diffInfo.baseBranch)}`,
@@ -219,33 +219,33 @@ const program = new Command()
     }
   })
   .addHelpText(
-    "after",
+    'after',
     `
-${highlighter.dim("Learn more:")}
-  ${highlighter.info("https://github.com/millionco/react-doctor")}
+${highlighter.dim('Learn more:')}
+  ${highlighter.info('https://github.com/millionco/react-doctor')}
 `,
   );
 
-const DEEPLINK_FIX_PROMPT = "/{slash-command:ami:react-doctor}";
+const DEEPLINK_FIX_PROMPT = '/{slash-command:ami:react-doctor}';
 
 const isAmiInstalled = (): boolean => {
-  if (process.platform === "darwin") {
+  if (process.platform === 'darwin') {
     return (
-      existsSync("/Applications/Ami.app") ||
-      existsSync(path.join(os.homedir(), "Applications", "Ami.app"))
+      existsSync('/Applications/Ami.app') ||
+      existsSync(path.join(os.homedir(), 'Applications', 'Ami.app'))
     );
   }
 
-  if (process.platform === "win32") {
+  if (process.platform === 'win32') {
     const { LOCALAPPDATA, PROGRAMFILES } = process.env;
     return (
-      Boolean(LOCALAPPDATA && existsSync(path.join(LOCALAPPDATA, "Programs", "Ami", "Ami.exe"))) ||
-      Boolean(PROGRAMFILES && existsSync(path.join(PROGRAMFILES, "Ami", "Ami.exe")))
+      Boolean(LOCALAPPDATA && existsSync(path.join(LOCALAPPDATA, 'Programs', 'Ami', 'Ami.exe'))) ||
+      Boolean(PROGRAMFILES && existsSync(path.join(PROGRAMFILES, 'Ami', 'Ami.exe')))
     );
   }
 
   try {
-    execSync("which ami", { stdio: "ignore" });
+    execSync('which ami', { stdio: 'ignore' });
     return true;
   } catch {
     return false;
@@ -253,10 +253,10 @@ const isAmiInstalled = (): boolean => {
 };
 
 const installAmi = (): void => {
-  logger.log("Installing Ami...");
+  logger.log('Installing Ami...');
   logger.break();
   try {
-    execSync(`curl -fsSL ${AMI_INSTALL_URL} | bash`, { stdio: "inherit" });
+    execSync(`curl -fsSL ${AMI_INSTALL_URL} | bash`, { stdio: 'inherit' });
   } catch {
     logger.error(`Failed to install Ami. Visit ${AMI_WEBSITE_URL} to install manually.`);
     process.exit(1);
@@ -265,24 +265,24 @@ const installAmi = (): void => {
 };
 
 const openUrl = (url: string): void => {
-  if (process.platform === "win32") {
+  if (process.platform === 'win32') {
     // HACK: cmd.exe interprets %XX% as env var expansion, which mangles encoded URLs.
     // Escaping % as %% produces literal % in cmd output.
-    const cmdEscapedUrl = url.replace(/%/g, "%%");
-    execSync(`start "" "${cmdEscapedUrl}"`, { stdio: "ignore" });
+    const cmdEscapedUrl = url.replace(/%/g, '%%');
+    execSync(`start "" "${cmdEscapedUrl}"`, { stdio: 'ignore' });
     return;
   }
-  const openCommand = process.platform === "darwin" ? `open "${url}"` : `xdg-open "${url}"`;
-  execSync(openCommand, { stdio: "ignore" });
+  const openCommand = process.platform === 'darwin' ? `open "${url}"` : `xdg-open "${url}"`;
+  execSync(openCommand, { stdio: 'ignore' });
 };
 
 const buildDeeplinkParams = (directory: string): URLSearchParams => {
   const params = new URLSearchParams();
-  params.set("cwd", path.resolve(directory));
-  params.set("prompt", DEEPLINK_FIX_PROMPT);
-  params.set("mode", "agent");
-  params.set("autoSubmit", "true");
-  params.set("source", "react-doctor");
+  params.set('cwd', path.resolve(directory));
+  params.set('prompt', DEEPLINK_FIX_PROMPT);
+  params.set('mode', 'agent');
+  params.set('autoSubmit', 'true');
+  params.set('source', 'react-doctor');
   return params;
 };
 
@@ -298,33 +298,33 @@ const openAmiToFix = (directory: string): void => {
   const webDeeplink = buildWebDeeplink(directory);
 
   if (!isInstalled) {
-    if (process.platform === "darwin") {
+    if (process.platform === 'darwin') {
       installAmi();
-      logger.success("Ami installed successfully.");
+      logger.success('Ami installed successfully.');
     } else {
-      logger.error("Ami is not installed.");
+      logger.error('Ami is not installed.');
       logger.dim(`Download at ${highlighter.info(AMI_RELEASES_URL)}`);
     }
     logger.break();
-    logger.dim("Open this link to start fixing:");
+    logger.dim('Open this link to start fixing:');
     logger.info(webDeeplink);
     return;
   }
 
-  logger.log("Opening Ami...");
+  logger.log('Opening Ami...');
 
   try {
     openUrl(deeplink);
-    logger.success("Ami opened. Fixing your issues now.");
+    logger.success('Ami opened. Fixing your issues now.');
   } catch {
     logger.break();
-    logger.dim("Could not open Ami automatically. Open this link instead:");
+    logger.dim('Could not open Ami automatically. Open this link instead:');
     logger.info(webDeeplink);
   }
 };
 
-const FIX_METHOD_AMI = "ami";
-const FIX_COMMAND_HINT = "npx react-doctor@latest --fix";
+const FIX_METHOD_AMI = 'ami';
+const FIX_COMMAND_HINT = 'npx react-doctor@latest --fix';
 
 const buildAmiBanner = (
   issueCount: number,
@@ -333,25 +333,25 @@ const buildAmiBanner = (
 ): string => {
   const currentScoreDisplay = colorizeByScore(String(currentScore), currentScore);
   const estimatedScoreDisplay = colorizeByScore(`~${estimatedScore}`, estimatedScore);
-  const issueLabel = issueCount === 1 ? "issue" : "issues";
+  const issueLabel = issueCount === 1 ? 'issue' : 'issues';
 
   return renderFramedBoxString([
     createFramedLine(
       `Score: ${currentScore} → ~${estimatedScore}`,
-      `Score: ${currentScoreDisplay} ${highlighter.dim("→")} ${estimatedScoreDisplay}`,
+      `Score: ${currentScoreDisplay} ${highlighter.dim('→')} ${estimatedScoreDisplay}`,
     ),
-    createFramedLine(""),
+    createFramedLine(''),
     createFramedLine(
       `Ami is a coding agent built for React. It reads`,
-      `${highlighter.info("Ami")} is a coding agent built for React. It reads`,
+      `${highlighter.info('Ami')} is a coding agent built for React. It reads`,
     ),
-    createFramedLine("your react-doctor report, understands your codebase,"),
+    createFramedLine('your react-doctor report, understands your codebase,'),
     createFramedLine(
       `and fixes ${issueCount} ${issueLabel} one by one — then re-runs the`,
       `and fixes ${highlighter.warn(String(issueCount))} ${issueLabel} one by one — then re-runs the`,
     ),
-    createFramedLine("scan to verify the score improved."),
-    createFramedLine(""),
+    createFramedLine('scan to verify the score improved.'),
+    createFramedLine(''),
     createFramedLine(
       `Free to use. ${AMI_WEBSITE_URL}`,
       `Free to use. ${highlighter.info(AMI_WEBSITE_URL)}`,
@@ -360,7 +360,7 @@ const buildAmiBanner = (
 };
 
 const buildSkipBanner = (issueCount: number, estimatedScore: number): string => {
-  const issueLabel = issueCount === 1 ? "issue" : "issues";
+  const issueLabel = issueCount === 1 ? 'issue' : 'issues';
   const estimatedScoreDisplay = colorizeByScore(`~${estimatedScore}`, estimatedScore);
 
   return renderFramedBoxString([
@@ -368,7 +368,7 @@ const buildSkipBanner = (issueCount: number, estimatedScore: number): string => 
       `Skip fixing ${issueCount} ${issueLabel} and reaching ~${estimatedScore}?`,
       `Skip fixing ${highlighter.warn(String(issueCount))} ${issueLabel} and reaching ${estimatedScoreDisplay}?`,
     ),
-    createFramedLine(""),
+    createFramedLine(''),
     createFramedLine(
       `Run ${FIX_COMMAND_HINT} anytime to come back.`,
       `Run ${highlighter.info(FIX_COMMAND_HINT)} anytime to come back.`,
@@ -399,16 +399,16 @@ const maybePromptFix = async (
   }
 
   const { fixMethod } = await prompts({
-    type: "select",
-    name: "fixMethod",
-    message: "Fix issues?",
+    type: 'select',
+    name: 'fixMethod',
+    message: 'Fix issues?',
     choices: [
       {
-        title: "Use Ami (recommended)",
-        description: "Optimized coding agent for React Doctor",
+        title: 'Use Ami (recommended)',
+        description: 'Optimized coding agent for React Doctor',
         value: FIX_METHOD_AMI,
       },
-      { title: "Skip", value: "skip" },
+      { title: 'Skip', value: 'skip' },
     ],
   });
 
@@ -430,14 +430,14 @@ const fixAction = (directory: string) => {
   }
 };
 
-const fixCommand = new Command("fix")
-  .description("Open Ami to auto-fix react-doctor issues")
-  .argument("[directory]", "project directory", ".")
+const fixCommand = new Command('fix')
+  .description('Open Ami to auto-fix react-doctor issues')
+  .argument('[directory]', 'project directory', '.')
   .action(fixAction);
 
-const installAmiCommand = new Command("install-ami")
-  .description("Install Ami and open it to auto-fix issues")
-  .argument("[directory]", "project directory", ".")
+const installAmiCommand = new Command('install-ami')
+  .description('Install Ami and open it to auto-fix issues')
+  .argument('[directory]', 'project directory', '.')
   .action(fixAction);
 
 program.addCommand(fixCommand);

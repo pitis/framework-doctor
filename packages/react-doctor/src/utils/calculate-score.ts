@@ -8,14 +8,14 @@ import {
   SCORE_OK_THRESHOLD,
   WARNING_ESTIMATED_FIX_RATE,
   WARNING_RULE_PENALTY,
-} from "../constants.js";
-import type { Diagnostic, EstimatedScoreResult, ScoreResult } from "../types.js";
-import { proxyFetch } from "./proxy-fetch.js";
+} from '../constants.js';
+import type { Diagnostic, EstimatedScoreResult, ScoreResult } from '../types.js';
+import { proxyFetch } from './proxy-fetch.js';
 
 const getScoreLabel = (score: number): string => {
-  if (score >= SCORE_GOOD_THRESHOLD) return "Great";
-  if (score >= SCORE_OK_THRESHOLD) return "Needs work";
-  return "Critical";
+  if (score >= SCORE_GOOD_THRESHOLD) return 'Great';
+  if (score >= SCORE_OK_THRESHOLD) return 'Needs work';
+  return 'Critical';
 };
 
 const countUniqueRules = (
@@ -26,7 +26,7 @@ const countUniqueRules = (
 
   for (const diagnostic of diagnostics) {
     const ruleKey = `${diagnostic.plugin}/${diagnostic.rule}`;
-    if (diagnostic.severity === "error") {
+    if (diagnostic.severity === 'error') {
       errorRules.add(ruleKey);
     } else {
       warningRules.add(ruleKey);
@@ -67,8 +67,8 @@ const estimateScoreLocally = (diagnostics: Diagnostic[]): EstimatedScoreResult =
 export const calculateScore = async (diagnostics: Diagnostic[]): Promise<ScoreResult | null> => {
   try {
     const response = await proxyFetch(SCORE_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ diagnostics }),
     });
 
@@ -85,8 +85,8 @@ export const fetchEstimatedScore = async (
 ): Promise<EstimatedScoreResult | null> => {
   try {
     const response = await proxyFetch(ESTIMATE_SCORE_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ diagnostics }),
     });
 

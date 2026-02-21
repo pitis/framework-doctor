@@ -1,4 +1,4 @@
-import { MILLISECONDS_PER_SECOND } from "../constants.js";
+import { MILLISECONDS_PER_SECOND } from '../constants.js';
 
 /**
  * Format elapsed milliseconds as human-readable string (e.g. "793ms", "1.2s").

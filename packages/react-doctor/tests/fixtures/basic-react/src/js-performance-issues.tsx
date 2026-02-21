@@ -1,11 +1,11 @@
 const CombineIterationsComponent = ({ items }: { items: number[] }) => {
   const result = items.filter((item) => item > 0).map((item) => item * 2);
-  return <div>{result.join(",")}</div>;
+  return <div>{result.join(',')}</div>;
 };
 
 const SpreadSortComponent = ({ items }: { items: number[] }) => {
   const sorted = [...items].sort((first, second) => first - second);
-  return <div>{sorted.join(",")}</div>;
+  return <div>{sorted.join(',')}</div>;
 };
 
 const MinViaSortComponent = ({ items }: { items: number[] }) => {
@@ -16,45 +16,45 @@ const MinViaSortComponent = ({ items }: { items: number[] }) => {
 const RegexpInLoopComponent = ({ items }: { items: string[] }) => {
   const matches: string[] = [];
   for (const item of items) {
-    if (new RegExp("test").test(item)) {
+    if (new RegExp('test').test(item)) {
       matches.push(item);
     }
   }
-  return <div>{matches.join(",")}</div>;
+  return <div>{matches.join(',')}</div>;
 };
 
 const SetMapLookupsComponent = ({ items }: { items: string[] }) => {
-  const allowed = ["a", "b", "c"];
+  const allowed = ['a', 'b', 'c'];
   const filtered: string[] = [];
   for (const item of items) {
     if (allowed.includes(item)) {
       filtered.push(item);
     }
   }
-  return <div>{filtered.join(",")}</div>;
+  return <div>{filtered.join(',')}</div>;
 };
 
 const BatchDomCssComponent = () => {
   const applyStyles = (element: HTMLElement) => {
-    element.style.color = "red";
-    element.style.backgroundColor = "blue";
+    element.style.color = 'red';
+    element.style.backgroundColor = 'blue';
   };
   return <button onClick={(event) => applyStyles(event.currentTarget)}>Style</button>;
 };
 
 const IndexMapsComponent = ({ users }: { users: { id: string; name: string }[] }) => {
-  const ids = ["1", "2", "3"];
+  const ids = ['1', '2', '3'];
   const found: string[] = [];
   for (const id of ids) {
     const user = users.find((innerUser) => innerUser.id === id);
     if (user) found.push(user.name);
   }
-  return <div>{found.join(",")}</div>;
+  return <div>{found.join(',')}</div>;
 };
 
 const CacheStorageComponent = () => {
-  const theme = localStorage.getItem("theme");
-  const themeAgain = localStorage.getItem("theme");
+  const theme = localStorage.getItem('theme');
+  const themeAgain = localStorage.getItem('theme');
   return (
     <div>
       {theme}
@@ -78,23 +78,23 @@ const EarlyExitComponent = ({ value }: { value: number }) => {
 
 const SequentialAwaitComponent = () => {
   const loadData = async () => {
-    const users = await fetch("/api/users");
-    const posts = await fetch("/api/posts");
-    const comments = await fetch("/api/comments");
+    const users = await fetch('/api/users');
+    const posts = await fetch('/api/posts');
+    const comments = await fetch('/api/comments');
     return { users, posts, comments };
   };
   return <button onClick={loadData}>Load</button>;
 };
 
 export {
+  BatchDomCssComponent,
+  CacheStorageComponent,
   CombineIterationsComponent,
-  SpreadSortComponent,
+  EarlyExitComponent,
+  IndexMapsComponent,
   MinViaSortComponent,
   RegexpInLoopComponent,
-  SetMapLookupsComponent,
-  BatchDomCssComponent,
-  IndexMapsComponent,
-  CacheStorageComponent,
-  EarlyExitComponent,
   SequentialAwaitComponent,
+  SetMapLookupsComponent,
+  SpreadSortComponent,
 };

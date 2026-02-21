@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 const ScrollListenerComponent = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -7,8 +7,8 @@ const ScrollListenerComponent = () => {
     const element = ref.current;
     if (!element) return;
     const handler = () => {};
-    element.addEventListener("scroll", handler);
-    return () => element.removeEventListener("scroll", handler);
+    element.addEventListener('scroll', handler);
+    return () => element.removeEventListener('scroll', handler);
   }, []);
 
   return <div ref={ref} />;

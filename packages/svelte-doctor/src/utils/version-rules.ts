@@ -1,13 +1,13 @@
-import type { VersionedRuleMeta } from "../types.js";
+import type { VersionedRuleMeta } from '../types.js';
 
 const normalizeVersion = (versionRange: string): string => {
   const match = versionRange.match(/\d+\.\d+\.\d+/);
-  return match ? match[0] : "0.0.0";
+  return match ? match[0] : '0.0.0';
 };
 
 const compareVersions = (a: string, b: string): number => {
-  const aParts = a.split(".").map((part) => Number(part));
-  const bParts = b.split(".").map((part) => Number(part));
+  const aParts = a.split('.').map((part) => Number(part));
+  const bParts = b.split('.').map((part) => Number(part));
 
   for (let index = 0; index < 3; index += 1) {
     const delta = (aParts[index] ?? 0) - (bParts[index] ?? 0);

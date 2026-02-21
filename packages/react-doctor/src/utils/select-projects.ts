@@ -1,9 +1,9 @@
-import path from "node:path";
-import type { WorkspacePackage } from "../types.js";
-import { discoverReactSubprojects, listWorkspacePackages } from "./discover-project.js";
-import { highlighter } from "./highlighter.js";
-import { logger } from "./logger.js";
-import { prompts } from "./prompts.js";
+import path from 'node:path';
+import type { WorkspacePackage } from '../types.js';
+import { discoverReactSubprojects, listWorkspacePackages } from './discover-project.js';
+import { highlighter } from './highlighter.js';
+import { logger } from './logger.js';
+import { prompts } from './prompts.js';
 
 export const selectProjects = async (
   rootDirectory: string,
@@ -18,7 +18,7 @@ export const selectProjects = async (
   if (packages.length === 0) return [rootDirectory];
   if (packages.length === 1) {
     logger.log(
-      `${highlighter.success("✔")} Select projects to scan ${highlighter.dim("›")} ${packages[0].name}`,
+      `${highlighter.success('✔')} Select projects to scan ${highlighter.dim('›')} ${packages[0].name}`,
     );
     return [packages[0].directory];
   }
@@ -37,7 +37,7 @@ const resolveProjectFlag = (
   projectFlag: string,
   workspacePackages: WorkspacePackage[],
 ): string[] => {
-  const requestedNames = projectFlag.split(",").map((name) => name.trim());
+  const requestedNames = projectFlag.split(',').map((name) => name.trim());
   const resolvedDirectories: string[] = [];
 
   for (const requestedName of requestedNames) {
@@ -50,7 +50,7 @@ const resolveProjectFlag = (
     if (!matched) {
       const availableNames = workspacePackages
         .map((workspacePackage) => workspacePackage.name)
-        .join(", ");
+        .join(', ');
       throw new Error(`Project "${requestedName}" not found. Available: ${availableNames}`);
     }
 
@@ -62,7 +62,7 @@ const resolveProjectFlag = (
 
 const printDiscoveredProjects = (packages: WorkspacePackage[]): void => {
   logger.log(
-    `${highlighter.success("✔")} Select projects to scan ${highlighter.dim("›")} ${packages.map((workspacePackage) => workspacePackage.name).join(", ")}`,
+    `${highlighter.success('✔')} Select projects to scan ${highlighter.dim('›')} ${packages.map((workspacePackage) => workspacePackage.name).join(', ')}`,
   );
 };
 
@@ -71,9 +71,9 @@ const promptProjectSelection = async (
   rootDirectory: string,
 ): Promise<string[]> => {
   const { selectedDirectories } = await prompts({
-    type: "multiselect",
-    name: "selectedDirectories",
-    message: "Select projects to scan",
+    type: 'multiselect',
+    name: 'selectedDirectories',
+    message: 'Select projects to scan',
     choices: workspacePackages.map((workspacePackage) => ({
       title: workspacePackage.name,
       description: path.relative(rootDirectory, workspacePackage.directory),

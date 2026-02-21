@@ -1,6 +1,6 @@
-import path from "node:path";
-import { spawnSync } from "node:child_process";
-import type { Diagnostic } from "../types.js";
+import { spawnSync } from 'node:child_process';
+import path from 'node:path';
+import type { Diagnostic } from '../types.js';
 
 interface KnipExport {
   name: string;
@@ -26,21 +26,21 @@ const asDiagnostics = (
 ): Diagnostic[] =>
   items.map((item) => ({
     filePath: path.resolve(rootDirectory, item.file),
-    plugin: "knip",
+    plugin: 'knip',
     rule: item.rule,
-    severity: "warning",
+    severity: 'warning',
     message: item.message,
-    help: "Remove dead code or keep it in an explicit public API boundary.",
+    help: 'Remove dead code or keep it in an explicit public API boundary.',
     line: item.line ?? 0,
     column: item.column ?? 0,
-    category: "maintainability",
+    category: 'maintainability',
   }));
 
 export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
-  const run = spawnSync("pnpm", ["knip", "--reporter", "json"], {
+  const run = spawnSync('pnpm', ['knip', '--reporter', 'json'], {
     cwd: rootDirectory,
-    encoding: "utf-8",
-    shell: process.platform === "win32",
+    encoding: 'utf-8',
+    shell: process.platform === 'win32',
   });
 
   const stdout = run.stdout.trim();
@@ -53,10 +53,16 @@ export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
     return [];
   }
 
-  const items: Array<{ file: string; message: string; rule: string; line?: number; column?: number }> = [];
+  const items: Array<{
+    file: string;
+    message: string;
+    rule: string;
+    line?: number;
+    column?: number;
+  }> = [];
 
   for (const file of payload.files ?? []) {
-    items.push({ file, message: `Unused file: ${file}`, rule: "files" });
+    items.push({ file, message: `Unused file: ${file}`, rule: 'files' });
   }
 
   for (const issue of payload.issues ?? []) {
@@ -65,7 +71,7 @@ export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
       items.push({
         file,
         message: `Unused export: ${exp.name}`,
-        rule: "exports",
+        rule: 'exports',
         line: exp.line,
         column: exp.col,
       });
@@ -74,7 +80,7 @@ export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
       items.push({
         file,
         message: `Unused type: ${typeItem.name}`,
-        rule: "types",
+        rule: 'types',
         line: typeItem.line,
         column: typeItem.col,
       });

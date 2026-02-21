@@ -1,7 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Head from "next/head";
+import { useEffect } from 'react';
 
 const useSearchParams = () => new URLSearchParams();
 
@@ -9,11 +8,11 @@ const Page = () => {
   const params = useSearchParams();
 
   useEffect(() => {
-    fetch("/api/data");
+    fetch('/api/data');
   }, []);
 
   useEffect(() => {
-    router.push("/dashboard");
+    router.push('/dashboard');
   }, []);
 
   return (
@@ -31,13 +30,13 @@ const Page = () => {
 };
 
 const AsyncClientComponent = async () => {
-  const data = await fetch("/api/data");
+  const data = await fetch('/api/data');
   return <div>{JSON.stringify(data)}</div>;
 };
 
 const RedirectInTryCatchComponent = () => {
   try {
-    redirect("/dashboard");
+    redirect('/dashboard');
   } catch {
     return <div>error</div>;
   }

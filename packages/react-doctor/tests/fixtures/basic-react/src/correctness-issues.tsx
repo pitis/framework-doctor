@@ -28,4 +28,4 @@ const PreventDefaultForm = () => (
   </form>
 );
 
-export { IndexKeyList, ConditionalRenderBug, PreventDefaultForm };
+export { ConditionalRenderBug, IndexKeyList, PreventDefaultForm };

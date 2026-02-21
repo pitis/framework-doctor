@@ -1,11 +1,11 @@
-import path from "node:path";
-import { spawnSync } from "node:child_process";
-import { createRequire } from "node:module";
+import { spawnSync } from 'node:child_process';
+import { createRequire } from 'node:module';
+import path from 'node:path';
 
-type Framework = "svelte" | "react" | "vue" | "angular" | null;
+type Framework = 'svelte' | 'react' | 'vue' | 'angular' | null;
 
 const detectFramework = (directory: string): Framework => {
-  const packagePath = path.join(directory, "package.json");
+  const packagePath = path.join(directory, 'package.json');
   try {
     const require = createRequire(import.meta.url);
     const pkg = require(packagePath) as Record<string, unknown>;
@@ -15,10 +15,10 @@ const detectFramework = (directory: string): Framework => {
       ...(pkg.peerDependencies as Record<string, string>),
     } as Record<string, string>;
 
-    if (deps.svelte || deps["@sveltejs/kit"]) return "svelte";
-    if (deps.react || deps["next"] || deps["remix"]) return "react";
-    if (deps.vue || deps["nuxt"]) return "vue";
-    if (deps["@angular/core"]) return "angular";
+    if (deps.svelte || deps['@sveltejs/kit']) return 'svelte';
+    if (deps.react || deps['next'] || deps['remix']) return 'react';
+    if (deps.vue || deps['nuxt']) return 'vue';
+    if (deps['@angular/core']) return 'angular';
 
     return null;
   } catch {
@@ -29,7 +29,7 @@ const detectFramework = (directory: string): Framework => {
 const resolveDoctorCli = (pkg: string): string => {
   const require = createRequire(import.meta.url);
   const indexPath = require.resolve(pkg);
-  return path.join(path.dirname(indexPath), "cli.js");
+  return path.join(path.dirname(indexPath), 'cli.js');
 };
 
 const runDoctor = (framework: Framework, args: string[]): number => {
@@ -37,28 +37,30 @@ const runDoctor = (framework: Framework, args: string[]): number => {
   const dirArg = args[0] ?? cwd;
   const restArgs = args[0] ? args.slice(1) : args;
 
-  if (framework === "svelte") {
-    const cliPath = resolveDoctorCli("@framework-doctor/svelte");
+  if (framework === 'svelte') {
+    const cliPath = resolveDoctorCli('@framework-doctor/svelte');
     const fullArgs = [dirArg, ...restArgs];
     const result = spawnSync(process.execPath, [cliPath, ...fullArgs], {
-      stdio: "inherit",
+      stdio: 'inherit',
       cwd,
     });
     return result.status ?? 1;
   }
 
-  if (framework === "react") {
-    const cliPath = resolveDoctorCli("@framework-doctor/react");
+  if (framework === 'react') {
+    const cliPath = resolveDoctorCli('@framework-doctor/react');
     const fullArgs = [dirArg, ...restArgs];
     const result = spawnSync(process.execPath, [cliPath, ...fullArgs], {
-      stdio: "inherit",
+      stdio: 'inherit',
       cwd,
     });
     return result.status ?? 1;
   }
 
-  if (framework === "vue" || framework === "angular") {
-    console.error(`\n  ${framework} Doctor is coming soon. For now, use the framework-specific package when available.\n`);
+  if (framework === 'vue' || framework === 'angular') {
+    console.error(
+      `\n  ${framework} Doctor is coming soon. For now, use the framework-specific package when available.\n`,
+    );
     return 1;
   }
 
@@ -82,9 +84,8 @@ const runDoctor = (framework: Framework, args: string[]): number => {
 
 const main = (): number => {
   const rawArgs = process.argv.slice(2);
-  const dirIndex = rawArgs.findIndex((a) => !a.startsWith("-"));
-  const dirArg =
-    dirIndex >= 0 ? path.resolve(process.cwd(), rawArgs[dirIndex]) : process.cwd();
+  const dirIndex = rawArgs.findIndex((a) => !a.startsWith('-'));
+  const dirArg = dirIndex >= 0 ? path.resolve(process.cwd(), rawArgs[dirIndex]) : process.cwd();
   const restArgs =
     dirIndex >= 0 ? [...rawArgs.slice(0, dirIndex), ...rawArgs.slice(dirIndex + 1)] : rawArgs;
 
