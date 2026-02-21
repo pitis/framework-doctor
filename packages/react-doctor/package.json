@@ -1,0 +1,86 @@
+{
+  "name": "@framework-doctor/react",
+  "version": "1.0.0",
+  "description": "Diagnose and fix performance issues in your React app",
+  "author": {
+    "name": "Pitis Radu",
+    "url": "https://github.com/pitis"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pitis/framework-doctor.git",
+    "directory": "packages/react-doctor"
+  },
+  "homepage": "https://github.com/pitis/framework-doctor/tree/main/packages/react-doctor#readme",
+  "bugs": {
+    "url": "https://github.com/pitis/framework-doctor/issues"
+  },
+  "keywords": [
+    "diagnostics",
+    "linter",
+    "nextjs",
+    "performance",
+    "react",
+    "cli",
+    "code-health"
+  ],
+  "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/pitis"
+  },
+  "type": "module",
+  "bin": {
+    "react-doctor": "./dist/cli.js"
+  },
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/cli.d.ts",
+      "default": "./dist/cli.js"
+    },
+    "./api": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./oxlint-plugin": {
+      "types": "./dist/react-doctor-plugin.d.ts",
+      "default": "./dist/react-doctor-plugin.js"
+    }
+  },
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "rimraf dist && cross-env NODE_ENV=production tsdown",
+    "lint": "oxlint src tests",
+    "lint:fix": "oxlint --fix src tests",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm build && vitest run",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "commander": "catalog:",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "knip": "catalog:",
+    "ora": "catalog:",
+    "oxlint": "catalog:",
+    "picocolors": "catalog:",
+    "prompts": "^2.4.2",
+    "typescript": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/prompts": "catalog:",
+    "cross-env": "catalog:",
+    "rimraf": "catalog:",
+    "tsdown": "catalog:",
+    "vitest": "catalog:"
+  },
+  "packageManager": "pnpm@10.30.0"
+}

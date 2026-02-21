@@ -1,0 +1,59 @@
+{
+  "name": "@framework-doctor",
+  "version": "1.0.0",
+  "description": "Auto-detect framework and run the right doctor",
+  "author": {
+    "name": "Pitis Radu",
+    "url": "https://github.com/pitis"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pitis/framework-doctor.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/pitis/framework-doctor#readme",
+  "bugs": {
+    "url": "https://github.com/pitis/framework-doctor/issues"
+  },
+  "keywords": [
+    "framework-doctor",
+    "diagnostics",
+    "svelte",
+    "react",
+    "vue",
+    "angular",
+    "cli"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "framework-doctor": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rimraf dist && cross-env NODE_ENV=production tsdown",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@framework-doctor/svelte": "workspace:*",
+    "@framework-doctor/react": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "cross-env": "catalog:",
+    "rimraf": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@10.30.0"
+}

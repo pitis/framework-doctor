@@ -39,12 +39,12 @@ runs:
         FLAGS=""
         if [ "$INPUT_VERBOSE" = "true" ]; then FLAGS="$FLAGS --verbose"; fi
         if [ -n "$INPUT_PROJECT" ]; then FLAGS="$FLAGS --project $INPUT_PROJECT"; fi
-        npx -y svelte-doctor@latest "$INPUT_DIRECTORY" $FLAGS
+        npx -y @framework-doctor/svelte "$INPUT_DIRECTORY" $FLAGS
 
     - id: score
       shell: bash
       env:
         INPUT_DIRECTORY: ${{ inputs.directory }}
       run: |
-        SCORE=$(npx -y svelte-doctor@latest "$INPUT_DIRECTORY" --score 2>/dev/null || echo "")
+        SCORE=$(npx -y @framework-doctor/svelte "$INPUT_DIRECTORY" --score 2>/dev/null || echo "")
         echo "score=$SCORE" >> "$GITHUB_OUTPUT"

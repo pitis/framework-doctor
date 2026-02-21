@@ -18,7 +18,7 @@ export interface Diagnostic {
   help: string;
   line: number;
   column: number;
-  category: "correctness" | "performance" | "maintainability" | "accessibility";
+  category: "correctness" | "performance" | "maintainability" | "accessibility" | "security";
   weight?: number;
 }
 

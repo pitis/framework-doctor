@@ -1,15 +1,43 @@
 {
-  "name": "svelte-doctor",
+  "name": "@framework-doctor/svelte",
   "version": "1.0.0",
   "description": "Diagnose and improve Svelte codebase health",
+  "author": {
+    "name": "Pitis Radu",
+    "url": "https://github.com/pitis"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pitis/framework-doctor.git",
+    "directory": "packages/svelte-doctor"
+  },
+  "homepage": "https://github.com/pitis/framework-doctor/tree/main/packages/svelte-doctor#readme",
+  "bugs": {
+    "url": "https://github.com/pitis/framework-doctor/issues"
+  },
   "keywords": [
     "diagnostics",
     "linter",
     "svelte",
     "sveltekit",
-    "performance"
+    "performance",
+    "cli",
+    "code-health",
+    "dead-code",
+    "quality"
   ],
   "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/pitis"
+  },
   "type": "module",
   "bin": {
     "svelte-doctor": "./dist/cli.js"
@@ -33,21 +61,24 @@
     "lint": "oxlint src tests",
     "lint:fix": "oxlint --fix src tests",
     "typecheck": "tsc --noEmit",
-    "test": "pnpm build && vitest run"
+    "test": "pnpm build && vitest run",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "commander": "^14.0.3",
-    "knip": "^5.83.1",
-    "oxlint": "^1.49.0",
-    "picocolors": "^1.1.1",
+    "commander": "catalog:",
+    "knip": "catalog:",
+    "ora": "catalog:",
+    "oxlint": "catalog:",
+    "picocolors": "catalog:",
     "svelte-check": "^4.1.6"
   },
   "devDependencies": {
-    "@types/node": "^25.3.0",
-    "cross-env": "^10.1.0",
-    "rimraf": "^6.1.3",
-    "tsdown": "^0.20.3",
-    "typescript": "^5.9.2",
-    "vitest": "^4.0.8"
-  }
+    "@types/node": "catalog:",
+    "cross-env": "catalog:",
+    "rimraf": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "packageManager": "pnpm@10.30.0"
 }

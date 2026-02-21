@@ -1,24 +1,53 @@
-# Svelte Doctor
+# Framework Doctor
 
-Svelte Doctor diagnoses Svelte project health with actionable diagnostics and a 0-100 score.
+[![npm version](https://img.shields.io/npm/v/@framework-doctor.svg)](https://www.npmjs.com/package/@framework-doctor)
+[![npm downloads](https://img.shields.io/npm/dm/@framework-doctor.svg)](https://www.npmjs.com/package/@framework-doctor)
+
+Framework Doctor auto-detects your framework and runs the right health check. Currently supports Svelte; React, Vue, and Angular coming soon.
 
 ## Quick start
 
-Run in a Svelte project root:
+Run in a project root (auto-detects Svelte, React, Vue, Angular from `package.json`):
 
 ```bash
-npx -y svelte-doctor@latest .
+npx -y @framework-doctor .
 ```
 
-## CLI commands people will use
+Or run a specific doctor directly:
 
-- `npx -y svelte-doctor@latest .` - run a full scan.
-- `npx -y svelte-doctor@latest ./path/to/project` - scan a specific project directory.
-- `npx -y svelte-doctor@latest . --verbose` - include file and line details.
-- `npx -y svelte-doctor@latest . --score` - print only the numeric score (CI-friendly).
-- `npx -y svelte-doctor@latest . --no-js-ts-lint` - only run Svelte checks (skip JS/TS linting).
-- `npx -y svelte-doctor@latest . --diff main` - scan only files changed against `main`.
-- `npx -y svelte-doctor@latest . --project web` - select a specific workspace package.
+```bash
+npx -y @framework-doctor/svelte .
+```
+
+## Try it
+
+Clone the repo and run the doctor on our demo project (includes intentional issues to showcase diagnostics):
+
+```bash
+git clone https://github.com/pitis/framework-doctor.git
+cd framework-doctor
+pnpm install
+pnpm run demo
+```
+
+See [examples/README.md](examples/README.md) for more demo projects and commands.
+
+## CLI commands
+
+**Unified (auto-detect):**
+
+- `npx -y @framework-doctor .` - auto-detect framework and run the right doctor
+- `npx -y @framework-doctor ./path/to/project` - scan a specific project directory
+
+**Svelte (direct):**
+
+- `npx -y @framework-doctor/svelte .` - run a full scan
+- `npx -y @framework-doctor/svelte ./path/to/project` - scan a specific project directory
+- `npx -y @framework-doctor/svelte . --verbose` - include file and line details.
+- `npx -y @framework-doctor/svelte . --score` - print only the numeric score (CI-friendly).
+- `npx -y @framework-doctor/svelte . --no-js-ts-lint` - only run Svelte checks (skip JS/TS linting).
+- `npx -y @framework-doctor/svelte . --diff main` - scan only files changed against `main`.
+- `npx -y @framework-doctor/svelte . --project web` - select a specific workspace package.
 
 ## Options
 
@@ -39,6 +68,18 @@ Options:
   -h, --help          display help for command
 ```
 
+## Security checks
+
+Svelte Doctor includes a security scan that flags:
+
+- **`{@html}`** — Raw HTML can lead to XSS if content is unsanitized
+- **`new Function()`** — Code injection risk
+- **`setTimeout("string")` / `setInterval("string")`** — Implied eval
+
+Plus oxlint's `no-eval` and svelte-check's `a11y_invalid_attribute` (e.g. `javascript:` URLs in `href`).
+
+To ignore a rule: `"svelte-doctor/no-at-html"`, `"svelte-doctor/no-new-function"`, `"svelte-doctor/no-implied-eval"`.
+
 ## Configuration
 
 Create `svelte-doctor.config.json`:
@@ -46,7 +87,7 @@ Create `svelte-doctor.config.json`:
 ```json
 {
   "ignore": {
-    "rules": ["svelte-check/a11y-missing-attribute"],
+    "rules": ["svelte-check/a11y-missing-attribute", "svelte-doctor/no-at-html"],
     "files": ["src/generated/**"]
   },
   "lint": true,

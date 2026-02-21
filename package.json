@@ -1,31 +1,33 @@
 {
-  "name": "svelte-doctor",
+  "name": "framework-doctor",
   "private": true,
-  "homepage": "https://github.com/your-org/svelte-doctor#readme",
+  "packageManager": "pnpm@10.30.0",
+  "homepage": "https://github.com/pitis/framework-doctor#readme",
   "license": "MIT",
-  "description": "Monorepo for Svelte Doctor",
+  "description": "Framework Doctor monorepo - diagnose framework project health",
   "scripts": {
     "build": "turbo run build",
-    "build:doctor": "turbo run build --filter=svelte-doctor",
+    "build:svelte": "turbo run build --filter=@framework-doctor/svelte",
+    "build:cli": "turbo run build --filter=@framework-doctor",
+    "demo": "pnpm build && pnpm exec framework-doctor examples/svelte/demo-app",
     "dev": "turbo run dev",
-    "dev:doctor": "turbo run dev --filter=svelte-doctor",
+    "dev:doctor": "turbo run dev --filter=@framework-doctor/svelte",
     "lint": "turbo run lint",
-    "lint:doctor": "turbo run lint --filter=svelte-doctor",
-    "lint:fix": "turbo run lint:fix --filter=svelte-doctor",
+    "lint:doctor": "turbo run lint --filter=@framework-doctor/svelte",
+    "lint:fix": "turbo run lint:fix --filter=@framework-doctor/svelte",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:doctor": "turbo run test --filter=svelte-doctor --concurrency=1",
+    "test:doctor": "turbo run test --filter=@framework-doctor/svelte --concurrency=1",
     "quality:check": "turbo run lint typecheck test",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.7",
-    "@types/node": "^25.3.0",
-    "oxlint": "^1.49.0",
-    "turbo": "^2.5.6",
-    "typescript": "^5.9.2"
-  },
-  "packageManager": "pnpm@10.29.1"
+    "@changesets/cli": "catalog:",
+    "@types/node": "catalog:",
+    "oxlint": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:"
+  }
 }
