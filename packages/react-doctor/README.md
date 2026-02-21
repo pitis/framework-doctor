@@ -1,19 +1,11 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/react-doctor-readme-logo-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/react-doctor-readme-logo-light.svg">
-  <img alt="React Doctor" src="./assets/react-doctor-readme-logo-light.svg" width="180" height="40">
-</picture>
+# React Doctor
 
-[![version](https://img.shields.io/npm/v/react-doctor?style=flat&colorA=000000&colorB=000000)](https://npmjs.com/package/react-doctor)
-[![downloads](https://img.shields.io/npm/dt/react-doctor.svg?style=flat&colorA=000000&colorB=000000)](https://npmjs.com/package/react-doctor)
+[![version](https://img.shields.io/npm/v/@framework-doctor/react.svg?style=flat)](https://npmjs.com/package/@framework-doctor/react)
+[![downloads](https://img.shields.io/npm/dm/@framework-doctor/react.svg?style=flat)](https://npmjs.com/package/@framework-doctor/react)
 
 Let coding agents diagnose and fix your React code.
 
 One command scans your codebase for security, performance, correctness, and architecture issues, then outputs a **0–100 score** with actionable diagnostics.
-
-### [See it in action →](https://react.doctor)
-
-https://github.com/user-attachments/assets/07cc88d9-9589-44c3-aa73-5d603cb1c570
 
 ## How it works
 
@@ -29,13 +21,13 @@ Diagnostics are filtered through your config, then scored by severity (errors we
 Run this at your project root:
 
 ```bash
-npx -y react-doctor@latest .
+npx -y @framework-doctor/react .
 ```
 
 Use `--verbose` to see affected files and line numbers:
 
 ```bash
-npx -y react-doctor@latest . --verbose
+npx -y @framework-doctor/react . --verbose
 ```
 
 ## Install for your coding agent
@@ -46,7 +38,7 @@ Teach your coding agent all 47+ React best practice rules:
 curl -fsSL https://react.doctor/install-skill.sh | bash
 ```
 
-Supports Cursor, Claude Code, Amp Code, Codex, Gemini CLI, OpenCode, Windsurf, and Antigravity.
+Supports Cursor, Claude Code, Cline, Windsurf, and other AI coding agents.
 
 ## Options
 
@@ -112,7 +104,7 @@ CLI flags always override config values.
 You can also use React Doctor programmatically:
 
 ```js
-import { diagnose } from 'react-doctor/api';
+import { diagnose } from '@framework-doctor/react/api';
 
 const result = await diagnose('./path/to/your/react-project');
 
@@ -168,15 +160,17 @@ interface Diagnostic {
 Want to contribute? Check out the codebase and submit a PR.
 
 ```bash
-git clone https://github.com/millionco/react-doctor
-cd react-doctor
+git clone https://github.com/pitis/framework-doctor
+cd framework-doctor
 pnpm install
-pnpm -r run build
+pnpm build
 ```
 
 Run locally:
 
 ```bash
+pnpm exec framework-doctor /path/to/your/react-project
+# or directly:
 node packages/react-doctor/dist/cli.js /path/to/your/react-project
 ```
 

@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@framework-doctor/cli.svg)](https://www.npmjs.com/package/@framework-doctor/cli)
 [![npm downloads](https://img.shields.io/npm/dm/@framework-doctor/cli.svg)](https://www.npmjs.com/package/@framework-doctor/cli)
 
-Framework Doctor auto-detects your framework and runs the right health check. Currently supports Svelte; React, Vue, and Angular coming soon.
+Framework Doctor auto-detects your framework and runs the right health check. Supports **Svelte** and **React**; Vue and Angular coming soon.
 
 ## Quick start
 
@@ -16,7 +16,8 @@ npx -y @framework-doctor/cli .
 Or run a specific doctor directly:
 
 ```bash
-npx -y @framework-doctor/svelte .
+npx -y @framework-doctor/react .    # React
+npx -y @framework-doctor/svelte .   # Svelte
 ```
 
 ## Try it
@@ -39,6 +40,12 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 - `npx -y @framework-doctor/cli .` - auto-detect framework and run the right doctor
 - `npx -y @framework-doctor/cli ./path/to/project` - scan a specific project directory
 
+**React (direct):**
+
+- `npx -y @framework-doctor/react .` - run a full scan
+- `npx -y @framework-doctor/react ./path/to/project` - scan a specific project directory
+- `npx -y @framework-doctor/react . --verbose` - include file and line details
+
 **Svelte (direct):**
 
 - `npx -y @framework-doctor/svelte .` - run a full scan
@@ -50,6 +57,8 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 - `npx -y @framework-doctor/svelte . --project web` - select a specific workspace package.
 
 ## Options
+
+Svelte doctor:
 
 ```txt
 Usage: svelte-doctor [directory] [options]
@@ -67,6 +76,8 @@ Options:
   --offline           skip remote scoring (local score only)
   -h, --help          display help for command
 ```
+
+React doctor options: `--no-lint`, `--no-dead-code`, `--verbose`, `--score`, `--project`, `--diff`. See [packages/react-doctor/README.md](packages/react-doctor/README.md).
 
 ## Security checks
 
