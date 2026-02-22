@@ -1,30 +1,38 @@
+import {
+  addAnalyticsOption,
+  buildCountsSummaryLine,
+  buildScoreBar,
+  buildScoreBreakdownLines,
+  colorizeByScore,
+  createFramedLine,
+  getDoctorFace,
+  groupBy,
+  highlighter,
+  indentMultilineText,
+  isAutomatedEnvironment,
+  logger,
+  PERFECT_SCORE,
+  printFramedBox,
+  spinner,
+} from '@framework-doctor/core';
 import { Command } from 'commander';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
-import {
-  PERFECT_SCORE,
-  SCORE_BAR_WIDTH_CHARS,
-  SCORE_GOOD_THRESHOLD,
-  SCORE_OK_THRESHOLD,
-} from './constants.js';
-import type { Diagnostic, ScanOptions, SvelteDoctorConfig } from './types.js';
-import { colorizeByScore } from './ui/colorize-by-score.js';
-import { createFramedLine, printFramedBox } from './ui/framed-box.js';
-import { highlighter } from './ui/highlighter.js';
-import { logger } from './ui/logger.js';
-import { spinner } from './ui/spinner.js';
+import type { Diagnostic, ScanOptions, ScoreResult, SvelteDoctorConfig } from './types.js';
 import { discoverProject } from './utils/discover-project.js';
 import { filterIgnoredDiagnostics } from './utils/filter-diagnostics.js';
-import { formatElapsedTime } from './utils/format-elapsed-time.js';
 import { filterSourceFiles, getDiffInfo } from './utils/get-diff-files.js';
-import { groupBy } from './utils/group-by.js';
-import { indentMultilineText } from './utils/indent-multiline-text.js';
 import { loadConfig } from './utils/load-config.js';
 import { runKnip } from './utils/run-knip.js';
 import { runOxlint } from './utils/run-oxlint.js';
 import { runSecurityScan } from './utils/run-security-scan.js';
 import { runSvelteCheck } from './utils/run-svelte-check.js';
 import { calculateScore } from './utils/score.js';
+import {
+  maybePromptAnalyticsConsent,
+  sendScanEvent,
+  shouldSendAnalytics,
+} from './utils/telemetry.js';
 
 const VERSION = process.env.VERSION ?? '0.0.0';
 
@@ -35,6 +43,7 @@ interface CliFlags {
   verbose: boolean;
   score: boolean;
   yes: boolean;
+  analytics: boolean;
   project?: string;
   diff?: boolean | string;
   offline?: boolean;
@@ -51,9 +60,6 @@ const colorizeBySeverity = (text: string, severity: Diagnostic['severity']): str
 const sortBySeverity = (groups: [string, Diagnostic[]][]): [string, Diagnostic[]][] =>
   groups.toSorted(([, a], [, b]) => SEVERITY_ORDER[a[0].severity] - SEVERITY_ORDER[b[0].severity]);
 
-const collectAffectedFiles = (diagnostics: Diagnostic[]): Set<string> =>
-  new Set(diagnostics.map((d) => d.filePath));
-
 const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
   const map = new Map<string, number[]>();
   for (const d of diagnostics) {
@@ -63,6 +69,11 @@ const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
   }
   return map;
 };
+
+const hasHighOrCriticalSecurityFindings = (diagnostics: Diagnostic[]): boolean =>
+  diagnostics.some(
+    (diagnostic) => diagnostic.category === 'security' && diagnostic.severity === 'error',
+  );
 
 const printRuleGroup = (ruleDiagnostics: Diagnostic[], verbose: boolean): void => {
   const first = ruleDiagnostics[0];
@@ -93,72 +104,20 @@ const printDiagnostics = (diagnostics: Diagnostic[], verbose: boolean): void => 
   }
 };
 
-const getDoctorFace = (score: number): [string, string] => {
-  if (score >= SCORE_GOOD_THRESHOLD) return ['◠ ◠', ' ▽ '];
-  if (score >= SCORE_OK_THRESHOLD) return ['• •', ' ─ '];
-  return ['x x', ' ▽ '];
-};
-
-const buildScoreBar = (score: number): { plain: string; rendered: string } => {
-  const filledCount = Math.round((score / PERFECT_SCORE) * SCORE_BAR_WIDTH_CHARS);
-  const emptyCount = SCORE_BAR_WIDTH_CHARS - filledCount;
-  const filled = '█'.repeat(filledCount);
-  const empty = '░'.repeat(emptyCount);
-  return {
-    plain: filled + empty,
-    rendered: colorizeByScore(filled, score) + highlighter.dim(empty),
-  };
-};
-
-const buildCountsSummaryLine = (
-  diagnostics: Diagnostic[],
-  totalSourceFileCount: number,
-  elapsedMs: number,
-): { plain: string; rendered: string } => {
-  const errorCount = diagnostics.filter((d) => d.severity === 'error').length;
-  const warningCount = diagnostics.filter((d) => d.severity === 'warning').length;
-  const affectedCount = collectAffectedFiles(diagnostics).size;
-  const elapsed = formatElapsedTime(elapsedMs);
-
-  const plainParts: string[] = [];
-  const renderedParts: string[] = [];
-
-  if (errorCount > 0) {
-    const text = `✗ ${errorCount} error${errorCount === 1 ? '' : 's'}`;
-    plainParts.push(text);
-    renderedParts.push(highlighter.error(text));
-  }
-  if (warningCount > 0) {
-    const text = `⚠ ${warningCount} warning${warningCount === 1 ? '' : 's'}`;
-    plainParts.push(text);
-    renderedParts.push(highlighter.warn(text));
-  }
-
-  const fileSuffix = affectedCount === 1 ? '' : 's';
-  const fileText =
-    totalSourceFileCount > 0
-      ? `across ${affectedCount}/${totalSourceFileCount} files`
-      : `across ${affectedCount} file${fileSuffix}`;
-  const timeText = `in ${elapsed}`;
-  plainParts.push(fileText, timeText);
-  renderedParts.push(highlighter.dim(fileText), highlighter.dim(timeText));
-
-  return { plain: plainParts.join('  '), rendered: renderedParts.join('  ') };
-};
-
 const printSummary = (
-  score: number,
-  label: string,
+  scoreResult: ScoreResult,
   diagnostics: Diagnostic[],
   totalSourceFileCount: number,
   elapsedMs: number,
+  verbose: boolean,
 ): void => {
+  const { score, label } = scoreResult;
   const [eyes, mouth] = getDoctorFace(score);
   const colorize = (text: string) => colorizeByScore(text, score);
   const bar = buildScoreBar(score);
   const counts = buildCountsSummaryLine(diagnostics, totalSourceFileCount, elapsedMs);
 
-  printFramedBox([
+  const framedLines: ReturnType<typeof createFramedLine>[] = [
     createFramedLine('┌─────┐', colorize('┌─────┐')),
     createFramedLine(`│ ${eyes} │`, colorize(`│ ${eyes} │`)),
     createFramedLine(`│ ${mouth} │`, colorize(`│ ${mouth} │`)),
@@ -171,9 +130,15 @@ const printSummary = (
     ),
     createFramedLine(''),
     createFramedLine(bar.plain, bar.rendered),
-    createFramedLine(''),
-    createFramedLine(counts.plain, counts.rendered),
-  ]);
+  ];
+  if (verbose && scoreResult.breakdown) {
+    framedLines.push(createFramedLine(''));
+    framedLines.push(...buildScoreBreakdownLines(scoreResult.breakdown));
+  }
+  framedLines.push(createFramedLine(''));
+  framedLines.push(createFramedLine(counts.plain, counts.rendered));
+
+  printFramedBox(framedLines);
 };
 
 const applyDiffMode = (rootDirectory: string, flags: CliFlags, scanOptions: ScanOptions): void => {
@@ -266,7 +231,11 @@ const main = new Command()
   .option('--no-dead-code', 'skip dead code detection')
   .option('--verbose', 'show file details per rule')
   .option('--score', 'output only the score')
-  .option('-y, --yes', 'skip prompts')
+  .option('-y, --yes', 'skip prompts');
+
+addAnalyticsOption(main);
+
+main
   .option('--project <name>', 'select workspace project (comma-separated)')
   .option('--diff [base]', 'scan only files changed vs base branch')
   .option('--offline', 'skip remote scoring (local score only)')
@@ -276,8 +245,16 @@ const main = new Command()
     const config = loadConfig(resolvedDirectory);
     const scanOptions = resolveScanOptions(flags, config, main);
 
+    const isScoreOnly = flags.score;
+    const isAutomated = isAutomatedEnvironment();
+    const shouldSkipPrompts = flags.yes || isAutomated || !process.stdin.isTTY;
+
     logger.log(`svelte-doctor v${VERSION}`);
     logger.break();
+
+    if (!isScoreOnly && !isAutomated && !flags.yes) {
+      await maybePromptAnalyticsConsent(shouldSkipPrompts);
+    }
 
     applyDiffMode(resolvedDirectory, flags, scanOptions);
 
@@ -345,7 +322,29 @@ const main = new Command()
       config,
     );
 
-    const scoreResult = calculateScore(diagnostics);
+    const hasIncludePaths = (scanOptions.includePaths?.length ?? 0) > 0;
+    const totalSourceFileCount = hasIncludePaths
+      ? scanOptions.includePaths!.length
+      : projectInfo.sourceFileCount;
+    const scoreResult = calculateScore(diagnostics, totalSourceFileCount, {
+      hasHighOrCriticalSecurityFindings: hasHighOrCriticalSecurityFindings(diagnostics),
+    });
+
+    const telemetryUrl = process.env.FRAMEWORK_DOCTOR_TELEMETRY_URL ?? '';
+    const isDiffMode = (scanOptions.includePaths?.length ?? 0) > 0;
+    if (
+      telemetryUrl &&
+      shouldSendAnalytics(
+        { analytics: flags.analytics, yes: flags.yes },
+        config?.analytics,
+        isAutomated,
+      )
+    ) {
+      sendScanEvent(telemetryUrl, projectInfo, scoreResult, diagnostics.length, {
+        isDiffMode,
+        cliVersion: VERSION,
+      });
+    }
 
     if (flags.score) {
       logger.log(`${scoreResult.score}`);
@@ -353,10 +352,6 @@ const main = new Command()
     }
 
     const elapsedMs = performance.now() - startTime;
-    const hasIncludePaths = (scanOptions.includePaths?.length ?? 0) > 0;
-    const totalSourceFileCount = hasIncludePaths
-      ? scanOptions.includePaths!.length
-      : projectInfo.sourceFileCount;
 
     if (diagnostics.length === 0) {
       logger.success('No issues found!');
@@ -366,11 +361,11 @@ const main = new Command()
 
     logger.break();
     printSummary(
-      scoreResult.score,
-      scoreResult.label,
+      scoreResult,
       diagnostics,
       totalSourceFileCount,
       elapsedMs,
+      Boolean(scanOptions.verbose),
     );
   });
 

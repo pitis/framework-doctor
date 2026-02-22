@@ -45,6 +45,7 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 - `npx -y @framework-doctor/react .` - run a full scan
 - `npx -y @framework-doctor/react ./path/to/project` - scan a specific project directory
 - `npx -y @framework-doctor/react . --verbose` - include file and line details
+- `npx -y @framework-doctor/react . --score` - print only the numeric score (CI-friendly)
 
 **Svelte (direct):**
 
@@ -71,13 +72,14 @@ Options:
   --verbose           show file details per rule
   --score             output only the score
   -y, --yes           skip prompts
+  --no-analytics      disable anonymous analytics
   --project <name>    select workspace project (comma-separated)
   --diff [base]       scan only changed files vs base branch
   --offline           skip remote scoring (local score only)
   -h, --help          display help for command
 ```
 
-React doctor options: `--no-lint`, `--no-dead-code`, `--verbose`, `--score`, `--project`, `--diff`. See [packages/react-doctor/README.md](packages/react-doctor/README.md).
+React doctor options: `--no-lint`, `--no-dead-code`, `--verbose`, `--score`, `--no-analytics`, `--project`, `--diff`. See [packages/react-doctor/README.md](packages/react-doctor/README.md).
 
 ## Security checks
 
@@ -90,6 +92,10 @@ Svelte Doctor includes a security scan that flags:
 Plus oxlint's `no-eval` and svelte-check's `a11y_invalid_attribute` (e.g. `javascript:` URLs in `href`).
 
 To ignore a rule: `"svelte-doctor/no-at-html"`, `"svelte-doctor/no-new-function"`, `"svelte-doctor/no-implied-eval"`.
+
+## Analytics
+
+Both doctors optionally send anonymous usage data when you opt in. Data is stored in your Supabase (see [supabase/README.md](supabase/README.md)). If your function enforces `TELEMETRY_KEY`, set `FRAMEWORK_DOCTOR_TELEMETRY_KEY` in the client environment. To disable: `--no-analytics`, `"analytics": false` in config, or `DO_NOT_TRACK=1`.
 
 ## Configuration
 
@@ -105,7 +111,8 @@ Create `svelte-doctor.config.json`:
   "jsTsLint": true,
   "deadCode": true,
   "verbose": false,
-  "diff": false
+  "diff": false,
+  "analytics": true
 }
 ```
 

@@ -7,6 +7,7 @@ import { discoverProject } from './utils/discover-project.js';
 import { loadConfig } from './utils/load-config.js';
 import { runKnip } from './utils/run-knip.js';
 import { runOxlint } from './utils/run-oxlint.js';
+import { runSecurityScan } from './utils/run-security-scan.js';
 
 export { filterSourceFiles, getDiffInfo } from './utils/get-diff-files.js';
 export type { Diagnostic, DiffInfo, ProjectInfo, ReactDoctorConfig, ScoreResult };
@@ -23,6 +24,11 @@ export interface DiagnoseResult {
   project: ProjectInfo;
   elapsedMilliseconds: number;
 }
+
+const hasHighOrCriticalSecurityFindings = (diagnostics: Diagnostic[]): boolean =>
+  diagnostics.some(
+    (diagnostic) => diagnostic.category === 'security' && diagnostic.severity === 'error',
+  );
 
 export const diagnose = async (
   directory: string,
@@ -68,17 +74,29 @@ export const diagnose = async (
         })
       : Promise.resolve(emptyDiagnostics);
 
-  const [lintDiagnostics, deadCodeDiagnostics] = await Promise.all([lintPromise, deadCodePromise]);
+  const securityPromise = effectiveLint
+    ? runSecurityScan(resolvedDirectory, includePaths)
+    : Promise.resolve(emptyDiagnostics);
+
+  const [lintDiagnostics, deadCodeDiagnostics, securityDiagnostics] = await Promise.all([
+    lintPromise,
+    deadCodePromise,
+    securityPromise,
+  ]);
   const diagnostics = combineDiagnostics(
     lintDiagnostics,
     deadCodeDiagnostics,
+    securityDiagnostics,
     resolvedDirectory,
     isDiffMode,
     userConfig,
   );
 
   const elapsedMilliseconds = performance.now() - startTime;
-  const score = await calculateScore(diagnostics);
+  const totalFilesScanned = isDiffMode ? includePaths.length : projectInfo.sourceFileCount;
+  const score = await calculateScore(diagnostics, totalFilesScanned, {
+    hasHighOrCriticalSecurityFindings: hasHighOrCriticalSecurityFindings(diagnostics),
+  });
 
   return {
     diagnostics,

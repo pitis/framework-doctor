@@ -1,5 +1,5 @@
+import { compileGlobPattern } from '@framework-doctor/core';
 import type { Diagnostic, ReactDoctorConfig } from '../types.js';
-import { compileGlobPattern } from './match-glob-pattern.js';
 
 export const filterIgnoredDiagnostics = (
   diagnostics: Diagnostic[],

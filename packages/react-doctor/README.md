@@ -3,7 +3,7 @@
 [![version](https://img.shields.io/npm/v/@framework-doctor/react.svg?style=flat)](https://npmjs.com/package/@framework-doctor/react)
 [![downloads](https://img.shields.io/npm/dm/@framework-doctor/react.svg?style=flat)](https://npmjs.com/package/@framework-doctor/react)
 
-Let coding agents diagnose and fix your React code.
+Diagnose and improve your React codebase health.
 
 One command scans your codebase for security, performance, correctness, and architecture issues, then outputs a **0–100 score** with actionable diagnostics.
 
@@ -18,27 +18,26 @@ Diagnostics are filtered through your config, then scored by severity (errors we
 
 ## Install
 
-Run this at your project root:
+```bash
+pnpm add -D @framework-doctor/react
+pnpm react-doctor .
+```
+
+Or run without installing:
 
 ```bash
-npx -y @framework-doctor/react .
+npx @framework-doctor/react .
 ```
 
 Use `--verbose` to see affected files and line numbers:
 
 ```bash
-npx -y @framework-doctor/react . --verbose
+pnpm react-doctor . --verbose
 ```
 
-## Install for your coding agent
+## Cursor skill
 
-Teach your coding agent all 47+ React best practice rules:
-
-```bash
-curl -fsSL https://react.doctor/install-skill.sh | bash
-```
-
-Supports Cursor, Claude Code, Cline, Windsurf, and other AI coding agents.
+Add the React Doctor skill so your AI assistant knows all 47+ React best practice rules. Copy `.cursor/skills/framework-doctor` from this repo into your project or global Cursor skills (e.g. `~/.cursor/skills/`).
 
 ## Options
 
@@ -54,8 +53,7 @@ Options:
   -y, --yes         skip prompts, scan all workspace projects
   --project <name>  select workspace project (comma-separated for multiple)
   --diff [base]     scan only files changed vs base branch
-  --no-ami          skip Ami-related prompts
-  --fix             open Ami to auto-fix all issues
+  --no-analytics    disable anonymous analytics
   -h, --help        display help for command
 ```
 
@@ -96,8 +94,19 @@ If both exist, `react-doctor.config.json` takes precedence.
 | `deadCode`     | `boolean`           | `true`  | Enable/disable dead code detection (same as `--no-dead-code`)                                                                       |
 | `verbose`      | `boolean`           | `false` | Show file details per rule (same as `--verbose`)                                                                                    |
 | `diff`         | `boolean \| string` | —       | Force diff mode (`true`) or pin a base branch (`"main"`). Set to `false` to disable auto-detection.                                 |
+| `analytics`    | `boolean`           | `true`  | Enable/disable anonymous analytics (same as `--no-analytics`)                                                                       |
 
 CLI flags always override config values.
+
+## Analytics
+
+React Doctor optionally sends anonymous usage data to help improve the tool. Data is sent to your Supabase Edge Function when you opt in and is limited to: framework type, score range, diagnostic count, and similar aggregates. No code, file paths, or project names are collected.
+
+- **Enable** (for maintainers): Set `FRAMEWORK_DOCTOR_TELEMETRY_URL` to your Supabase Edge Function URL (e.g. `https://<project>.supabase.co/functions/v1/telemetry`) in your publish/CI env.
+- **Shared key (optional)**: If your Supabase function enforces `TELEMETRY_KEY`, set `FRAMEWORK_DOCTOR_TELEMETRY_KEY` in the client environment.
+- **Opt-in**: On first run (when analytics is configured), you’ll be prompted. Your choice is stored in `~/.framework-doctor/config.json`.
+- **Disable**: Use `--no-analytics`, set `"analytics": false` in config, or set `DO_NOT_TRACK=1`.
+- **Skipped automatically**: CI and other non-interactive environments (e.g. Cursor Agent, Claude Code).
 
 ## Node.js API
 
@@ -138,26 +147,7 @@ interface Diagnostic {
 }
 ```
 
-## [Scores for popular open-source projects](https://react.doctor/leaderboard)
-
-| Project                                                | Score  | Share                                                                                   |
-| ------------------------------------------------------ | ------ | --------------------------------------------------------------------------------------- |
-| [tldraw](https://github.com/tldraw/tldraw)             | **84** | [view](https://www.react.doctor/share?p=tldraw&s=84&e=98&w=139&f=40)                    |
-| [excalidraw](https://github.com/excalidraw/excalidraw) | **84** | [view](https://www.react.doctor/share?p=%40excalidraw%2Fexcalidraw&s=84&e=2&w=196&f=80) |
-| [twenty](https://github.com/twentyhq/twenty)           | **78** | [view](https://www.react.doctor/share?p=twenty-front&s=78&e=99&w=293&f=268)             |
-| [plane](https://github.com/makeplane/plane)            | **78** | [view](https://www.react.doctor/share?p=web&s=78&e=7&w=525&f=292)                       |
-| [formbricks](https://github.com/formbricks/formbricks) | **75** | [view](https://www.react.doctor/share?p=%40formbricks%2Fweb&s=75&e=15&w=389&f=242)      |
-| [posthog](https://github.com/PostHog/posthog)          | **72** | [view](https://www.react.doctor/share?p=%40posthog%2Ffrontend&s=72&e=82&w=1177&f=585)   |
-| [supabase](https://github.com/supabase/supabase)       | **69** | [view](https://www.react.doctor/share?p=studio&s=69&e=74&w=1087&f=566)                  |
-| [onlook](https://github.com/onlook-dev/onlook)         | **69** | [view](https://www.react.doctor/share?p=%40onlook%2Fweb-client&s=69&e=64&w=418&f=178)   |
-| [payload](https://github.com/payloadcms/payload)       | **68** | [view](https://www.react.doctor/share?p=%40payloadcms%2Fui&s=68&e=139&w=408&f=298)      |
-| [sentry](https://github.com/getsentry/sentry)          | **64** | [view](https://www.react.doctor/share?p=sentry&s=64&e=94&w=1345&f=818)                  |
-| [cal.com](https://github.com/calcom/cal.com)           | **63** | [view](https://www.react.doctor/share?p=%40calcom%2Fweb&s=63&e=31&w=558&f=311)          |
-| [dub](https://github.com/dubinc/dub)                   | **62** | [view](https://www.react.doctor/share?p=web&s=62&e=52&w=966&f=457)                      |
-
 ## Contributing
-
-Want to contribute? Check out the codebase and submit a PR.
 
 ```bash
 git clone https://github.com/pitis/framework-doctor
@@ -169,7 +159,7 @@ pnpm build
 Run locally:
 
 ```bash
-pnpm exec framework-doctor /path/to/your/react-project
+pnpm exec react-doctor /path/to/your/react-project
 # or directly:
 node packages/react-doctor/dist/cli.js /path/to/your/react-project
 ```

@@ -1,5 +1,5 @@
+import { matchGlobPattern } from '@framework-doctor/core';
 import { describe, expect, it } from 'vitest';
-import { matchGlobPattern } from '../src/utils/match-glob-pattern.js';
 
 describe('matchGlobPattern', () => {
   it('matches exact file paths', () => {

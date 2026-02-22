@@ -16,7 +16,6 @@ const finalize = (method: 'succeed' | 'fail', originalText: string, displayText:
   }
 
   sharedInstance.stop();
-  // Avoid printing an extra "spinner start" line for parallel tasks.
   ora({ text: displayText })[method](displayText);
 
   const [remainingText] = pendingTexts;

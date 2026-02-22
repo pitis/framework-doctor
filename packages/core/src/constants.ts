@@ -1,0 +1,29 @@
+export const TELEMETRY_FETCH_TIMEOUT_MS = 3_000;
+
+export const GIT_LS_FILES_MAX_BUFFER_BYTES = 10 * 1024 * 1024;
+
+export const PERFECT_SCORE = 100;
+
+export const SCORE_GOOD_THRESHOLD = 75;
+
+export const SCORE_OK_THRESHOLD = 50;
+
+export const SCORE_BAR_WIDTH_CHARS = 50;
+
+export const MILLISECONDS_PER_SECOND = 1000;
+
+export const SUMMARY_BOX_OUTER_INDENT_CHARS = 2;
+
+export const SUMMARY_BOX_HORIZONTAL_PADDING_CHARS = 1;
+
+export const ERROR_RULE_PENALTY = 2.5;
+
+export const WARNING_RULE_PENALTY = 1;
+
+export const ERROR_VOLUME_COEFFICIENT = 1.8;
+
+export const WARNING_VOLUME_COEFFICIENT = 0.8;
+
+export const SPREAD_PENALTY_MAX = 12;
+
+export const SCORE_BLOCKING_CHECK_CAP = 59;

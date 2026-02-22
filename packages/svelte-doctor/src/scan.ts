@@ -74,9 +74,12 @@ export const scan = async (directory: string, options: ScanOptions = {}): Promis
     userConfig,
   );
 
+  const totalFilesScanned =
+    resolved.includePaths.length > 0 ? resolved.includePaths.length : projectInfo.sourceFileCount;
+
   return {
     diagnostics,
-    scoreResult: calculateScore(diagnostics),
+    scoreResult: calculateScore(diagnostics, totalFilesScanned),
     skippedChecks,
   };
 };

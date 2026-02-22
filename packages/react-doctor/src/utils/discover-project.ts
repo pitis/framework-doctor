@@ -1,3 +1,4 @@
+import { findMonorepoRoot, isMonorepoRoot } from '@framework-doctor/core';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,7 +10,6 @@ import type {
   ProjectInfo,
   WorkspacePackage,
 } from '../types.js';
-import { findMonorepoRoot, isMonorepoRoot } from './find-monorepo-root.js';
 import { readPackageJson } from './read-package-json.js';
 
 const REACT_COMPILER_PACKAGES = new Set([

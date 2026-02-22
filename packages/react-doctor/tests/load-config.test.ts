@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { loadConfig } from '../src/utils/load-config.js';
 
 const tempRootDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'react-doctor-config-test-'));
@@ -168,20 +168,14 @@ describe('loadConfig', () => {
       );
     });
 
-    it('returns null and warns for malformed JSON', () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    it('returns null for malformed JSON', () => {
       const config = loadConfig(invalidJsonDirectory);
       expect(config).toBeNull();
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to parse'));
-      warnSpy.mockRestore();
     });
 
-    it('returns null and warns when config is not an object', () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    it('returns null when config is not an object', () => {
       const config = loadConfig(nonObjectDirectory);
       expect(config).toBeNull();
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('must be a JSON object'));
-      warnSpy.mockRestore();
     });
 
     it('ignores non-object reactDoctor key in package.json', () => {

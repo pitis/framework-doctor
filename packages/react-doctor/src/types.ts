@@ -1,3 +1,5 @@
+import type { BaseDoctorConfig, Diagnostic, ScoreResult } from '@framework-doctor/core';
+
 export type Framework = 'nextjs' | 'vite' | 'cra' | 'remix' | 'gatsby' | 'unknown';
 
 export interface ProjectInfo {
@@ -40,18 +42,12 @@ export interface OxlintOutput {
   number_of_rules: number;
 }
 
-export interface Diagnostic {
-  filePath: string;
-  plugin: string;
-  rule: string;
-  severity: 'error' | 'warning';
-  message: string;
-  help: string;
-  line: number;
-  column: number;
-  category: string;
-  weight?: number;
-}
+export type {
+  Diagnostic,
+  DiffInfo,
+  ScoreGuardrailInput,
+  ScoreResult,
+} from '@framework-doctor/core';
 
 export interface PackageJson {
   name?: string;
@@ -78,22 +74,11 @@ export interface KnipIssueRecords {
   };
 }
 
-export interface ScoreResult {
-  score: number;
-  label: string;
-}
-
 export interface ScanResult {
   diagnostics: Diagnostic[];
   scoreResult: ScoreResult | null;
   skippedChecks: string[];
-}
-
-export interface EstimatedScoreResult {
-  currentScore: number;
-  currentLabel: string;
-  estimatedScore: number;
-  estimatedLabel: string;
+  projectInfo: ProjectInfo;
 }
 
 export interface ScanOptions {
@@ -101,15 +86,7 @@ export interface ScanOptions {
   deadCode?: boolean;
   verbose?: boolean;
   scoreOnly?: boolean;
-  offline?: boolean;
   includePaths?: string[];
-}
-
-export interface DiffInfo {
-  currentBranch: string;
-  baseBranch: string;
-  changedFiles: string[];
-  isCurrentChanges?: boolean;
 }
 
 export interface HandleErrorOptions {
@@ -152,15 +129,6 @@ export interface CleanedDiagnostic {
   help: string;
 }
 
-export interface ReactDoctorIgnoreConfig {
-  rules?: string[];
-  files?: string[];
-}
+export interface ReactDoctorConfig extends BaseDoctorConfig {}
 
-export interface ReactDoctorConfig {
-  ignore?: ReactDoctorIgnoreConfig;
-  lint?: boolean;
-  deadCode?: boolean;
-  verbose?: boolean;
-  diff?: boolean | string;
-}
+export type { IgnoreConfig } from '@framework-doctor/core';

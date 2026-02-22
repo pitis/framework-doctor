@@ -1,14 +1,11 @@
+import { highlighter, logger, readGlobalConfig, writeGlobalConfig } from '@framework-doctor/core';
 import { execSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { highlighter } from './highlighter.js';
-import { logger } from './logger.js';
 import { prompts } from './prompts.js';
 
 const HOME_DIRECTORY = homedir();
-const CONFIG_DIRECTORY = join(HOME_DIRECTORY, '.framework-doctor');
-const CONFIG_FILE = join(CONFIG_DIRECTORY, 'config.json');
 
 const SKILL_NAME = 'react-doctor';
 const WINDSURF_MARKER = '# React Doctor';
@@ -57,31 +54,11 @@ const CODEX_AGENT_CONFIG = `interface:
   short_description: "Diagnose and fix React codebase health issues"
 `;
 
-interface SkillPromptConfig {
-  skillPromptDismissed?: boolean;
-}
-
 interface SkillTarget {
   name: string;
   detect: () => boolean;
   install: () => void;
 }
-
-const readSkillPromptConfig = (): SkillPromptConfig => {
-  try {
-    if (!existsSync(CONFIG_FILE)) return {};
-    return JSON.parse(readFileSync(CONFIG_FILE, 'utf-8'));
-  } catch {
-    return {};
-  }
-};
-
-const writeSkillPromptConfig = (config: SkillPromptConfig): void => {
-  try {
-    mkdirSync(CONFIG_DIRECTORY, { recursive: true });
-    writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
-  } catch {}
-};
 
 const writeSkillFiles = (directory: string): void => {
   mkdirSync(directory, { recursive: true });
@@ -198,7 +175,7 @@ const installSkill = (): void => {
 };
 
 export const maybePromptSkillInstall = async (shouldSkipPrompts: boolean): Promise<void> => {
-  const config = readSkillPromptConfig();
+  const config = readGlobalConfig();
   if (config.skillPromptDismissed) return;
   if (shouldSkipPrompts) return;
 
@@ -207,7 +184,7 @@ export const maybePromptSkillInstall = async (shouldSkipPrompts: boolean): Promi
   logger.dim(
     `   Install the ${highlighter.info('react-doctor')} skill to teach Cursor, Claude Code,`,
   );
-  logger.dim('   Ami, and other AI agents how to diagnose and fix React issues.');
+  logger.dim('   and other AI agents how to diagnose and fix React issues.');
   logger.break();
 
   const { shouldInstall } = await prompts({
@@ -222,5 +199,5 @@ export const maybePromptSkillInstall = async (shouldSkipPrompts: boolean): Promi
     installSkill();
   }
 
-  writeSkillPromptConfig({ ...config, skillPromptDismissed: true });
+  writeGlobalConfig({ ...config, skillPromptDismissed: true });
 };

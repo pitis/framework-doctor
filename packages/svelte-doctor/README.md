@@ -34,6 +34,7 @@ Options:
   --verbose           show file details per rule
   --score             output only the score (CI-friendly)
   -y, --yes           skip prompts
+  --no-analytics      disable anonymous analytics
   --project <name>    select workspace project (comma-separated)
   --diff [base]       scan only changed files vs base branch
   --offline           skip remote scoring (local score only)
@@ -54,7 +55,8 @@ Create `svelte-doctor.config.json`:
   "jsTsLint": true,
   "deadCode": true,
   "verbose": false,
-  "diff": false
+  "diff": false,
+  "analytics": true
 }
 ```
 
@@ -81,6 +83,14 @@ Plus oxlint's `no-eval` and svelte-check's `a11y_invalid_attribute` (e.g. `javas
 
 To ignore a rule: `"svelte-doctor/no-at-html"`, `"svelte-doctor/no-new-function"`, `"svelte-doctor/no-implied-eval"`.
 
+## Analytics
+
+Svelte Doctor optionally sends anonymous usage data when you opt in. Data is sent to your Supabase Edge Function (see [supabase/README.md](../../supabase/README.md)) when `FRAMEWORK_DOCTOR_TELEMETRY_URL` is configured. If your function enforces `TELEMETRY_KEY`, set `FRAMEWORK_DOCTOR_TELEMETRY_KEY` in the client environment. Limited to framework type, score range, diagnostic count. No code or paths are collected.
+
+- **Opt-in**: On first run (when analytics is configured), you’ll be prompted. Your choice is stored in `~/.framework-doctor/config.json`.
+- **Disable**: Use `--no-analytics`, set `"analytics": false` in config, or `DO_NOT_TRACK=1`.
+- **Skipped automatically**: CI and other non-interactive environments (e.g. Cursor Agent, Claude Code).
+
 ## Contributing
 
 ```bash
@@ -93,7 +103,7 @@ pnpm build
 Run locally:
 
 ```bash
-pnpm exec framework-doctor /path/to/your/svelte-project
+pnpm exec svelte-doctor /path/to/your/svelte-project
 # or directly:
 node packages/svelte-doctor/dist/cli.js /path/to/your/svelte-project
 ```

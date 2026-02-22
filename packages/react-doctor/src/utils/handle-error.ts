@@ -1,5 +1,5 @@
+import { logger } from '@framework-doctor/core';
 import type { HandleErrorOptions } from '../types.js';
-import { logger } from './logger.js';
 
 const DEFAULT_HANDLE_ERROR_OPTIONS: HandleErrorOptions = {
   shouldExit: true,
