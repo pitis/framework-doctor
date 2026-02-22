@@ -1,3 +1,5 @@
+import type { Diagnostic } from '@framework-doctor/core';
+
 export type SvelteFramework = 'sveltekit' | 'svelte';
 
 export interface ProjectInfo {
@@ -9,18 +11,7 @@ export interface ProjectInfo {
   sourceFileCount: number;
 }
 
-export interface Diagnostic {
-  filePath: string;
-  plugin: string;
-  rule: string;
-  severity: 'error' | 'warning';
-  message: string;
-  help: string;
-  line: number;
-  column: number;
-  category: 'correctness' | 'performance' | 'maintainability' | 'accessibility' | 'security';
-  weight?: number;
-}
+export type { Diagnostic } from '@framework-doctor/core';
 
 export interface ScoreResult {
   score: number;

@@ -35,5 +35,9 @@
     "tsdown": "catalog:",
     "typescript": "catalog:"
   },
-  "packageManager": "pnpm@10.30.0"
+  "packageManager": "pnpm@10.30.0",
+  "dependencies": {
+    "ora": "catalog:",
+    "picocolors": "catalog:"
+  }
 }

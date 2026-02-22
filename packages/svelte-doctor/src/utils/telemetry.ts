@@ -2,12 +2,12 @@ import {
   maybePromptAnalyticsConsent as coreMaybePromptAnalyticsConsent,
   sendScanEvent as coreSendScanEvent,
   shouldSendAnalytics as coreShouldSendAnalytics,
+  highlighter,
+  logger,
   type TelemetryEventPayload,
 } from '@framework-doctor/core';
 import prompts from 'prompts';
 import type { ProjectInfo, ScoreResult } from '../types.js';
-import { highlighter } from '../ui/highlighter.js';
-import { logger } from '../ui/logger.js';
 
 export const shouldSendAnalytics = coreShouldSendAnalytics;
 

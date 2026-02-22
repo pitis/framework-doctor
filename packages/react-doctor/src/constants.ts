@@ -28,8 +28,6 @@ export const SPAWN_ARGS_MAX_LENGTH_CHARS = 24_000;
 
 export const OFFLINE_FLAG_MESSAGE = 'Score not available.';
 
-export const DEFAULT_BRANCH_CANDIDATES = ['main', 'master'];
-
 export const ERROR_RULE_PENALTY = 1.5;
 
 export const WARNING_RULE_PENALTY = 0.75;

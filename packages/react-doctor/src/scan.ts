@@ -1,17 +1,25 @@
+import type { FramedLine } from '@framework-doctor/core';
+import {
+  buildCountsSummaryLine,
+  buildScoreBar,
+  colorizeByScore,
+  createFramedLine,
+  getDoctorFace,
+  highlighter,
+  logger,
+  PERFECT_SCORE,
+  printFramedBox,
+  spinner,
+} from '@framework-doctor/core';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import {
-  MILLISECONDS_PER_SECOND,
   OFFLINE_FLAG_MESSAGE,
   OXLINT_NODE_REQUIREMENT,
   OXLINT_RECOMMENDED_NODE_MAJOR,
-  PERFECT_SCORE,
-  SCORE_BAR_WIDTH_CHARS,
-  SCORE_GOOD_THRESHOLD,
-  SCORE_OK_THRESHOLD,
 } from './constants.js';
 import type {
   Diagnostic,
@@ -22,15 +30,11 @@ import type {
   ScoreResult,
 } from './types.js';
 import { calculateScore } from './utils/calculate-score.js';
-import { colorizeByScore } from './utils/colorize-by-score.js';
 import { combineDiagnostics, computeJsxIncludePaths } from './utils/combine-diagnostics.js';
 import { discoverProject, formatFrameworkName } from './utils/discover-project.js';
-import { type FramedLine, createFramedLine, printFramedBox } from './utils/framed-box.js';
 import { groupBy } from './utils/group-by.js';
-import { highlighter } from './utils/highlighter.js';
 import { indentMultilineText } from './utils/indent-multiline-text.js';
 import { loadConfig } from './utils/load-config.js';
-import { logger } from './utils/logger.js';
 import { prompts } from './utils/prompts.js';
 import {
   installNodeViaNvm,
@@ -39,12 +43,7 @@ import {
 } from './utils/resolve-compatible-node.js';
 import { runKnip } from './utils/run-knip.js';
 import { runOxlint } from './utils/run-oxlint.js';
-import { spinner } from './utils/spinner.js';
-
-interface ScoreBarSegments {
-  filledSegment: string;
-  emptySegment: string;
-}
+import { runSecurityScan } from './utils/run-security-scan.js';
 
 const SEVERITY_ORDER: Record<Diagnostic['severity'], number> = {
   error: 0,
@@ -109,13 +108,6 @@ const printDiagnostics = (diagnostics: Diagnostic[], isVerbose: boolean): void =
   }
 };
 
-const formatElapsedTime = (elapsedMilliseconds: number): string => {
-  if (elapsedMilliseconds < MILLISECONDS_PER_SECOND) {
-    return `${Math.round(elapsedMilliseconds)}ms`;
-  }
-  return `${(elapsedMilliseconds / MILLISECONDS_PER_SECOND).toFixed(1)}s`;
-};
-
 const formatRuleSummary = (ruleKey: string, ruleDiagnostics: Diagnostic[]): string => {
   const firstDiagnostic = ruleDiagnostics[0];
   const fileLines = buildFileLineMap(ruleDiagnostics);
@@ -162,39 +154,14 @@ const writeDiagnosticsDirectory = (diagnostics: Diagnostic[]): string => {
   return outputDirectory;
 };
 
-const buildScoreBarSegments = (score: number): ScoreBarSegments => {
-  const filledCount = Math.round((score / PERFECT_SCORE) * SCORE_BAR_WIDTH_CHARS);
-  const emptyCount = SCORE_BAR_WIDTH_CHARS - filledCount;
-
-  return {
-    filledSegment: '█'.repeat(filledCount),
-    emptySegment: '░'.repeat(emptyCount),
-  };
-};
-
-const buildPlainScoreBar = (score: number): string => {
-  const { filledSegment, emptySegment } = buildScoreBarSegments(score);
-  return `${filledSegment}${emptySegment}`;
-};
-
-const buildScoreBar = (score: number): string => {
-  const { filledSegment, emptySegment } = buildScoreBarSegments(score);
-  return colorizeByScore(filledSegment, score) + highlighter.dim(emptySegment);
-};
-
 const printScoreGauge = (score: number, label: string): void => {
   const scoreDisplay = colorizeByScore(`${score}`, score);
   const labelDisplay = colorizeByScore(label, score);
+  const bar = buildScoreBar(score);
   logger.log(`  ${scoreDisplay} / ${PERFECT_SCORE}  ${labelDisplay}`);
   logger.break();
-  logger.log(`  ${buildScoreBar(score)}`);
+  logger.log(`  ${bar.rendered}`);
   logger.break();
-};
-
-const getDoctorFace = (score: number): string[] => {
-  if (score >= SCORE_GOOD_THRESHOLD) return ['◠ ◠', ' ▽ '];
-  if (score >= SCORE_OK_THRESHOLD) return ['• •', ' ─ '];
-  return ['x x', ' ▽ '];
 };
 
 const printBranding = (score?: number): void => {
@@ -236,9 +203,8 @@ const buildBrandingLines = (
     const scoreLineRenderedText = `${colorizeByScore(String(scoreResult.score), scoreResult.score)} / ${PERFECT_SCORE}  ${colorizeByScore(scoreResult.label, scoreResult.score)}`;
     lines.push(createFramedLine(scoreLinePlainText, scoreLineRenderedText));
     lines.push(createFramedLine(''));
-    lines.push(
-      createFramedLine(buildPlainScoreBar(scoreResult.score), buildScoreBar(scoreResult.score)),
-    );
+    const bar = buildScoreBar(scoreResult.score);
+    lines.push(createFramedLine(bar.plain, bar.rendered));
     lines.push(createFramedLine(''));
   } else {
     lines.push(
@@ -255,40 +221,17 @@ const buildBrandingLines = (
   return lines;
 };
 
-const buildCountsSummaryLine = (
+const toCountsFramedLine = (
   diagnostics: Diagnostic[],
   totalSourceFileCount: number,
   elapsedMilliseconds: number,
 ): FramedLine => {
-  const errorCount = diagnostics.filter((diagnostic) => diagnostic.severity === 'error').length;
-  const warningCount = diagnostics.filter((diagnostic) => diagnostic.severity === 'warning').length;
-  const affectedFileCount = collectAffectedFiles(diagnostics).size;
-  const elapsed = formatElapsedTime(elapsedMilliseconds);
-
-  const plainParts: string[] = [];
-  const renderedParts: string[] = [];
-
-  if (errorCount > 0) {
-    const errorText = `✗ ${errorCount} error${errorCount === 1 ? '' : 's'}`;
-    plainParts.push(errorText);
-    renderedParts.push(highlighter.error(errorText));
-  }
-  if (warningCount > 0) {
-    const warningText = `⚠ ${warningCount} warning${warningCount === 1 ? '' : 's'}`;
-    plainParts.push(warningText);
-    renderedParts.push(highlighter.warn(warningText));
-  }
-
-  const fileCountText =
-    totalSourceFileCount > 0
-      ? `across ${affectedFileCount}/${totalSourceFileCount} files`
-      : `across ${affectedFileCount} file${affectedFileCount === 1 ? '' : 's'}`;
-  const elapsedTimeText = `in ${elapsed}`;
-
-  plainParts.push(fileCountText, elapsedTimeText);
-  renderedParts.push(highlighter.dim(fileCountText), highlighter.dim(elapsedTimeText));
-
-  return createFramedLine(plainParts.join('  '), renderedParts.join('  '));
+  const { plain, rendered } = buildCountsSummaryLine(
+    diagnostics,
+    totalSourceFileCount,
+    elapsedMilliseconds,
+  );
+  return createFramedLine(plain, rendered);
 };
 
 const printSummary = (
@@ -301,7 +244,7 @@ const printSummary = (
 ): void => {
   const summaryFramedLines = [
     ...buildBrandingLines(scoreResult, noScoreMessage),
-    buildCountsSummaryLine(diagnostics, totalSourceFileCount, elapsedMilliseconds),
+    toCountsFramedLine(diagnostics, totalSourceFileCount, elapsedMilliseconds),
   ];
   printFramedBox(summaryFramedLines);
 
@@ -507,10 +450,19 @@ export const scan = async (
         })()
       : Promise.resolve<Diagnostic[]>([]);
 
-  const [lintDiagnostics, deadCodeDiagnostics] = await Promise.all([lintPromise, deadCodePromise]);
+  const securityPromise = options.lint
+    ? runSecurityScan(directory, includePaths)
+    : Promise.resolve<Diagnostic[]>([]);
+
+  const [lintDiagnostics, deadCodeDiagnostics, securityDiagnostics] = await Promise.all([
+    lintPromise,
+    deadCodePromise,
+    securityPromise,
+  ]);
   const diagnostics = combineDiagnostics(
     lintDiagnostics,
     deadCodeDiagnostics,
+    securityDiagnostics,
     directory,
     isDiffMode,
     userConfig,

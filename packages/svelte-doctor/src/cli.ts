@@ -1,22 +1,23 @@
-import { addAnalyticsOption, isAutomatedEnvironment } from '@framework-doctor/core';
+import {
+  addAnalyticsOption,
+  buildCountsSummaryLine,
+  buildScoreBar,
+  colorizeByScore,
+  createFramedLine,
+  getDoctorFace,
+  highlighter,
+  isAutomatedEnvironment,
+  logger,
+  PERFECT_SCORE,
+  printFramedBox,
+  spinner,
+} from '@framework-doctor/core';
 import { Command } from 'commander';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
-import {
-  PERFECT_SCORE,
-  SCORE_BAR_WIDTH_CHARS,
-  SCORE_GOOD_THRESHOLD,
-  SCORE_OK_THRESHOLD,
-} from './constants.js';
 import type { Diagnostic, ScanOptions, SvelteDoctorConfig } from './types.js';
-import { colorizeByScore } from './ui/colorize-by-score.js';
-import { createFramedLine, printFramedBox } from './ui/framed-box.js';
-import { highlighter } from './ui/highlighter.js';
-import { logger } from './ui/logger.js';
-import { spinner } from './ui/spinner.js';
 import { discoverProject } from './utils/discover-project.js';
 import { filterIgnoredDiagnostics } from './utils/filter-diagnostics.js';
-import { formatElapsedTime } from './utils/format-elapsed-time.js';
 import { filterSourceFiles, getDiffInfo } from './utils/get-diff-files.js';
 import { groupBy } from './utils/group-by.js';
 import { indentMultilineText } from './utils/indent-multiline-text.js';
@@ -58,9 +59,6 @@ const colorizeBySeverity = (text: string, severity: Diagnostic['severity']): str
 const sortBySeverity = (groups: [string, Diagnostic[]][]): [string, Diagnostic[]][] =>
   groups.toSorted(([, a], [, b]) => SEVERITY_ORDER[a[0].severity] - SEVERITY_ORDER[b[0].severity]);
 
-const collectAffectedFiles = (diagnostics: Diagnostic[]): Set<string> =>
-  new Set(diagnostics.map((d) => d.filePath));
-
 const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
   const map = new Map<string, number[]>();
   for (const d of diagnostics) {
@@ -98,59 +96,6 @@ const printDiagnostics = (diagnostics: Diagnostic[], verbose: boolean): void => 
   for (const [, ruleDiagnostics] of sortedGroups) {
     printRuleGroup(ruleDiagnostics, verbose);
   }
-};
-
-const getDoctorFace = (score: number): [string, string] => {
-  if (score >= SCORE_GOOD_THRESHOLD) return ['◠ ◠', ' ▽ '];
-  if (score >= SCORE_OK_THRESHOLD) return ['• •', ' ─ '];
-  return ['x x', ' ▽ '];
-};
-
-const buildScoreBar = (score: number): { plain: string; rendered: string } => {
-  const filledCount = Math.round((score / PERFECT_SCORE) * SCORE_BAR_WIDTH_CHARS);
-  const emptyCount = SCORE_BAR_WIDTH_CHARS - filledCount;
-  const filled = '█'.repeat(filledCount);
-  const empty = '░'.repeat(emptyCount);
-  return {
-    plain: filled + empty,
-    rendered: colorizeByScore(filled, score) + highlighter.dim(empty),
-  };
-};
-
-const buildCountsSummaryLine = (
-  diagnostics: Diagnostic[],
-  totalSourceFileCount: number,
-  elapsedMs: number,
-): { plain: string; rendered: string } => {
-  const errorCount = diagnostics.filter((d) => d.severity === 'error').length;
-  const warningCount = diagnostics.filter((d) => d.severity === 'warning').length;
-  const affectedCount = collectAffectedFiles(diagnostics).size;
-  const elapsed = formatElapsedTime(elapsedMs);
-
-  const plainParts: string[] = [];
-  const renderedParts: string[] = [];
-
-  if (errorCount > 0) {
-    const text = `✗ ${errorCount} error${errorCount === 1 ? '' : 's'}`;
-    plainParts.push(text);
-    renderedParts.push(highlighter.error(text));
-  }
-  if (warningCount > 0) {
-    const text = `⚠ ${warningCount} warning${warningCount === 1 ? '' : 's'}`;
-    plainParts.push(text);
-    renderedParts.push(highlighter.warn(text));
-  }
-
-  const fileSuffix = affectedCount === 1 ? '' : 's';
-  const fileText =
-    totalSourceFileCount > 0
-      ? `across ${affectedCount}/${totalSourceFileCount} files`
-      : `across ${affectedCount} file${fileSuffix}`;
-  const timeText = `in ${elapsed}`;
-  plainParts.push(fileText, timeText);
-  renderedParts.push(highlighter.dim(fileText), highlighter.dim(timeText));
-
-  return { plain: plainParts.join('  '), rendered: renderedParts.join('  ') };
 };
 
 const printSummary = (

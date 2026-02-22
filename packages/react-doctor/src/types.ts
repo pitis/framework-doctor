@@ -1,3 +1,5 @@
+import type { Diagnostic } from '@framework-doctor/core';
+
 export type Framework = 'nextjs' | 'vite' | 'cra' | 'remix' | 'gatsby' | 'unknown';
 
 export interface ProjectInfo {
@@ -40,18 +42,7 @@ export interface OxlintOutput {
   number_of_rules: number;
 }
 
-export interface Diagnostic {
-  filePath: string;
-  plugin: string;
-  rule: string;
-  severity: 'error' | 'warning';
-  message: string;
-  help: string;
-  line: number;
-  column: number;
-  category: string;
-  weight?: number;
-}
+export type { Diagnostic, DiffInfo } from '@framework-doctor/core';
 
 export interface PackageJson {
   name?: string;
@@ -103,13 +94,6 @@ export interface ScanOptions {
   verbose?: boolean;
   scoreOnly?: boolean;
   includePaths?: string[];
-}
-
-export interface DiffInfo {
-  currentBranch: string;
-  baseBranch: string;
-  changedFiles: string[];
-  isCurrentChanges?: boolean;
 }
 
 export interface HandleErrorOptions {

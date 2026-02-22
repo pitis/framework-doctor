@@ -11,6 +11,7 @@ export const computeJsxIncludePaths = (includePaths: string[]): string[] | undef
 export const combineDiagnostics = (
   lintDiagnostics: Diagnostic[],
   deadCodeDiagnostics: Diagnostic[],
+  securityDiagnostics: Diagnostic[],
   directory: string,
   isDiffMode: boolean,
   userConfig: ReactDoctorConfig | null,
@@ -18,6 +19,7 @@ export const combineDiagnostics = (
   const allDiagnostics = [
     ...lintDiagnostics,
     ...deadCodeDiagnostics,
+    ...securityDiagnostics,
     ...(isDiffMode ? [] : checkReducedMotion(directory)),
   ];
   return userConfig ? filterIgnoredDiagnostics(allDiagnostics, userConfig) : allDiagnostics;

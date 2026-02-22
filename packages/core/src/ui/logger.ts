@@ -1,25 +1,25 @@
 import { highlighter } from './highlighter.js';
 
 export const logger = {
-  error(...args: unknown[]) {
+  error: (...args: unknown[]) => {
     console.log(highlighter.error(args.join(' ')));
   },
-  warn(...args: unknown[]) {
+  warn: (...args: unknown[]) => {
     console.log(highlighter.warn(args.join(' ')));
   },
-  info(...args: unknown[]) {
+  info: (...args: unknown[]) => {
     console.log(highlighter.info(args.join(' ')));
   },
-  success(...args: unknown[]) {
+  success: (...args: unknown[]) => {
     console.log(highlighter.success(args.join(' ')));
   },
-  dim(...args: unknown[]) {
+  dim: (...args: unknown[]) => {
     console.log(highlighter.dim(args.join(' ')));
   },
-  log(...args: unknown[]) {
+  log: (...args: unknown[]) => {
     console.log(args.join(' '));
   },
-  break() {
+  break: () => {
     console.log('');
   },
 };

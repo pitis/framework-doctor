@@ -1,14 +1,11 @@
-import { calculateScore as calculateScoreFromCore } from '@framework-doctor/core';
 import {
-  ERROR_ESTIMATED_FIX_RATE,
   ERROR_RULE_PENALTY,
   PERFECT_SCORE,
   SCORE_GOOD_THRESHOLD,
   SCORE_OK_THRESHOLD,
-  WARNING_ESTIMATED_FIX_RATE,
   WARNING_RULE_PENALTY,
-} from '../constants.js';
-import type { Diagnostic, EstimatedScoreResult, ScoreResult } from '../types.js';
+} from './constants.js';
+import type { Diagnostic, ScoreResult } from './types.js';
 
 const getScoreLabel = (score: number): string => {
   if (score >= SCORE_GOOD_THRESHOLD) return 'Great';
@@ -39,30 +36,8 @@ const scoreFromRuleCounts = (errorRuleCount: number, warningRuleCount: number): 
   return Math.max(0, Math.round(PERFECT_SCORE - penalty));
 };
 
-export const calculateScore = async (diagnostics: Diagnostic[]): Promise<ScoreResult> =>
-  Promise.resolve(calculateScoreFromCore(diagnostics));
-
-export const fetchEstimatedScore = async (
-  diagnostics: Diagnostic[],
-): Promise<EstimatedScoreResult | null> => {
+export const calculateScore = (diagnostics: Diagnostic[]): ScoreResult => {
   const { errorRuleCount, warningRuleCount } = countUniqueRules(diagnostics);
-
-  const currentScore = scoreFromRuleCounts(errorRuleCount, warningRuleCount);
-  const estimatedUnfixedErrorRuleCount = Math.round(
-    errorRuleCount * (1 - ERROR_ESTIMATED_FIX_RATE),
-  );
-  const estimatedUnfixedWarningRuleCount = Math.round(
-    warningRuleCount * (1 - WARNING_ESTIMATED_FIX_RATE),
-  );
-  const estimatedScore = scoreFromRuleCounts(
-    estimatedUnfixedErrorRuleCount,
-    estimatedUnfixedWarningRuleCount,
-  );
-
-  return Promise.resolve({
-    currentScore,
-    currentLabel: getScoreLabel(currentScore),
-    estimatedScore,
-    estimatedLabel: getScoreLabel(estimatedScore),
-  });
+  const score = scoreFromRuleCounts(errorRuleCount, warningRuleCount);
+  return { score, label: getScoreLabel(score) };
 };

@@ -38,14 +38,14 @@ describe('combineDiagnostics', () => {
     const lintDiagnostics = [createDiagnostic({ rule: 'lint-rule' })];
     const deadCodeDiagnostics = [createDiagnostic({ rule: 'dead-code-rule' })];
 
-    const result = combineDiagnostics(lintDiagnostics, deadCodeDiagnostics, '/tmp', true, null);
+    const result = combineDiagnostics(lintDiagnostics, deadCodeDiagnostics, [], '/tmp', true, null);
     expect(result).toHaveLength(2);
     expect(result[0].rule).toBe('lint-rule');
     expect(result[1].rule).toBe('dead-code-rule');
   });
 
   it('returns empty array when both inputs are empty in diff mode', () => {
-    const result = combineDiagnostics([], [], '/tmp', true, null);
+    const result = combineDiagnostics([], [], [], '/tmp', true, null);
     expect(result).toEqual([]);
   });
 
@@ -58,14 +58,14 @@ describe('combineDiagnostics', () => {
       ignore: { rules: ['react/no-danger'] },
     };
 
-    const result = combineDiagnostics(diagnostics, [], '/tmp', true, config);
+    const result = combineDiagnostics(diagnostics, [], [], '/tmp', true, config);
     expect(result).toHaveLength(1);
     expect(result[0].rule).toBe('no-giant-component');
   });
 
   it('skips config filtering when userConfig is null', () => {
     const diagnostics = [createDiagnostic(), createDiagnostic()];
-    const result = combineDiagnostics(diagnostics, [], '/tmp', true, null);
+    const result = combineDiagnostics(diagnostics, [], [], '/tmp', true, null);
     expect(result).toHaveLength(2);
   });
 });

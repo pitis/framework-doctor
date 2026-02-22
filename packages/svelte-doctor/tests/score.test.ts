@@ -32,7 +32,7 @@ describe('calculateScore', () => {
       },
     ]);
 
-    expect(result.score).toBe(92);
+    expect(result.score).toBe(98);
     expect(result.label).toBe('Great');
   });
 });
