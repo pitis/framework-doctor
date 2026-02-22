@@ -87,6 +87,7 @@ export interface ScanResult {
   diagnostics: Diagnostic[];
   scoreResult: ScoreResult | null;
   skippedChecks: string[];
+  projectInfo: ProjectInfo;
 }
 
 export interface EstimatedScoreResult {
@@ -162,4 +163,5 @@ export interface ReactDoctorConfig {
   deadCode?: boolean;
   verbose?: boolean;
   diff?: boolean | string;
+  analytics?: boolean;
 }

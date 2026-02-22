@@ -20,6 +20,8 @@ export const SUMMARY_BOX_OUTER_INDENT_CHARS = 2;
 
 export const FETCH_TIMEOUT_MS = 10_000;
 
+export const TELEMETRY_FETCH_TIMEOUT_MS = 3_000;
+
 export const GIT_LS_FILES_MAX_BUFFER_BYTES = 50 * 1024 * 1024;
 
 // HACK: Windows CreateProcessW limits total command-line length to 32,767 chars.

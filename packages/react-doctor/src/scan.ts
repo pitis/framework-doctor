@@ -532,7 +532,7 @@ export const scan = async (
     } else {
       logger.dim(noScoreMessage);
     }
-    return { diagnostics, scoreResult, skippedChecks };
+    return { diagnostics, scoreResult, skippedChecks, projectInfo };
   }
 
   if (diagnostics.length === 0) {
@@ -554,7 +554,7 @@ export const scan = async (
     } else {
       logger.dim(`  ${noScoreMessage}`);
     }
-    return { diagnostics, scoreResult, skippedChecks };
+    return { diagnostics, scoreResult, skippedChecks, projectInfo };
   }
 
   printDiagnostics(diagnostics, options.verbose);
@@ -576,5 +576,5 @@ export const scan = async (
     logger.warn(`  Note: ${skippedLabel} checks failed — score may be incomplete.`);
   }
 
-  return { diagnostics, scoreResult, skippedChecks };
+  return { diagnostics, scoreResult, skippedChecks, projectInfo };
 };

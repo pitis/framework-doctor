@@ -23,6 +23,11 @@ import { logger } from './utils/logger.js';
 import { clearSelectBanner, prompts, setSelectBanner } from './utils/prompts.js';
 import { selectProjects } from './utils/select-projects.js';
 import { maybePromptSkillInstall } from './utils/skill-prompt.js';
+import {
+  maybePromptAnalyticsConsent,
+  sendScanEvent,
+  shouldSendAnalytics,
+} from './utils/telemetry.js';
 
 const VERSION = process.env.VERSION ?? '0.0.0';
 
@@ -34,6 +39,7 @@ interface CliFlags {
   fix: boolean;
   yes: boolean;
   ami: boolean;
+  analytics: boolean;
   project?: string;
   diff?: boolean | string;
 }
@@ -125,6 +131,7 @@ const program = new Command()
   .option('-y, --yes', 'skip prompts, scan all workspace projects')
   .option('--project <name>', 'select workspace project (comma-separated for multiple)')
   .option('--diff [base]', 'scan only files changed vs base branch')
+  .option('--no-analytics', 'disable anonymous analytics')
   .option('--no-ami', 'skip Ami-related prompts')
   .option('--fix', 'open Ami to auto-fix all issues')
   .action(async (directory: string, flags: CliFlags) => {
@@ -171,6 +178,12 @@ const program = new Command()
       }
 
       const allDiagnostics: Diagnostic[] = [];
+      const telemetryUrl = process.env.FRAMEWORK_DOCTOR_TELEMETRY_URL ?? '';
+      const isAutomated = isAutomatedEnvironment();
+
+      if (!isScoreOnly && !isAutomated && !flags.yes) {
+        await maybePromptAnalyticsConsent(shouldSkipPrompts);
+      }
 
       for (const projectDirectory of projectDirectories) {
         let includePaths: string[] | undefined;
@@ -195,6 +208,28 @@ const program = new Command()
         }
         const scanResult = await scan(projectDirectory, { ...scanOptions, includePaths });
         allDiagnostics.push(...scanResult.diagnostics);
+
+        if (
+          telemetryUrl &&
+          scanResult.scoreResult &&
+          shouldSendAnalytics(
+            { analytics: flags.analytics, yes: flags.yes },
+            userConfig,
+            isAutomated,
+          )
+        ) {
+          sendScanEvent(
+            telemetryUrl,
+            scanResult.projectInfo,
+            scanResult.scoreResult,
+            scanResult.diagnostics.length,
+            {
+              isDiffMode: Boolean(includePaths?.length),
+              cliVersion: VERSION,
+            },
+          );
+        }
+
         if (!isScoreOnly) {
           logger.break();
         }
