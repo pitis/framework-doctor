@@ -5,7 +5,9 @@ import {
   colorizeByScore,
   createFramedLine,
   getDoctorFace,
+  groupBy,
   highlighter,
+  indentMultilineText,
   logger,
   PERFECT_SCORE,
   printFramedBox,
@@ -32,8 +34,6 @@ import type {
 import { calculateScore } from './utils/calculate-score.js';
 import { combineDiagnostics, computeJsxIncludePaths } from './utils/combine-diagnostics.js';
 import { discoverProject, formatFrameworkName } from './utils/discover-project.js';
-import { groupBy } from './utils/group-by.js';
-import { indentMultilineText } from './utils/indent-multiline-text.js';
 import { loadConfig } from './utils/load-config.js';
 import { prompts } from './utils/prompts.js';
 import {

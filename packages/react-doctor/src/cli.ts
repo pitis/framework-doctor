@@ -1,13 +1,16 @@
-import { addAnalyticsOption, isAutomatedEnvironment } from '@framework-doctor/core';
+import {
+  addAnalyticsOption,
+  highlighter,
+  isAutomatedEnvironment,
+  logger,
+} from '@framework-doctor/core';
 import { Command } from 'commander';
 import path from 'node:path';
 import { scan } from './scan.js';
 import type { Diagnostic, DiffInfo, ReactDoctorConfig, ScanOptions } from './types.js';
 import { filterSourceFiles, getDiffInfo } from './utils/get-diff-files.js';
 import { handleError } from './utils/handle-error.js';
-import { highlighter } from './utils/highlighter.js';
 import { loadConfig } from './utils/load-config.js';
-import { logger } from './utils/logger.js';
 import { prompts } from './utils/prompts.js';
 import { selectProjects } from './utils/select-projects.js';
 import { maybePromptSkillInstall } from './utils/skill-prompt.js';

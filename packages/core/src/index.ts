@@ -56,3 +56,4 @@ export {
   spinner,
 } from './ui/index.js';
 export type { FramedLine } from './ui/index.js';
+export { groupBy, indentMultilineText } from './utils/index.js';

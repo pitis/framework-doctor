@@ -1,5 +1,5 @@
+import { colorizeByScore } from '@framework-doctor/core';
 import { describe, expect, it } from 'vitest';
-import { colorizeByScore } from '../src/utils/colorize-by-score.js';
 
 describe('colorizeByScore', () => {
   it('returns a string for high scores', () => {

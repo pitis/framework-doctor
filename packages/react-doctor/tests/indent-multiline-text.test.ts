@@ -1,5 +1,5 @@
+import { indentMultilineText } from '@framework-doctor/core';
 import { describe, expect, it } from 'vitest';
-import { indentMultilineText } from '../src/utils/indent-multiline-text.js';
 
 describe('indentMultilineText', () => {
   it('adds the prefix to a single line', () => {

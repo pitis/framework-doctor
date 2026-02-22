@@ -5,7 +5,9 @@ import {
   colorizeByScore,
   createFramedLine,
   getDoctorFace,
+  groupBy,
   highlighter,
+  indentMultilineText,
   isAutomatedEnvironment,
   logger,
   PERFECT_SCORE,
@@ -19,8 +21,6 @@ import type { Diagnostic, ScanOptions, SvelteDoctorConfig } from './types.js';
 import { discoverProject } from './utils/discover-project.js';
 import { filterIgnoredDiagnostics } from './utils/filter-diagnostics.js';
 import { filterSourceFiles, getDiffInfo } from './utils/get-diff-files.js';
-import { groupBy } from './utils/group-by.js';
-import { indentMultilineText } from './utils/indent-multiline-text.js';
 import { loadConfig } from './utils/load-config.js';
 import { runKnip } from './utils/run-knip.js';
 import { runOxlint } from './utils/run-oxlint.js';

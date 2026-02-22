@@ -1,8 +1,7 @@
+import { highlighter, logger } from '@framework-doctor/core';
 import path from 'node:path';
 import type { WorkspacePackage } from '../types.js';
 import { discoverReactSubprojects, listWorkspacePackages } from './discover-project.js';
-import { highlighter } from './highlighter.js';
-import { logger } from './logger.js';
 import { prompts } from './prompts.js';
 
 export const selectProjects = async (

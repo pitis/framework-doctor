@@ -1,10 +1,8 @@
-import { readGlobalConfig, writeGlobalConfig } from '@framework-doctor/core';
+import { highlighter, logger, readGlobalConfig, writeGlobalConfig } from '@framework-doctor/core';
 import { execSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { highlighter } from './highlighter.js';
-import { logger } from './logger.js';
 import { prompts } from './prompts.js';
 
 const HOME_DIRECTORY = homedir();
