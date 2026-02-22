@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-import { z } from 'zod';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno';
+import { z } from 'https://esm.sh/zod@4.3.6?target=deno';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
