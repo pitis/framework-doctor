@@ -54,8 +54,6 @@ Options:
   --project <name>  select workspace project (comma-separated for multiple)
   --diff [base]     scan only files changed vs base branch
   --no-analytics    disable anonymous analytics
-  --no-ami          skip Ami-related prompts
-  --fix             open Ami to auto-fix all issues
   -h, --help        display help for command
 ```
 

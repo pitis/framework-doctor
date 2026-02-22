@@ -4,17 +4,17 @@ import {
   shouldSendAnalytics as coreShouldSendAnalytics,
   type TelemetryEventPayload,
 } from '@framework-doctor/core';
+import prompts from 'prompts';
 import type { ProjectInfo, ScoreResult } from '../types.js';
-import { highlighter } from './highlighter.js';
-import { logger } from './logger.js';
-import { prompts } from './prompts.js';
+import { highlighter } from '../ui/highlighter.js';
+import { logger } from '../ui/logger.js';
 
 export const shouldSendAnalytics = coreShouldSendAnalytics;
 
 export const maybePromptAnalyticsConsent = async (shouldSkipPrompts: boolean): Promise<boolean> =>
   coreMaybePromptAnalyticsConsent(shouldSkipPrompts, async () => {
     logger.break();
-    logger.log(`${highlighter.info('?')} Help improve react-doctor?`);
+    logger.log(`${highlighter.info('?')} Help improve svelte-doctor?`);
     logger.dim('   Anonymous usage (framework, score range). No code or paths sent.');
     logger.break();
 

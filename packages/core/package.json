@@ -1,0 +1,39 @@
+{
+  "name": "@framework-doctor/core",
+  "version": "1.0.0",
+  "description": "Shared utilities for Framework Doctor (telemetry, config)",
+  "author": {
+    "name": "Pitis Radu",
+    "url": "https://github.com/pitis"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rimraf dist && cross-env NODE_ENV=production tsdown",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "cross-env": "catalog:",
+    "oxlint": "catalog:",
+    "rimraf": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@10.30.0"
+}

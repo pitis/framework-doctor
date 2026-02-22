@@ -54,6 +54,7 @@ export interface SvelteDoctorConfig {
   deadCode?: boolean;
   verbose?: boolean;
   diff?: boolean | string;
+  analytics?: boolean;
 }
 
 export interface VersionedRuleMeta {

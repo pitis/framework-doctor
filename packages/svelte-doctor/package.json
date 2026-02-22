@@ -65,15 +65,18 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "@framework-doctor/core": "workspace:*",
     "commander": "catalog:",
     "knip": "catalog:",
     "ora": "catalog:",
     "oxlint": "catalog:",
     "picocolors": "catalog:",
+    "prompts": "^2.4.2",
     "svelte-check": "^4.1.6"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/prompts": "catalog:",
     "cross-env": "catalog:",
     "rimraf": "catalog:",
     "tsdown": "catalog:",

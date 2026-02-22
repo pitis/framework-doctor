@@ -1,0 +1,1 @@
+export const TELEMETRY_FETCH_TIMEOUT_MS = 3_000;

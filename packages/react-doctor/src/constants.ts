@@ -20,8 +20,6 @@ export const SUMMARY_BOX_OUTER_INDENT_CHARS = 2;
 
 export const FETCH_TIMEOUT_MS = 10_000;
 
-export const TELEMETRY_FETCH_TIMEOUT_MS = 3_000;
-
 export const GIT_LS_FILES_MAX_BUFFER_BYTES = 50 * 1024 * 1024;
 
 // HACK: Windows CreateProcessW limits total command-line length to 32,767 chars.
@@ -45,9 +43,3 @@ export const MAX_KNIP_RETRIES = 5;
 export const OXLINT_NODE_REQUIREMENT = '^20.19.0 || >=22.12.0';
 
 export const OXLINT_RECOMMENDED_NODE_MAJOR = 24;
-
-export const AMI_WEBSITE_URL = 'https://ami.dev';
-
-export const AMI_INSTALL_URL = `${AMI_WEBSITE_URL}/install.sh`;
-
-export const AMI_RELEASES_URL = 'https://github.com/millionco/ami-releases/releases';

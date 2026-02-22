@@ -1,8 +1,8 @@
+import { readGlobalConfig, writeGlobalConfig } from '@framework-doctor/core';
 import { execSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { readGlobalConfig, writeGlobalConfig } from './global-config.js';
 import { highlighter } from './highlighter.js';
 import { logger } from './logger.js';
 import { prompts } from './prompts.js';
@@ -186,7 +186,7 @@ export const maybePromptSkillInstall = async (shouldSkipPrompts: boolean): Promi
   logger.dim(
     `   Install the ${highlighter.info('react-doctor')} skill to teach Cursor, Claude Code,`,
   );
-  logger.dim('   Ami, and other AI agents how to diagnose and fix React issues.');
+  logger.dim('   and other AI agents how to diagnose and fix React issues.');
   logger.break();
 
   const { shouldInstall } = await prompts({

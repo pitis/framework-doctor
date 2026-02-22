@@ -67,6 +67,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "@framework-doctor/core": "workspace:*",
     "commander": "catalog:",
     "eslint-plugin-react-hooks": "^7.0.1",
     "knip": "catalog:",

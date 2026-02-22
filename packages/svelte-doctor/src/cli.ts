@@ -1,3 +1,4 @@
+import { isAutomatedEnvironment } from '@framework-doctor/core';
 import { Command } from 'commander';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
@@ -25,6 +26,11 @@ import { runOxlint } from './utils/run-oxlint.js';
 import { runSecurityScan } from './utils/run-security-scan.js';
 import { runSvelteCheck } from './utils/run-svelte-check.js';
 import { calculateScore } from './utils/score.js';
+import {
+  maybePromptAnalyticsConsent,
+  sendScanEvent,
+  shouldSendAnalytics,
+} from './utils/telemetry.js';
 
 const VERSION = process.env.VERSION ?? '0.0.0';
 
@@ -35,6 +41,7 @@ interface CliFlags {
   verbose: boolean;
   score: boolean;
   yes: boolean;
+  analytics: boolean;
   project?: string;
   diff?: boolean | string;
   offline?: boolean;
@@ -267,6 +274,7 @@ const main = new Command()
   .option('--verbose', 'show file details per rule')
   .option('--score', 'output only the score')
   .option('-y, --yes', 'skip prompts')
+  .option('--no-analytics', 'disable anonymous analytics')
   .option('--project <name>', 'select workspace project (comma-separated)')
   .option('--diff [base]', 'scan only files changed vs base branch')
   .option('--offline', 'skip remote scoring (local score only)')
@@ -276,8 +284,16 @@ const main = new Command()
     const config = loadConfig(resolvedDirectory);
     const scanOptions = resolveScanOptions(flags, config, main);
 
+    const isScoreOnly = flags.score;
+    const isAutomated = isAutomatedEnvironment();
+    const shouldSkipPrompts = flags.yes || isAutomated || !process.stdin.isTTY;
+
     logger.log(`svelte-doctor v${VERSION}`);
     logger.break();
+
+    if (!isScoreOnly && !isAutomated && !flags.yes) {
+      await maybePromptAnalyticsConsent(shouldSkipPrompts);
+    }
 
     applyDiffMode(resolvedDirectory, flags, scanOptions);
 
@@ -346,6 +362,22 @@ const main = new Command()
     );
 
     const scoreResult = calculateScore(diagnostics);
+
+    const telemetryUrl = process.env.FRAMEWORK_DOCTOR_TELEMETRY_URL ?? '';
+    const isDiffMode = (scanOptions.includePaths?.length ?? 0) > 0;
+    if (
+      telemetryUrl &&
+      shouldSendAnalytics(
+        { analytics: flags.analytics, yes: flags.yes },
+        config?.analytics,
+        isAutomated,
+      )
+    ) {
+      sendScanEvent(telemetryUrl, projectInfo, scoreResult, diagnostics.length, {
+        isDiffMode,
+        cliVersion: VERSION,
+      });
+    }
 
     if (flags.score) {
       logger.log(`${scoreResult.score}`);
