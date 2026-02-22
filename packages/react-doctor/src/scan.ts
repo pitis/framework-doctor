@@ -2,6 +2,7 @@ import type { FramedLine } from '@framework-doctor/core';
 import {
   buildCountsSummaryLine,
   buildScoreBar,
+  buildScoreBreakdownLines,
   colorizeByScore,
   createFramedLine,
   getDoctorFace,
@@ -74,6 +75,11 @@ const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
   }
   return fileLines;
 };
+
+const hasHighOrCriticalSecurityFindings = (diagnostics: Diagnostic[]): boolean =>
+  diagnostics.some(
+    (diagnostic) => diagnostic.category === 'security' && diagnostic.severity === 'error',
+  );
 
 const printDiagnostics = (diagnostics: Diagnostic[], isVerbose: boolean): void => {
   const ruleGroups = groupBy(
@@ -180,6 +186,7 @@ const printBranding = (score?: number): void => {
 const buildBrandingLines = (
   scoreResult: ScoreResult | null,
   noScoreMessage: string,
+  verbose: boolean,
 ): FramedLine[] => {
   const lines: FramedLine[] = [];
 
@@ -205,6 +212,10 @@ const buildBrandingLines = (
     lines.push(createFramedLine(''));
     const bar = buildScoreBar(scoreResult.score);
     lines.push(createFramedLine(bar.plain, bar.rendered));
+    if (verbose && scoreResult.breakdown) {
+      lines.push(createFramedLine(''));
+      lines.push(...buildScoreBreakdownLines(scoreResult.breakdown));
+    }
     lines.push(createFramedLine(''));
   } else {
     lines.push(
@@ -241,9 +252,10 @@ const printSummary = (
   projectName: string,
   totalSourceFileCount: number,
   noScoreMessage: string,
+  verbose: boolean,
 ): void => {
   const summaryFramedLines = [
-    ...buildBrandingLines(scoreResult, noScoreMessage),
+    ...buildBrandingLines(scoreResult, noScoreMessage, verbose),
     toCountsFramedLine(diagnostics, totalSourceFileCount, elapsedMilliseconds),
   ];
   printFramedBox(summaryFramedLines);
@@ -475,7 +487,10 @@ export const scan = async (
   if (didDeadCodeFail) skippedChecks.push('dead code');
   const hasSkippedChecks = skippedChecks.length > 0;
 
-  const scoreResult = await calculateScore(diagnostics);
+  const totalFilesScanned = isDiffMode ? includePaths.length : projectInfo.sourceFileCount;
+  const scoreResult = await calculateScore(diagnostics, totalFilesScanned, {
+    hasHighOrCriticalSecurityFindings: hasHighOrCriticalSecurityFindings(diagnostics),
+  });
   const noScoreMessage = OFFLINE_FLAG_MESSAGE;
 
   if (options.scoreOnly) {
@@ -520,6 +535,7 @@ export const scan = async (
     projectInfo.projectName,
     displayedSourceFileCount,
     noScoreMessage,
+    options.verbose,
   );
 
   if (hasSkippedChecks) {

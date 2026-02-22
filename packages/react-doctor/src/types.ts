@@ -42,7 +42,12 @@ export interface OxlintOutput {
   number_of_rules: number;
 }
 
-export type { Diagnostic, DiffInfo, ScoreResult } from '@framework-doctor/core';
+export type {
+  Diagnostic,
+  DiffInfo,
+  ScoreGuardrailInput,
+  ScoreResult,
+} from '@framework-doctor/core';
 
 export interface PackageJson {
   name?: string;
@@ -74,13 +79,6 @@ export interface ScanResult {
   scoreResult: ScoreResult | null;
   skippedChecks: string[];
   projectInfo: ProjectInfo;
-}
-
-export interface EstimatedScoreResult {
-  currentScore: number;
-  currentLabel: string;
-  estimatedScore: number;
-  estimatedLabel: string;
 }
 
 export interface ScanOptions {

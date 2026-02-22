@@ -2,6 +2,7 @@ import {
   addAnalyticsOption,
   buildCountsSummaryLine,
   buildScoreBar,
+  buildScoreBreakdownLines,
   colorizeByScore,
   createFramedLine,
   getDoctorFace,
@@ -17,7 +18,7 @@ import {
 import { Command } from 'commander';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
-import type { Diagnostic, ScanOptions, SvelteDoctorConfig } from './types.js';
+import type { Diagnostic, ScanOptions, ScoreResult, SvelteDoctorConfig } from './types.js';
 import { discoverProject } from './utils/discover-project.js';
 import { filterIgnoredDiagnostics } from './utils/filter-diagnostics.js';
 import { filterSourceFiles, getDiffInfo } from './utils/get-diff-files.js';
@@ -69,6 +70,11 @@ const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
   return map;
 };
 
+const hasHighOrCriticalSecurityFindings = (diagnostics: Diagnostic[]): boolean =>
+  diagnostics.some(
+    (diagnostic) => diagnostic.category === 'security' && diagnostic.severity === 'error',
+  );
+
 const printRuleGroup = (ruleDiagnostics: Diagnostic[], verbose: boolean): void => {
   const first = ruleDiagnostics[0];
   const icon = colorizeBySeverity(first.severity === 'error' ? '✗' : '⚠', first.severity);
@@ -99,18 +105,19 @@ const printDiagnostics = (diagnostics: Diagnostic[], verbose: boolean): void => 
 };
 
 const printSummary = (
-  score: number,
-  label: string,
+  scoreResult: ScoreResult,
   diagnostics: Diagnostic[],
   totalSourceFileCount: number,
   elapsedMs: number,
+  verbose: boolean,
 ): void => {
+  const { score, label } = scoreResult;
   const [eyes, mouth] = getDoctorFace(score);
   const colorize = (text: string) => colorizeByScore(text, score);
   const bar = buildScoreBar(score);
   const counts = buildCountsSummaryLine(diagnostics, totalSourceFileCount, elapsedMs);
 
-  printFramedBox([
+  const framedLines: ReturnType<typeof createFramedLine>[] = [
     createFramedLine('┌─────┐', colorize('┌─────┐')),
     createFramedLine(`│ ${eyes} │`, colorize(`│ ${eyes} │`)),
     createFramedLine(`│ ${mouth} │`, colorize(`│ ${mouth} │`)),
@@ -123,9 +130,15 @@ const printSummary = (
     ),
     createFramedLine(''),
     createFramedLine(bar.plain, bar.rendered),
-    createFramedLine(''),
-    createFramedLine(counts.plain, counts.rendered),
-  ]);
+  ];
+  if (verbose && scoreResult.breakdown) {
+    framedLines.push(createFramedLine(''));
+    framedLines.push(...buildScoreBreakdownLines(scoreResult.breakdown));
+  }
+  framedLines.push(createFramedLine(''));
+  framedLines.push(createFramedLine(counts.plain, counts.rendered));
+
+  printFramedBox(framedLines);
 };
 
 const applyDiffMode = (rootDirectory: string, flags: CliFlags, scanOptions: ScanOptions): void => {
@@ -309,7 +322,13 @@ main
       config,
     );
 
-    const scoreResult = calculateScore(diagnostics);
+    const hasIncludePaths = (scanOptions.includePaths?.length ?? 0) > 0;
+    const totalSourceFileCount = hasIncludePaths
+      ? scanOptions.includePaths!.length
+      : projectInfo.sourceFileCount;
+    const scoreResult = calculateScore(diagnostics, totalSourceFileCount, {
+      hasHighOrCriticalSecurityFindings: hasHighOrCriticalSecurityFindings(diagnostics),
+    });
 
     const telemetryUrl = process.env.FRAMEWORK_DOCTOR_TELEMETRY_URL ?? '';
     const isDiffMode = (scanOptions.includePaths?.length ?? 0) > 0;
@@ -333,10 +352,6 @@ main
     }
 
     const elapsedMs = performance.now() - startTime;
-    const hasIncludePaths = (scanOptions.includePaths?.length ?? 0) > 0;
-    const totalSourceFileCount = hasIncludePaths
-      ? scanOptions.includePaths!.length
-      : projectInfo.sourceFileCount;
 
     if (diagnostics.length === 0) {
       logger.success('No issues found!');
@@ -346,11 +361,11 @@ main
 
     logger.break();
     printSummary(
-      scoreResult.score,
-      scoreResult.label,
+      scoreResult,
       diagnostics,
       totalSourceFileCount,
       elapsedMs,
+      Boolean(scanOptions.verbose),
     );
   });
 

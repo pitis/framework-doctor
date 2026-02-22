@@ -26,10 +26,6 @@ export const SPAWN_ARGS_MAX_LENGTH_CHARS = 24_000;
 
 export const OFFLINE_FLAG_MESSAGE = 'Score not available.';
 
-export const ERROR_ESTIMATED_FIX_RATE = 0.85;
-
-export const WARNING_ESTIMATED_FIX_RATE = 0.8;
-
 export const MAX_KNIP_RETRIES = 5;
 
 export const OXLINT_NODE_REQUIREMENT = '^20.19.0 || >=22.12.0';

@@ -25,6 +25,11 @@ export interface DiagnoseResult {
   elapsedMilliseconds: number;
 }
 
+const hasHighOrCriticalSecurityFindings = (diagnostics: Diagnostic[]): boolean =>
+  diagnostics.some(
+    (diagnostic) => diagnostic.category === 'security' && diagnostic.severity === 'error',
+  );
+
 export const diagnose = async (
   directory: string,
   options: DiagnoseOptions = {},
@@ -88,7 +93,10 @@ export const diagnose = async (
   );
 
   const elapsedMilliseconds = performance.now() - startTime;
-  const score = await calculateScore(diagnostics);
+  const totalFilesScanned = isDiffMode ? includePaths.length : projectInfo.sourceFileCount;
+  const score = await calculateScore(diagnostics, totalFilesScanned, {
+    hasHighOrCriticalSecurityFindings: hasHighOrCriticalSecurityFindings(diagnostics),
+  });
 
   return {
     diagnostics,

@@ -11,9 +11,31 @@ export interface Diagnostic {
   weight?: number;
 }
 
+export interface ScoreBreakdown {
+  typesPenalty: number;
+  volumePenalty: number;
+  spreadPenalty: number;
+  didApplyGuardrail: boolean;
+  guardrailReasons: string[];
+  uniqueErrorRules: number;
+  uniqueWarningRules: number;
+  errorCount: number;
+  warningCount: number;
+  filesWithDiagnostics: number;
+  totalFilesScanned: number;
+}
+
+export interface ScoreGuardrailInput {
+  didBuildFail?: boolean;
+  didTestsFail?: boolean;
+  didTypecheckFail?: boolean;
+  hasHighOrCriticalSecurityFindings?: boolean;
+}
+
 export interface ScoreResult {
   score: number;
   label: string;
+  breakdown?: ScoreBreakdown;
 }
 
 export interface DiffInfo {

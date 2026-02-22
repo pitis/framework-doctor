@@ -11,7 +11,12 @@ export interface ProjectInfo {
   sourceFileCount: number;
 }
 
-export type { Diagnostic, IgnoreConfig, ScoreResult } from '@framework-doctor/core';
+export type {
+  Diagnostic,
+  IgnoreConfig,
+  ScoreGuardrailInput,
+  ScoreResult,
+} from '@framework-doctor/core';
 
 export interface ScanOptions {
   lint?: boolean;

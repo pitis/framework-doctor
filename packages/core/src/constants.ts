@@ -16,6 +16,14 @@ export const SUMMARY_BOX_OUTER_INDENT_CHARS = 2;
 
 export const SUMMARY_BOX_HORIZONTAL_PADDING_CHARS = 1;
 
-export const ERROR_RULE_PENALTY = 1.5;
+export const ERROR_RULE_PENALTY = 2.5;
 
-export const WARNING_RULE_PENALTY = 0.75;
+export const WARNING_RULE_PENALTY = 1;
+
+export const ERROR_VOLUME_COEFFICIENT = 1.8;
+
+export const WARNING_VOLUME_COEFFICIENT = 0.8;
+
+export const SPREAD_PENALTY_MAX = 12;
+
+export const SCORE_BLOCKING_CHECK_CAP = 59;
