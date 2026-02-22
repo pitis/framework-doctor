@@ -101,7 +101,6 @@ export interface ScanOptions {
   deadCode?: boolean;
   verbose?: boolean;
   scoreOnly?: boolean;
-  offline?: boolean;
   includePaths?: string[];
 }
 

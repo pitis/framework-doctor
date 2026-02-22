@@ -18,14 +18,6 @@ export const SUMMARY_BOX_HORIZONTAL_PADDING_CHARS = 1;
 
 export const SUMMARY_BOX_OUTER_INDENT_CHARS = 2;
 
-export const SCORE_API_URL = 'https://www.react.doctor/api/score';
-
-export const ESTIMATE_SCORE_API_URL = 'https://www.react.doctor/api/estimate-score';
-
-export const SHARE_BASE_URL = 'https://www.react.doctor/share';
-
-export const OPEN_BASE_URL = 'https://www.react.doctor/open';
-
 export const FETCH_TIMEOUT_MS = 10_000;
 
 export const GIT_LS_FILES_MAX_BUFFER_BYTES = 50 * 1024 * 1024;
@@ -34,10 +26,7 @@ export const GIT_LS_FILES_MAX_BUFFER_BYTES = 50 * 1024 * 1024;
 // Use a conservative threshold to leave room for the executable path and quoting overhead.
 export const SPAWN_ARGS_MAX_LENGTH_CHARS = 24_000;
 
-export const OFFLINE_MESSAGE =
-  'You are offline, could not calculate score. Reconnect to calculate.';
-
-export const OFFLINE_FLAG_MESSAGE = 'Score not calculated. Remove --offline to calculate score.';
+export const OFFLINE_FLAG_MESSAGE = 'Score not available.';
 
 export const DEFAULT_BRANCH_CANDIDATES = ['main', 'master'];
 

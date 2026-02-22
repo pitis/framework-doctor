@@ -3,7 +3,7 @@ import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { AMI_INSTALL_URL, AMI_RELEASES_URL, AMI_WEBSITE_URL, OPEN_BASE_URL } from './constants.js';
+import { AMI_INSTALL_URL, AMI_RELEASES_URL, AMI_WEBSITE_URL } from './constants.js';
 import { scan } from './scan.js';
 import type {
   Diagnostic,
@@ -33,7 +33,6 @@ interface CliFlags {
   score: boolean;
   fix: boolean;
   yes: boolean;
-  offline: boolean;
   ami: boolean;
   project?: string;
   diff?: boolean | string;
@@ -76,7 +75,6 @@ const resolveCliScanOptions = (
     deadCode: isCliOverride('deadCode') ? flags.deadCode : (userConfig?.deadCode ?? flags.deadCode),
     verbose: isCliOverride('verbose') ? Boolean(flags.verbose) : (userConfig?.verbose ?? false),
     scoreOnly: flags.score,
-    offline: flags.offline,
   };
 };
 
@@ -127,7 +125,6 @@ const program = new Command()
   .option('-y, --yes', 'skip prompts, scan all workspace projects')
   .option('--project <name>', 'select workspace project (comma-separated for multiple)')
   .option('--diff [base]', 'scan only files changed vs base branch')
-  .option('--offline', 'skip telemetry (anonymous, not stored, only used to calculate score)')
   .option('--no-ami', 'skip Ami-related prompts')
   .option('--fix', 'open Ami to auto-fix all issues')
   .action(async (directory: string, flags: CliFlags) => {
@@ -209,9 +206,7 @@ const program = new Command()
 
       if (!isScoreOnly && !shouldSkipAmiPrompts && !flags.fix) {
         await maybePromptSkillInstall(shouldSkipAmiPrompts);
-        const estimatedScoreResult = flags.offline
-          ? null
-          : await fetchEstimatedScore(allDiagnostics);
+        const estimatedScoreResult = await fetchEstimatedScore(allDiagnostics);
         await maybePromptFix(resolvedDirectory, allDiagnostics, estimatedScoreResult);
       }
     } catch (error) {
@@ -222,7 +217,7 @@ const program = new Command()
     'after',
     `
 ${highlighter.dim('Learn more:')}
-  ${highlighter.info('https://github.com/millionco/react-doctor')}
+  ${highlighter.info('https://github.com/pitis/framework-doctor')}
 `,
   );
 
@@ -289,13 +284,9 @@ const buildDeeplinkParams = (directory: string): URLSearchParams => {
 const buildDeeplink = (directory: string): string =>
   `ami://open-project?${buildDeeplinkParams(directory).toString()}`;
 
-const buildWebDeeplink = (directory: string): string =>
-  `${OPEN_BASE_URL}?${buildDeeplinkParams(directory).toString()}`;
-
 const openAmiToFix = (directory: string): void => {
   const isInstalled = isAmiInstalled();
   const deeplink = buildDeeplink(directory);
-  const webDeeplink = buildWebDeeplink(directory);
 
   if (!isInstalled) {
     if (process.platform === 'darwin') {
@@ -306,8 +297,6 @@ const openAmiToFix = (directory: string): void => {
       logger.dim(`Download at ${highlighter.info(AMI_RELEASES_URL)}`);
     }
     logger.break();
-    logger.dim('Open this link to start fixing:');
-    logger.info(webDeeplink);
     return;
   }
 
@@ -318,8 +307,8 @@ const openAmiToFix = (directory: string): void => {
     logger.success('Ami opened. Fixing your issues now.');
   } catch {
     logger.break();
-    logger.dim('Could not open Ami automatically. Open this link instead:');
-    logger.info(webDeeplink);
+    logger.dim('Could not open Ami automatically.');
+    logger.dim(`Install Ami from ${highlighter.info(AMI_WEBSITE_URL)}`);
   }
 };
 

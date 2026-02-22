@@ -6,14 +6,12 @@ import { performance } from 'node:perf_hooks';
 import {
   MILLISECONDS_PER_SECOND,
   OFFLINE_FLAG_MESSAGE,
-  OFFLINE_MESSAGE,
   OXLINT_NODE_REQUIREMENT,
   OXLINT_RECOMMENDED_NODE_MAJOR,
   PERFECT_SCORE,
   SCORE_BAR_WIDTH_CHARS,
   SCORE_GOOD_THRESHOLD,
   SCORE_OK_THRESHOLD,
-  SHARE_BASE_URL,
 } from './constants.js';
 import type {
   Diagnostic,
@@ -208,27 +206,8 @@ const printBranding = (score?: number): void => {
     logger.log(colorize(`  │ ${mouth} │`));
     logger.log(colorize('  └─────┘'));
   }
-  logger.log(`  React Doctor ${highlighter.dim('(www.react.doctor)')}`);
+  logger.log(`  React Doctor ${highlighter.dim('(github.com/pitis/framework-doctor)')}`);
   logger.break();
-};
-
-const buildShareUrl = (
-  diagnostics: Diagnostic[],
-  scoreResult: ScoreResult | null,
-  projectName: string,
-): string => {
-  const errorCount = diagnostics.filter((diagnostic) => diagnostic.severity === 'error').length;
-  const warningCount = diagnostics.filter((diagnostic) => diagnostic.severity === 'warning').length;
-  const affectedFileCount = collectAffectedFiles(diagnostics).size;
-
-  const params = new URLSearchParams();
-  params.set('p', projectName);
-  if (scoreResult) params.set('s', String(scoreResult.score));
-  if (errorCount > 0) params.set('e', String(errorCount));
-  if (warningCount > 0) params.set('w', String(warningCount));
-  if (affectedFileCount > 0) params.set('f', String(affectedFileCount));
-
-  return `${SHARE_BASE_URL}?${params.toString()}`;
 };
 
 const buildBrandingLines = (
@@ -247,8 +226,8 @@ const buildBrandingLines = (
     lines.push(createFramedLine('└─────┘', scoreColorizer('└─────┘')));
     lines.push(
       createFramedLine(
-        'React Doctor (www.react.doctor)',
-        `React Doctor ${highlighter.dim('(www.react.doctor)')}`,
+        'React Doctor (github.com/pitis/framework-doctor)',
+        `React Doctor ${highlighter.dim('(github.com/pitis/framework-doctor)')}`,
       ),
     );
     lines.push(createFramedLine(''));
@@ -264,8 +243,8 @@ const buildBrandingLines = (
   } else {
     lines.push(
       createFramedLine(
-        'React Doctor (www.react.doctor)',
-        `React Doctor ${highlighter.dim('(www.react.doctor)')}`,
+        'React Doctor (github.com/pitis/framework-doctor)',
+        `React Doctor ${highlighter.dim('(github.com/pitis/framework-doctor)')}`,
       ),
     );
     lines.push(createFramedLine(''));
@@ -333,10 +312,6 @@ const printSummary = (
   } catch {
     logger.break();
   }
-
-  const shareUrl = buildShareUrl(diagnostics, scoreResult, projectName);
-  logger.break();
-  logger.dim(`  Share your results: ${highlighter.info(shareUrl)}`);
 };
 
 const resolveOxlintNode = async (
@@ -402,7 +377,6 @@ interface ResolvedScanOptions {
   deadCode: boolean;
   verbose: boolean;
   scoreOnly: boolean;
-  offline: boolean;
   includePaths: string[];
 }
 
@@ -414,7 +388,6 @@ const mergeScanOptions = (
   deadCode: inputOptions.deadCode ?? userConfig?.deadCode ?? true,
   verbose: inputOptions.verbose ?? userConfig?.verbose ?? false,
   scoreOnly: inputOptions.scoreOnly ?? false,
-  offline: inputOptions.offline ?? false,
   includePaths: inputOptions.includePaths ?? [],
 });
 
@@ -550,8 +523,8 @@ export const scan = async (
   if (didDeadCodeFail) skippedChecks.push('dead code');
   const hasSkippedChecks = skippedChecks.length > 0;
 
-  const scoreResult = options.offline ? null : await calculateScore(diagnostics);
-  const noScoreMessage = options.offline ? OFFLINE_FLAG_MESSAGE : OFFLINE_MESSAGE;
+  const scoreResult = await calculateScore(diagnostics);
+  const noScoreMessage = OFFLINE_FLAG_MESSAGE;
 
   if (options.scoreOnly) {
     if (scoreResult) {
