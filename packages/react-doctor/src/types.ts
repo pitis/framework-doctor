@@ -1,4 +1,4 @@
-import type { Diagnostic } from '@framework-doctor/core';
+import type { BaseDoctorConfig, Diagnostic, ScoreResult } from '@framework-doctor/core';
 
 export type Framework = 'nextjs' | 'vite' | 'cra' | 'remix' | 'gatsby' | 'unknown';
 
@@ -42,7 +42,7 @@ export interface OxlintOutput {
   number_of_rules: number;
 }
 
-export type { Diagnostic, DiffInfo } from '@framework-doctor/core';
+export type { Diagnostic, DiffInfo, ScoreResult } from '@framework-doctor/core';
 
 export interface PackageJson {
   name?: string;
@@ -67,11 +67,6 @@ export interface KnipIssueRecords {
   [workspace: string]: {
     [filePath: string]: KnipIssue;
   };
-}
-
-export interface ScoreResult {
-  score: number;
-  label: string;
 }
 
 export interface ScanResult {
@@ -136,16 +131,6 @@ export interface CleanedDiagnostic {
   help: string;
 }
 
-export interface ReactDoctorIgnoreConfig {
-  rules?: string[];
-  files?: string[];
-}
+export interface ReactDoctorConfig extends BaseDoctorConfig {}
 
-export interface ReactDoctorConfig {
-  ignore?: ReactDoctorIgnoreConfig;
-  lint?: boolean;
-  deadCode?: boolean;
-  verbose?: boolean;
-  diff?: boolean | string;
-  analytics?: boolean;
-}
+export type { IgnoreConfig } from '@framework-doctor/core';

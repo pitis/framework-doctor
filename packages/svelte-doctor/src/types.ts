@@ -1,4 +1,4 @@
-import type { Diagnostic } from '@framework-doctor/core';
+import type { BaseDoctorConfig, Diagnostic, ScoreResult } from '@framework-doctor/core';
 
 export type SvelteFramework = 'sveltekit' | 'svelte';
 
@@ -11,12 +11,7 @@ export interface ProjectInfo {
   sourceFileCount: number;
 }
 
-export type { Diagnostic } from '@framework-doctor/core';
-
-export interface ScoreResult {
-  score: number;
-  label: string;
-}
+export type { Diagnostic, IgnoreConfig, ScoreResult } from '@framework-doctor/core';
 
 export interface ScanOptions {
   lint?: boolean;
@@ -33,19 +28,8 @@ export interface ScanResult {
   skippedChecks: string[];
 }
 
-export interface SvelteDoctorIgnoreConfig {
-  rules?: string[];
-  files?: string[];
-}
-
-export interface SvelteDoctorConfig {
-  ignore?: SvelteDoctorIgnoreConfig;
-  lint?: boolean;
+export interface SvelteDoctorConfig extends BaseDoctorConfig {
   jsTsLint?: boolean;
-  deadCode?: boolean;
-  verbose?: boolean;
-  diff?: boolean | string;
-  analytics?: boolean;
 }
 
 export interface VersionedRuleMeta {

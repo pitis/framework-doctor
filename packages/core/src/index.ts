@@ -46,7 +46,7 @@ export {
   type TelemetryEventPayload,
   type TelemetryFlags,
 } from './telemetry.js';
-export type { Diagnostic, DiffInfo, ScoreResult } from './types.js';
+export type { BaseDoctorConfig, Diagnostic, DiffInfo, IgnoreConfig, ScoreResult } from './types.js';
 export {
   buildCountsSummaryLine,
   buildScoreBar,

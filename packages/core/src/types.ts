@@ -22,3 +22,17 @@ export interface DiffInfo {
   changedFiles: string[];
   isCurrentChanges?: boolean;
 }
+
+export interface IgnoreConfig {
+  rules?: string[];
+  files?: string[];
+}
+
+export interface BaseDoctorConfig {
+  ignore?: IgnoreConfig;
+  lint?: boolean;
+  deadCode?: boolean;
+  verbose?: boolean;
+  diff?: boolean | string;
+  analytics?: boolean;
+}
