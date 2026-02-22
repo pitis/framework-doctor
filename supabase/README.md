@@ -8,6 +8,7 @@ Stores anonymous analytics from framework-doctor (react-doctor, svelte-doctor).
 2. Run migrations: `supabase db push` (or apply both files in `migrations/` via the SQL editor)
 3. Deploy the Edge Function: `supabase functions deploy telemetry`
 4. Set `FRAMEWORK_DOCTOR_TELEMETRY_URL` to your function URL (e.g. `https://<project-ref>.supabase.co/functions/v1/telemetry`) in your publish/CI env
+5. If you configure `TELEMETRY_KEY` on the function, also set `FRAMEWORK_DOCTOR_TELEMETRY_KEY` for the doctor clients
 
 ## Optional environment variables
 
@@ -17,4 +18,4 @@ Stores anonymous analytics from framework-doctor (react-doctor, svelte-doctor).
 
 ## Data
 
-Events are stored in `telemetry_events` with: framework, score, score_bucket, diagnostic_count, has_typescript, is_diff_mode, cli_version, anon_install_id.
+Events are stored in `telemetry_events` with: doctor_family, framework, score, score_bucket, diagnostic_count, has_typescript, is_diff_mode, cli_version, event_id, anon_install_id.

@@ -54,6 +54,7 @@ const getScoreBucket = (score: number): string => {
 };
 
 export interface TelemetryEventPayload {
+  doctor_family: string;
   framework: string;
   score: number;
   diagnostic_count: number;
@@ -63,10 +64,19 @@ export interface TelemetryEventPayload {
 }
 
 export const sendScanEvent = (telemetryUrl: string, payload: TelemetryEventPayload): void => {
+  const telemetryKey = process.env.FRAMEWORK_DOCTOR_TELEMETRY_KEY;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (telemetryKey) {
+    headers['x-telemetry-key'] = telemetryKey;
+  }
+
   const fullPayload = {
     ...payload,
     score_bucket: getScoreBucket(payload.score),
     install_id: getOrCreateInstallId(),
+    event_id: crypto.randomUUID(),
   };
 
   const controller = new AbortController();
@@ -74,7 +84,7 @@ export const sendScanEvent = (telemetryUrl: string, payload: TelemetryEventPaylo
 
   fetch(telemetryUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(fullPayload),
     signal: controller.signal,
   })

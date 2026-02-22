@@ -103,6 +103,7 @@ CLI flags always override config values.
 React Doctor optionally sends anonymous usage data to help improve the tool. Data is sent to your Supabase Edge Function when you opt in and is limited to: framework type, score range, diagnostic count, and similar aggregates. No code, file paths, or project names are collected.
 
 - **Enable** (for maintainers): Set `FRAMEWORK_DOCTOR_TELEMETRY_URL` to your Supabase Edge Function URL (e.g. `https://<project>.supabase.co/functions/v1/telemetry`) in your publish/CI env.
+- **Shared key (optional)**: If your Supabase function enforces `TELEMETRY_KEY`, set `FRAMEWORK_DOCTOR_TELEMETRY_KEY` in the client environment.
 - **Opt-in**: On first run (when analytics is configured), you’ll be prompted. Your choice is stored in `~/.framework-doctor/config.json`.
 - **Disable**: Use `--no-analytics`, set `"analytics": false` in config, or set `DO_NOT_TRACK=1`.
 - **Skipped automatically**: CI and other non-interactive environments (e.g. Cursor Agent, Claude Code).

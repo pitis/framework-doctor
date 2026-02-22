@@ -60,6 +60,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // ---- Body validation ----
 const telemetryEventSchema = z.object({
+  doctor_family: z.string().min(1).max(50).optional(),
   framework: z.string().min(1).max(50),
   score: z.number(),
   score_bucket: z.string().min(1).max(50),
@@ -72,8 +73,17 @@ const telemetryEventSchema = z.object({
   install_id: z.string().min(10).max(200).optional(),
 
   // Optional: client-side dedupe id (uuid). If you add a unique constraint in DB, retries won't double-insert.
-  event_id: z.string().min(8).max(100).optional(),
+  event_id: z.string().uuid().optional(),
 });
+
+const REACT_FRAMEWORK_VALUES = new Set(['nextjs', 'vite', 'cra', 'remix', 'gatsby', 'unknown']);
+const SVELTE_FRAMEWORK_VALUES = new Set(['svelte', 'sveltekit']);
+
+const inferDoctorFamily = (framework: string): string => {
+  if (SVELTE_FRAMEWORK_VALUES.has(framework)) return 'svelte';
+  if (REACT_FRAMEWORK_VALUES.has(framework)) return 'react';
+  return 'unknown';
+};
 
 Deno.serve(async (req) => {
   // CORS preflight
@@ -121,7 +131,18 @@ Deno.serve(async (req) => {
     );
   }
 
-  const { install_id, ...rest } = parsed.data;
+  const {
+    install_id,
+    doctor_family,
+    framework,
+    score,
+    score_bucket,
+    diagnostic_count,
+    has_typescript,
+    is_diff_mode,
+    cli_version,
+    event_id,
+  } = parsed.data;
 
   // Derive anonymous install id (optional)
   let anon_install_id: string | null = null;
@@ -135,7 +156,15 @@ Deno.serve(async (req) => {
   }
 
   const row = {
-    ...rest,
+    doctor_family: doctor_family ?? inferDoctorFamily(framework),
+    framework,
+    score,
+    score_bucket,
+    diagnostic_count,
+    has_typescript,
+    is_diff_mode,
+    cli_version,
+    event_id: event_id ?? null,
     anon_install_id,
   };
 

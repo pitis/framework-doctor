@@ -33,6 +33,7 @@ const buildPayload = (
   diagnosticCount: number,
   options: { isDiffMode: boolean; cliVersion: string },
 ): TelemetryEventPayload => ({
+  doctor_family: 'svelte',
   framework: projectInfo.framework,
   score: scoreResult.score,
   diagnostic_count: diagnosticCount,

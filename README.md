@@ -95,7 +95,7 @@ To ignore a rule: `"svelte-doctor/no-at-html"`, `"svelte-doctor/no-new-function"
 
 ## Analytics
 
-Both doctors optionally send anonymous usage data when you opt in. Data is stored in your Supabase (see [supabase/README.md](supabase/README.md)). To disable: `--no-analytics`, `"analytics": false` in config, or `DO_NOT_TRACK=1`.
+Both doctors optionally send anonymous usage data when you opt in. Data is stored in your Supabase (see [supabase/README.md](supabase/README.md)). If your function enforces `TELEMETRY_KEY`, set `FRAMEWORK_DOCTOR_TELEMETRY_KEY` in the client environment. To disable: `--no-analytics`, `"analytics": false` in config, or `DO_NOT_TRACK=1`.
 
 ## Configuration
 
