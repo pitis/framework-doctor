@@ -37,9 +37,7 @@ pnpm react-doctor . --verbose
 
 ## Cursor skill
 
-Add the React Doctor skill so your AI assistant knows all 47+ React best practice rules:
-
-Copy `.cursor/skills/framework-doctor` from this repo into your project or global Cursor skills.
+Add the React Doctor skill so your AI assistant knows all 47+ React best practice rules. Copy `.cursor/skills/framework-doctor` from this repo into your project or global Cursor skills (e.g. `~/.cursor/skills/`).
 
 ## Options
 
@@ -55,6 +53,7 @@ Options:
   -y, --yes         skip prompts, scan all workspace projects
   --project <name>  select workspace project (comma-separated for multiple)
   --diff [base]     scan only files changed vs base branch
+  --no-analytics    disable anonymous analytics
   --no-ami          skip Ami-related prompts
   --fix             open Ami to auto-fix all issues
   -h, --help        display help for command
@@ -97,8 +96,18 @@ If both exist, `react-doctor.config.json` takes precedence.
 | `deadCode`     | `boolean`           | `true`  | Enable/disable dead code detection (same as `--no-dead-code`)                                                                       |
 | `verbose`      | `boolean`           | `false` | Show file details per rule (same as `--verbose`)                                                                                    |
 | `diff`         | `boolean \| string` | —       | Force diff mode (`true`) or pin a base branch (`"main"`). Set to `false` to disable auto-detection.                                 |
+| `analytics`    | `boolean`           | `true`  | Enable/disable anonymous analytics (same as `--no-analytics`)                                                                       |
 
 CLI flags always override config values.
+
+## Analytics
+
+React Doctor optionally sends anonymous usage data to help improve the tool. Data is sent to your Supabase Edge Function when you opt in and is limited to: framework type, score range, diagnostic count, and similar aggregates. No code, file paths, or project names are collected.
+
+- **Enable** (for maintainers): Set `FRAMEWORK_DOCTOR_TELEMETRY_URL` to your Supabase Edge Function URL (e.g. `https://<project>.supabase.co/functions/v1/telemetry`) in your publish/CI env.
+- **Opt-in**: On first run (when analytics is configured), you’ll be prompted. Your choice is stored in `~/.framework-doctor/config.json`.
+- **Disable**: Use `--no-analytics`, set `"analytics": false` in config, or set `DO_NOT_TRACK=1`.
+- **Skipped automatically**: CI and other non-interactive environments (e.g. Cursor Agent, Claude Code).
 
 ## Node.js API
 

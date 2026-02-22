@@ -93,7 +93,7 @@ pnpm build
 Run locally:
 
 ```bash
-pnpm exec framework-doctor /path/to/your/svelte-project
+pnpm exec svelte-doctor /path/to/your/svelte-project
 # or directly:
 node packages/svelte-doctor/dist/cli.js /path/to/your/svelte-project
 ```

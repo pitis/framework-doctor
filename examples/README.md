@@ -4,12 +4,7 @@ Demo projects to try Framework Doctor. Each example includes **intentional issue
 
 ## Svelte: demo-app
 
-A minimal SvelteKit app with:
-
-- **Security issues** — `eval()`, `new Function()`, `setTimeout("string")` in `src/lib/SecurityTest.ts`
-- **Dead code** — Unused exports in `src/lib/orphanUtils.ts` (knip will flag them)
-- **Legacy Svelte** — `DoctorTestComponent.svelte` uses export let, createEventDispatcher, onMount
-- **XSS** — `{@html}` and `javascript:` URLs in `+page.svelte`
+A minimal SvelteKit app with intentional issues. See [svelte/demo-app/README.md](svelte/demo-app/README.md) for details.
 
 ### Run from the repo
 
@@ -29,21 +24,16 @@ pnpm exec svelte-doctor examples/svelte/demo-app
 ### Run with npx (no clone)
 
 ```bash
-# After cloning, from repo root
-cd framework-doctor
-pnpm install
-npx -y @framework-doctor/cli examples/svelte/demo-app
-```
-
-Or from anywhere with an absolute path:
-
-```bash
 npx -y @framework-doctor/cli /path/to/framework-doctor/examples/svelte/demo-app
 ```
 
-### What to expect
+Or from repo root after `pnpm install`:
 
-The doctor will report:
+```bash
+npx -y @framework-doctor/cli examples/svelte/demo-app
+```
+
+### What to expect
 
 - **Errors** — Security findings (eval, new Function, implied eval, {@html}, javascript: URLs)
 - **Warnings** — Dead/unused code, lint issues, legacy Svelte patterns

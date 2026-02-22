@@ -45,6 +45,7 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 - `npx -y @framework-doctor/react .` - run a full scan
 - `npx -y @framework-doctor/react ./path/to/project` - scan a specific project directory
 - `npx -y @framework-doctor/react . --verbose` - include file and line details
+- `npx -y @framework-doctor/react . --score` - print only the numeric score (CI-friendly)
 
 **Svelte (direct):**
 

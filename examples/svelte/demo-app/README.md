@@ -4,10 +4,12 @@ A minimal SvelteKit app with **intentional issues** for testing [Framework Docto
 
 ## Run the doctor
 
-From the framework-doctor repo root:
+From the framework-doctor repo root (after `pnpm install` and `pnpm build`):
 
 ```bash
 pnpm exec framework-doctor examples/svelte/demo-app
+# or directly:
+pnpm exec svelte-doctor examples/svelte/demo-app
 ```
 
 ## Intentional issues
