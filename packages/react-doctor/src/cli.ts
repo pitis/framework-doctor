@@ -1,4 +1,4 @@
-import { isAutomatedEnvironment } from '@framework-doctor/core';
+import { addAnalyticsOption, isAutomatedEnvironment } from '@framework-doctor/core';
 import { Command } from 'commander';
 import path from 'node:path';
 import { scan } from './scan.js';
@@ -102,8 +102,11 @@ const program = new Command()
   .option('--score', 'output only the score')
   .option('-y, --yes', 'skip prompts, scan all workspace projects')
   .option('--project <name>', 'select workspace project (comma-separated for multiple)')
-  .option('--diff [base]', 'scan only files changed vs base branch')
-  .option('--no-analytics', 'disable anonymous analytics')
+  .option('--diff [base]', 'scan only files changed vs base branch');
+
+addAnalyticsOption(program);
+
+program
   .action(async (directory: string, flags: CliFlags) => {
     const isScoreOnly = flags.score;
 

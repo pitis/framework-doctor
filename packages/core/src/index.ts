@@ -1,4 +1,10 @@
 export {
+  ANALYTICS_CONFIG_KEY,
+  ANALYTICS_OPTION_DESCRIPTION,
+  ANALYTICS_OPTION_FLAGS,
+  addAnalyticsOption,
+} from './cli-options.js';
+export {
   getOrCreateInstallId,
   readGlobalConfig,
   writeGlobalConfig,

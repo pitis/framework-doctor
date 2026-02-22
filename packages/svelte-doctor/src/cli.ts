@@ -1,4 +1,4 @@
-import { isAutomatedEnvironment } from '@framework-doctor/core';
+import { addAnalyticsOption, isAutomatedEnvironment } from '@framework-doctor/core';
 import { Command } from 'commander';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
@@ -273,8 +273,11 @@ const main = new Command()
   .option('--no-dead-code', 'skip dead code detection')
   .option('--verbose', 'show file details per rule')
   .option('--score', 'output only the score')
-  .option('-y, --yes', 'skip prompts')
-  .option('--no-analytics', 'disable anonymous analytics')
+  .option('-y, --yes', 'skip prompts');
+
+addAnalyticsOption(main);
+
+main
   .option('--project <name>', 'select workspace project (comma-separated)')
   .option('--diff [base]', 'scan only files changed vs base branch')
   .option('--offline', 'skip remote scoring (local score only)')
