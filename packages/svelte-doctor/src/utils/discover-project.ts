@@ -1,8 +1,8 @@
+import { readJson } from '@framework-doctor/core';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { ProjectInfo, SvelteFramework } from '../types.js';
-import { readJson } from './read-json.js';
 
 interface PackageJson {
   name?: string;

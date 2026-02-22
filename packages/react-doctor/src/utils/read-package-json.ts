@@ -1,5 +1,5 @@
-import fs from 'node:fs';
+import { readJson } from '@framework-doctor/core';
 import type { PackageJson } from '../types.js';
 
 export const readPackageJson = (packageJsonPath: string): PackageJson =>
-  JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+  readJson<PackageJson>(packageJsonPath);

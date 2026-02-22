@@ -6,10 +6,15 @@ export {
   addAnalyticsOption,
 } from './cli-options.js';
 export {
+  ERROR_RULE_PENALTY,
+  MILLISECONDS_PER_SECOND,
   PERFECT_SCORE,
   SCORE_BAR_WIDTH_CHARS,
   SCORE_GOOD_THRESHOLD,
   SCORE_OK_THRESHOLD,
+  SUMMARY_BOX_HORIZONTAL_PADDING_CHARS,
+  SUMMARY_BOX_OUTER_INDENT_CHARS,
+  WARNING_RULE_PENALTY,
 } from './constants.js';
 export {
   SOURCE_FILE_PATTERN_JS_TS,
@@ -56,4 +61,12 @@ export {
   spinner,
 } from './ui/index.js';
 export type { FramedLine } from './ui/index.js';
-export { groupBy, indentMultilineText } from './utils/index.js';
+export {
+  compileGlobPattern,
+  findMonorepoRoot,
+  groupBy,
+  indentMultilineText,
+  isMonorepoRoot,
+  matchGlobPattern,
+  readJson,
+} from './utils/index.js';

@@ -1,10 +1,10 @@
+import { findMonorepoRoot } from '@framework-doctor/core';
 import { main } from 'knip';
 import { createOptions } from 'knip/session';
 import fs from 'node:fs';
 import path from 'node:path';
 import { MAX_KNIP_RETRIES } from '../constants.js';
 import type { Diagnostic, KnipIssueRecords, KnipResults } from '../types.js';
-import { findMonorepoRoot } from './find-monorepo-root.js';
 
 const KNIP_CATEGORY_MAP: Record<string, string> = {
   files: 'Dead Code',
