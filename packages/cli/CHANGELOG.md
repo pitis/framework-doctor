@@ -1,5 +1,15 @@
 # @framework-doctor/cli
 
+## 1.0.2
+
+### Patch Changes
+
+- Version alignment
+- added telemetry and refactored core
+- Updated dependencies
+  - @framework-doctor/svelte@1.0.2
+  - @framework-doctor/react@1.0.2
+
 ## 1.1.0
 
 ### Minor Changes

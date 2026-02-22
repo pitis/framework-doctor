@@ -1,6 +1,6 @@
 {
   "name": "framework-doctor-svelte-demo",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "description": "Demo SvelteKit app for Framework Doctor - includes intentional issues",
   "type": "module",

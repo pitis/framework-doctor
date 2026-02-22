@@ -1,5 +1,13 @@
 # react-doctor
 
+## 1.0.2
+
+### Patch Changes
+
+- added telemetry and refactored core
+- Updated dependencies
+  - @framework-doctor/core@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes
