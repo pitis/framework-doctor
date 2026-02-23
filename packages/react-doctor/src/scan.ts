@@ -179,7 +179,7 @@ const printBranding = (score?: number): void => {
     logger.log(colorize(`  │ ${mouth} │`));
     logger.log(colorize('  └─────┘'));
   }
-  logger.log(`  React Doctor ${highlighter.dim('(github.com/pitis/framework-doctor)')}`);
+  logger.log('  React Doctor');
   logger.break();
 };
 
@@ -198,12 +198,7 @@ const buildBrandingLines = (
     lines.push(createFramedLine(`│ ${eyes} │`, scoreColorizer(`│ ${eyes} │`)));
     lines.push(createFramedLine(`│ ${mouth} │`, scoreColorizer(`│ ${mouth} │`)));
     lines.push(createFramedLine('└─────┘', scoreColorizer('└─────┘')));
-    lines.push(
-      createFramedLine(
-        'React Doctor (github.com/pitis/framework-doctor)',
-        `React Doctor ${highlighter.dim('(github.com/pitis/framework-doctor)')}`,
-      ),
-    );
+    lines.push(createFramedLine('React Doctor', 'React Doctor'));
     lines.push(createFramedLine(''));
 
     const scoreLinePlainText = `${scoreResult.score} / ${PERFECT_SCORE}  ${scoreResult.label}`;
@@ -218,12 +213,7 @@ const buildBrandingLines = (
     }
     lines.push(createFramedLine(''));
   } else {
-    lines.push(
-      createFramedLine(
-        'React Doctor (github.com/pitis/framework-doctor)',
-        `React Doctor ${highlighter.dim('(github.com/pitis/framework-doctor)')}`,
-      ),
-    );
+    lines.push(createFramedLine('React Doctor', 'React Doctor'));
     lines.push(createFramedLine(''));
     lines.push(createFramedLine(noScoreMessage, highlighter.dim(noScoreMessage)));
     lines.push(createFramedLine(''));

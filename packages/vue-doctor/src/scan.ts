@@ -142,7 +142,7 @@ const printBranding = (score?: number): void => {
     logger.log(colorize(`  │ ${mouth} │`));
     logger.log(colorize('  └─────┘'));
   }
-  logger.log(`  Vue Doctor ${highlighter.dim('(github.com/pitis/framework-doctor)')}`);
+  logger.log('  Vue Doctor');
   logger.break();
 };
 
@@ -171,12 +171,7 @@ const buildBrandingLines = (
     lines.push(createFramedLine(`│ ${eyes} │`, scoreColorizer(`│ ${eyes} │`)));
     lines.push(createFramedLine(`│ ${mouth} │`, scoreColorizer(`│ ${mouth} │`)));
     lines.push(createFramedLine('└─────┘', scoreColorizer('└─────┘')));
-    lines.push(
-      createFramedLine(
-        'Vue Doctor (github.com/pitis/framework-doctor)',
-        `Vue Doctor ${highlighter.dim('(github.com/pitis/framework-doctor)')}`,
-      ),
-    );
+    lines.push(createFramedLine('Vue Doctor', 'Vue Doctor'));
     lines.push(createFramedLine(''));
 
     const scoreLinePlainText = `${scoreResult.score} / ${PERFECT_SCORE}  ${scoreResult.label}`;
@@ -191,12 +186,7 @@ const buildBrandingLines = (
     }
     lines.push(createFramedLine(''));
   } else {
-    lines.push(
-      createFramedLine(
-        'Vue Doctor (github.com/pitis/framework-doctor)',
-        `Vue Doctor ${highlighter.dim('(github.com/pitis/framework-doctor)')}`,
-      ),
-    );
+    lines.push(createFramedLine('Vue Doctor', 'Vue Doctor'));
     lines.push(createFramedLine(''));
     lines.push(createFramedLine(noScoreMessage, highlighter.dim(noScoreMessage)));
     lines.push(createFramedLine(''));

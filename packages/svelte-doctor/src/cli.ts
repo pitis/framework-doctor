@@ -124,7 +124,7 @@ const printSummary = (
     createFramedLine(`│ ${eyes} │`, colorize(`│ ${eyes} │`)),
     createFramedLine(`│ ${mouth} │`, colorize(`│ ${mouth} │`)),
     createFramedLine('└─────┘', colorize('└─────┘')),
-    createFramedLine('Svelte Doctor (local)', `Svelte Doctor ${highlighter.dim('(local)')}`),
+    createFramedLine('Svelte Doctor', 'Svelte Doctor'),
     createFramedLine(''),
     createFramedLine(
       `${score} / ${PERFECT_SCORE}  ${label}`,
