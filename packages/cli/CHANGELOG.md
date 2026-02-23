@@ -1,5 +1,15 @@
 # @framework-doctor/cli
 
+## 1.0.3
+
+### Patch Changes
+
+- vue doctor
+- Updated dependencies
+  - @framework-doctor/svelte@1.0.3
+  - @framework-doctor/react@1.0.3
+  - @framework-doctor/vue@1.0.3
+
 ## Unreleased
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # vue-doctor
 
+## 1.0.3
+
+### Patch Changes
+
+- vue doctor
+- Updated dependencies
+  - @framework-doctor/core@1.0.3
+
 ## 1.0.0
 
 ### Major Changes

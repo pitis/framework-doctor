@@ -1,6 +1,6 @@
 {
   "name": "@framework-doctor/vue",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Diagnose Vue and Nuxt codebase health",
   "author": {
     "name": "Pitis Radu",
