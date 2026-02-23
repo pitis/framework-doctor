@@ -46,7 +46,8 @@
   },
   "dependencies": {
     "@framework-doctor/svelte": "workspace:*",
-    "@framework-doctor/react": "workspace:*"
+    "@framework-doctor/react": "workspace:*",
+    "@framework-doctor/vue": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

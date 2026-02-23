@@ -57,9 +57,19 @@ const runDoctor = (framework: Framework, args: string[]): number => {
     return result.status ?? 1;
   }
 
-  if (framework === 'vue' || framework === 'angular') {
+  if (framework === 'vue') {
+    const cliPath = resolveDoctorCli('@framework-doctor/vue');
+    const fullArgs = [dirArg, ...restArgs];
+    const result = spawnSync(process.execPath, [cliPath, ...fullArgs], {
+      stdio: 'inherit',
+      cwd,
+    });
+    return result.status ?? 1;
+  }
+
+  if (framework === 'angular') {
     console.error(
-      `\n  ${framework} Doctor is coming soon. For now, use the framework-specific package when available.\n`,
+      `\n  Angular Doctor is coming soon. For now, use the framework-specific package when available.\n`,
     );
     return 1;
   }
@@ -67,7 +77,7 @@ const runDoctor = (framework: Framework, args: string[]): number => {
   console.error(`
   Could not detect a supported framework in ${dirArg}.
 
-  Supported: Svelte, React, Vue (coming soon), Angular (coming soon)
+  Supported: Svelte, React, Vue, Angular (coming soon)
 
   Make sure you're in a project root with a package.json that includes:
   - Svelte: "svelte" or "@sveltejs/kit"
@@ -78,6 +88,7 @@ const runDoctor = (framework: Framework, args: string[]): number => {
   Or run a specific doctor directly:
   - npx @framework-doctor/svelte .
   - npx @framework-doctor/react .
+  - npx @framework-doctor/vue .
 `);
   return 1;
 };

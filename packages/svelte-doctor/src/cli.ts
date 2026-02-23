@@ -13,26 +13,30 @@ import {
   logger,
   PERFECT_SCORE,
   printFramedBox,
-  spinner,
 } from '@framework-doctor/core';
 import { Command } from 'commander';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
-import type { Diagnostic, ScanOptions, ScoreResult, SvelteDoctorConfig } from './types.js';
-import { discoverProject } from './utils/discover-project.js';
-import { filterIgnoredDiagnostics } from './utils/filter-diagnostics.js';
+import prompts from 'prompts';
+import { scan } from './scan.js';
+import type {
+  Diagnostic,
+  DiffInfo,
+  ScanOptions,
+  ScoreResult,
+  SvelteDoctorConfig,
+} from './types.js';
 import { filterSourceFiles, getDiffInfo } from './utils/get-diff-files.js';
+import { handleError } from './utils/handle-error.js';
 import { loadConfig } from './utils/load-config.js';
-import { runKnip } from './utils/run-knip.js';
-import { runOxlint } from './utils/run-oxlint.js';
-import { runSecurityScan } from './utils/run-security-scan.js';
-import { runSvelteCheck } from './utils/run-svelte-check.js';
-import { calculateScore } from './utils/score.js';
+import { selectProjects } from './utils/select-projects.js';
+import { maybePromptSkillInstall } from './utils/skill-prompt.js';
 import {
   maybePromptAnalyticsConsent,
   sendScanEvent,
   shouldSendAnalytics,
 } from './utils/telemetry.js';
+import { writeDiagnosticsDirectory } from './utils/write-diagnostics-dir.js';
 
 const VERSION = process.env.VERSION ?? '0.0.0';
 
@@ -62,18 +66,13 @@ const sortBySeverity = (groups: [string, Diagnostic[]][]): [string, Diagnostic[]
 
 const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
   const map = new Map<string, number[]>();
-  for (const d of diagnostics) {
-    const lines = map.get(d.filePath) ?? [];
-    if (d.line > 0) lines.push(d.line);
-    map.set(d.filePath, lines);
+  for (const diagnostic of diagnostics) {
+    const lines = map.get(diagnostic.filePath) ?? [];
+    if (diagnostic.line > 0) lines.push(diagnostic.line);
+    map.set(diagnostic.filePath, lines);
   }
   return map;
 };
-
-const hasHighOrCriticalSecurityFindings = (diagnostics: Diagnostic[]): boolean =>
-  diagnostics.some(
-    (diagnostic) => diagnostic.category === 'security' && diagnostic.severity === 'error',
-  );
 
 const printRuleGroup = (ruleDiagnostics: Diagnostic[], verbose: boolean): void => {
   const first = ruleDiagnostics[0];
@@ -96,7 +95,10 @@ const printRuleGroup = (ruleDiagnostics: Diagnostic[], verbose: boolean): void =
 };
 
 const printDiagnostics = (diagnostics: Diagnostic[], verbose: boolean): void => {
-  const ruleGroups = groupBy(diagnostics, (d) => `${d.plugin}/${d.rule}`);
+  const ruleGroups = groupBy(
+    diagnostics,
+    (diagnostic) => `${diagnostic.plugin}/${diagnostic.rule}`,
+  );
   const sortedGroups = sortBySeverity([...ruleGroups.entries()]);
 
   for (const [, ruleDiagnostics] of sortedGroups) {
@@ -141,70 +143,49 @@ const printSummary = (
   printFramedBox(framedLines);
 };
 
-const applyDiffMode = (rootDirectory: string, flags: CliFlags, scanOptions: ScanOptions): void => {
-  if (flags.diff === undefined || flags.diff === false) return;
-  const base = typeof flags.diff === 'string' ? flags.diff : 'main';
-  const diff = getDiffInfo(rootDirectory, base);
-  if (!diff) return;
-  scanOptions.includePaths = filterSourceFiles(diff.changedFiles);
-};
-
-const printDetection = (
-  frameworkLabel: string,
-  svelteVersion: string,
-  languageLabel: string,
-  sourceFileCount: number,
-  changedFileCount: number | undefined,
-  hasConfig: boolean,
-): void => {
-  spinner('Detecting framework...')
-    .start()
-    .succeed(`Detecting framework. Found ${highlighter.info(frameworkLabel)}.`);
-
-  const versionLabel = `Svelte ${svelteVersion}`;
-  spinner('Detecting Svelte version...')
-    .start()
-    .succeed(`Detecting Svelte version. Found ${highlighter.info(versionLabel)}.`);
-
-  spinner('Detecting language...')
-    .start()
-    .succeed(`Detecting language. Found ${highlighter.info(languageLabel)}.`);
-
-  if (typeof changedFileCount === 'number') {
-    spinner('Detecting scan scope...')
-      .start()
-      .succeed(`Scanning ${highlighter.info(String(changedFileCount))} changed source files.`);
-  } else {
-    spinner('Counting source files...')
-      .start()
-      .succeed(`Found ${highlighter.info(String(sourceFileCount))} source files.`);
+const resolveDiffMode = async (
+  diffInfo: DiffInfo | null,
+  effectiveDiff: boolean | string | undefined,
+  shouldSkipPrompts: boolean,
+  isScoreOnly: boolean,
+): Promise<boolean> => {
+  if (effectiveDiff !== undefined && effectiveDiff !== false) {
+    if (diffInfo) return true;
+    if (!isScoreOnly) {
+      logger.warn('No feature branch or uncommitted changes detected. Running full scan.');
+      logger.break();
+    }
+    return false;
   }
 
-  if (hasConfig) {
-    spinner('Loading config...')
-      .start()
-      .succeed(`Loaded ${highlighter.info('svelte-doctor config')}.`);
-  }
+  if (effectiveDiff === false || !diffInfo) return false;
 
-  logger.break();
-};
+  const changedSourceFiles = filterSourceFiles(diffInfo.changedFiles);
+  if (changedSourceFiles.length === 0) return false;
+  if (shouldSkipPrompts) return true;
+  if (isScoreOnly) return false;
 
-const runNonFatal = async (
-  startText: string,
-  successText: string,
-  failText: string,
-  fn: () => Promise<Diagnostic[]>,
-): Promise<Diagnostic[]> => {
-  const s = spinner(startText).start();
-  try {
-    const diagnostics = await fn();
-    s.succeed(successText);
-    return diagnostics;
-  } catch (error) {
-    s.fail(failText);
-    logger.dim(String(error));
-    return [];
-  }
+  const promptMessage = diffInfo.isCurrentChanges
+    ? `Found ${changedSourceFiles.length} uncommitted changed files. Only scan current changes?`
+    : `On branch ${diffInfo.currentBranch} (${changedSourceFiles.length} changed files vs ${diffInfo.baseBranch}). Only scan this branch?`;
+
+  const { shouldScanChangedOnly } = await prompts(
+    {
+      type: 'confirm',
+      name: 'shouldScanChangedOnly',
+      message: promptMessage,
+      initial: true,
+    },
+    {
+      onCancel: () => {
+        logger.break();
+        logger.log('Cancelled.');
+        logger.break();
+        process.exit(0);
+      },
+    },
+  );
+  return Boolean(shouldScanChangedOnly);
 };
 
 const resolveScanOptions = (
@@ -221,6 +202,16 @@ const resolveScanOptions = (
   };
 };
 
+const exitWithCancelHint = () => {
+  logger.break();
+  logger.log('Cancelled.');
+  logger.break();
+  process.exit(0);
+};
+
+process.on('SIGINT', exitWithCancelHint);
+process.on('SIGTERM', exitWithCancelHint);
+
 const main = new Command()
   .name('svelte-doctor')
   .description('Diagnose Svelte codebase health')
@@ -231,7 +222,7 @@ const main = new Command()
   .option('--no-dead-code', 'skip dead code detection')
   .option('--verbose', 'show file details per rule')
   .option('--score', 'output only the score')
-  .option('-y, --yes', 'skip prompts');
+  .option('-y, --yes', 'skip prompts, scan all workspace projects');
 
 addAnalyticsOption(main);
 
@@ -240,133 +231,160 @@ main
   .option('--diff [base]', 'scan only files changed vs base branch')
   .option('--offline', 'skip remote scoring (local score only)')
   .action(async (directory: string, flags: CliFlags) => {
-    const startTime = performance.now();
-    const resolvedDirectory = path.resolve(directory);
-    const config = loadConfig(resolvedDirectory);
-    const scanOptions = resolveScanOptions(flags, config, main);
-
     const isScoreOnly = flags.score;
-    const isAutomated = isAutomatedEnvironment();
-    const shouldSkipPrompts = flags.yes || isAutomated || !process.stdin.isTTY;
 
-    logger.log(`svelte-doctor v${VERSION}`);
-    logger.break();
+    try {
+      const resolvedDirectory = path.resolve(directory);
+      const config = loadConfig(resolvedDirectory);
+      const scanOptions = resolveScanOptions(flags, config, main);
 
-    if (!isScoreOnly && !isAutomated && !flags.yes) {
-      await maybePromptAnalyticsConsent(shouldSkipPrompts);
-    }
+      const isAutomated = isAutomatedEnvironment();
+      const shouldSkipPrompts = flags.yes || isAutomated || !process.stdin.isTTY;
 
-    applyDiffMode(resolvedDirectory, flags, scanOptions);
+      if (!isScoreOnly) {
+        logger.log(`svelte-doctor v${VERSION}`);
+        logger.break();
+      }
 
-    const projectInfo = discoverProject(resolvedDirectory);
-    if (!projectInfo.svelteVersion) {
-      throw new Error('No Svelte dependency found in package.json');
-    }
+      const projectDirectories = await selectProjects(
+        resolvedDirectory,
+        flags.project,
+        shouldSkipPrompts,
+      );
 
-    const languageLabel = projectInfo.hasTypeScript ? 'TypeScript' : 'JavaScript';
-    const frameworkLabel = projectInfo.framework === 'sveltekit' ? 'SvelteKit' : 'Svelte';
+      const isDiffCliOverride = main.getOptionValueSource('diff') === 'cli';
+      const effectiveDiff = isDiffCliOverride ? flags.diff : config?.diff;
+      const explicitBaseBranch = typeof effectiveDiff === 'string' ? effectiveDiff : undefined;
+      const diffInfo = getDiffInfo(resolvedDirectory, explicitBaseBranch);
+      const isDiffMode = await resolveDiffMode(
+        diffInfo,
+        effectiveDiff,
+        shouldSkipPrompts,
+        isScoreOnly,
+      );
 
-    const includePaths = scanOptions.includePaths ?? [];
-    const changedCount = includePaths.length > 0 ? includePaths.length : undefined;
-    printDetection(
-      frameworkLabel,
-      projectInfo.svelteVersion,
-      languageLabel,
-      projectInfo.sourceFileCount,
-      changedCount,
-      Boolean(config),
-    );
+      if (isDiffMode && diffInfo && !isScoreOnly) {
+        if (diffInfo.isCurrentChanges) {
+          logger.log('Scanning uncommitted changes');
+        } else {
+          logger.log(
+            `Scanning changes: ${highlighter.info(diffInfo.currentBranch)} → ${highlighter.info(diffInfo.baseBranch)}`,
+          );
+        }
+        logger.break();
+      }
 
-    const sveltePromise = scanOptions.lint
-      ? runNonFatal(
-          'Running Svelte checks...',
-          'Running Svelte checks.',
-          'Svelte checks failed (non-fatal, skipping).',
-          () => runSvelteCheck(resolvedDirectory, includePaths, projectInfo.svelteVersion ?? ''),
-        )
-      : Promise.resolve([]);
+      if (!isScoreOnly && !isAutomated && !flags.yes) {
+        await maybePromptAnalyticsConsent(shouldSkipPrompts);
+      }
 
-    const jsTsPromise = scanOptions.jsTsLint
-      ? runNonFatal(
-          'Running JS/TS lint...',
-          'Running JS/TS lint.',
-          'JS/TS lint failed (non-fatal, skipping).',
-          () => runOxlint(resolvedDirectory, projectInfo.hasTypeScript, includePaths),
-        )
-      : Promise.resolve([]);
+      const allDiagnostics: Diagnostic[] = [];
+      const telemetryUrl = process.env.FRAMEWORK_DOCTOR_TELEMETRY_URL ?? '';
 
-    const securityPromise = scanOptions.lint
-      ? runNonFatal(
-          'Running security checks...',
-          'Running security checks.',
-          'Security checks failed (non-fatal, skipping).',
-          () => runSecurityScan(resolvedDirectory, includePaths),
-        )
-      : Promise.resolve([]);
+      for (const projectDirectory of projectDirectories) {
+        let includePaths: string[] | undefined;
+        if (isDiffMode) {
+          const projectDiffInfo = getDiffInfo(projectDirectory, explicitBaseBranch);
+          if (projectDiffInfo) {
+            const changedSourceFiles = filterSourceFiles(projectDiffInfo.changedFiles);
+            if (changedSourceFiles.length === 0) {
+              if (!isScoreOnly) {
+                logger.dim(`No changed source files in ${projectDirectory}, skipping.`);
+                logger.break();
+              }
+              continue;
+            }
+            includePaths = changedSourceFiles;
+          }
+        }
 
-    const deadCodePromise =
-      scanOptions.deadCode && includePaths.length === 0
-        ? runNonFatal(
-            'Detecting dead code...',
-            'Detecting dead code.',
-            'Dead code detection failed (non-fatal, skipping).',
-            () => runKnip(resolvedDirectory),
+        if (!isScoreOnly) {
+          logger.dim(`Scanning ${projectDirectory}...`);
+          logger.break();
+        }
+
+        const startTime = performance.now();
+        const result = await scan(projectDirectory, {
+          ...scanOptions,
+          includePaths: includePaths ?? [],
+        });
+        const elapsedMs = performance.now() - startTime;
+
+        allDiagnostics.push(...result.diagnostics);
+
+        if (
+          telemetryUrl &&
+          result.scoreResult &&
+          shouldSendAnalytics(
+            { analytics: flags.analytics, yes: flags.yes },
+            config?.analytics,
+            isAutomated,
           )
-        : Promise.resolve([]);
+        ) {
+          sendScanEvent(
+            telemetryUrl,
+            result.projectInfo,
+            result.scoreResult,
+            result.diagnostics.length,
+            {
+              isDiffMode: Boolean(includePaths?.length),
+              cliVersion: VERSION,
+            },
+          );
+        }
 
-    const [svelteDiagnostics, jsTsDiagnostics, securityDiagnostics, deadCodeDiagnostics] =
-      await Promise.all([sveltePromise, jsTsPromise, securityPromise, deadCodePromise]);
+        if (flags.score) {
+          if (result.scoreResult) {
+            logger.log(`${result.scoreResult.score}`);
+          }
+          continue;
+        }
 
-    const diagnostics = filterIgnoredDiagnostics(
-      [...svelteDiagnostics, ...jsTsDiagnostics, ...securityDiagnostics, ...deadCodeDiagnostics],
-      config,
-    );
+        if (result.diagnostics.length === 0) {
+          logger.success('No issues found!');
+        } else {
+          printDiagnostics(result.diagnostics, Boolean(scanOptions.verbose));
+        }
 
-    const hasIncludePaths = (scanOptions.includePaths?.length ?? 0) > 0;
-    const totalSourceFileCount = hasIncludePaths
-      ? scanOptions.includePaths!.length
-      : projectInfo.sourceFileCount;
-    const scoreResult = calculateScore(diagnostics, totalSourceFileCount, {
-      hasHighOrCriticalSecurityFindings: hasHighOrCriticalSecurityFindings(diagnostics),
-    });
+        logger.break();
+        const totalSourceFileCount =
+          (includePaths?.length ?? 0) > 0
+            ? (includePaths?.length ?? 0)
+            : result.projectInfo.sourceFileCount;
+        printSummary(
+          result.scoreResult,
+          result.diagnostics,
+          totalSourceFileCount,
+          elapsedMs,
+          Boolean(scanOptions.verbose),
+        );
 
-    const telemetryUrl = process.env.FRAMEWORK_DOCTOR_TELEMETRY_URL ?? '';
-    const isDiffMode = (scanOptions.includePaths?.length ?? 0) > 0;
-    if (
-      telemetryUrl &&
-      shouldSendAnalytics(
-        { analytics: flags.analytics, yes: flags.yes },
-        config?.analytics,
-        isAutomated,
-      )
-    ) {
-      sendScanEvent(telemetryUrl, projectInfo, scoreResult, diagnostics.length, {
-        isDiffMode,
-        cliVersion: VERSION,
-      });
+        try {
+          const diagnosticsDirectory = writeDiagnosticsDirectory(result.diagnostics);
+          logger.break();
+          logger.dim(`  Full diagnostics written to ${diagnosticsDirectory}`);
+        } catch {
+          logger.break();
+        }
+
+        if (!isScoreOnly) {
+          logger.break();
+        }
+      }
+
+      if (!isScoreOnly && !shouldSkipPrompts) {
+        await maybePromptSkillInstall(shouldSkipPrompts);
+      }
+    } catch (error) {
+      handleError(error);
     }
+  })
+  .addHelpText(
+    'after',
+    `
+${highlighter.dim('Learn more:')}
+  ${highlighter.info('https://github.com/pitis/framework-doctor')}
+`,
+  );
 
-    if (flags.score) {
-      logger.log(`${scoreResult.score}`);
-      return;
-    }
-
-    const elapsedMs = performance.now() - startTime;
-
-    if (diagnostics.length === 0) {
-      logger.success('No issues found!');
-    } else {
-      printDiagnostics(diagnostics, Boolean(scanOptions.verbose));
-    }
-
-    logger.break();
-    printSummary(
-      scoreResult,
-      diagnostics,
-      totalSourceFileCount,
-      elapsedMs,
-      Boolean(scanOptions.verbose),
-    );
-  });
-
-await main.parseAsync();
+main.parseAsync();

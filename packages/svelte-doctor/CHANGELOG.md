@@ -1,5 +1,15 @@
 # svelte-doctor
 
+## Unreleased
+
+### Minor Changes
+
+- Add security scan to `scan()` so `diagnose()` matches CLI
+- Add selectProjects, --project multi-project support
+- Add maybePromptSkillInstall, handleError, checkReducedMotion
+- Add writeDiagnosticsDirectory, addHelpText, resolveDiffMode prompt
+- Refactor CLI to use `scan()` for single source of truth
+
 ## 1.0.2
 
 ### Patch Changes

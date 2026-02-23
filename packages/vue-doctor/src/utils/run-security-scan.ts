@@ -1,0 +1,17 @@
+import {
+  NO_V_HTML_RULE,
+  runSecurityScan as runSecurityScanCore,
+  SOURCE_FILE_PATTERN_WITH_VUE,
+  UNIVERSAL_SECURITY_RULES,
+} from '@framework-doctor/core';
+
+const VUE_PLUGIN = 'vue-doctor';
+
+const VUE_SECURITY_RULES = [...UNIVERSAL_SECURITY_RULES, NO_V_HTML_RULE];
+
+export const runSecurityScan = async (rootDirectory: string, includePaths: string[]) =>
+  runSecurityScanCore(rootDirectory, includePaths, {
+    plugin: VUE_PLUGIN,
+    rules: VUE_SECURITY_RULES,
+    filePattern: SOURCE_FILE_PATTERN_WITH_VUE,
+  });

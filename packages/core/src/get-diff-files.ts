@@ -108,6 +108,8 @@ export const SOURCE_FILE_PATTERN_SVELTE = /\.(svelte|ts|tsx|js|jsx|mts|cts|mjs|c
 
 export const SOURCE_FILE_PATTERN_REACT = /\.(tsx?|jsx?)$/;
 
+export const SOURCE_FILE_PATTERN_VUE = /\.(vue|ts|tsx|js|jsx|mts|cts|mjs|cjs)$/;
+
 export const filterSourceFiles = (
   filePaths: string[],
   pattern: RegExp = SOURCE_FILE_PATTERN_JS_TS,

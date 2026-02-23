@@ -1,5 +1,11 @@
 # react-doctor
 
+## Unreleased
+
+### Patch Changes
+
+- Add --offline flag for parity with svelte-doctor
+
 ## 1.0.2
 
 ### Patch Changes

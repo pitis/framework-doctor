@@ -1,4 +1,4 @@
-export { getFilesToScan } from './get-files-to-scan.js';
+export { SOURCE_FILE_PATTERN_WITH_VUE, getFilesToScan } from './get-files-to-scan.js';
 export { DANGEROUSLY_SET_INNER_HTML_RULE } from './react-rules.js';
 export type { SecurityRule } from './rule.js';
 export { runSecurityScan } from './run-security-scan.js';
@@ -11,3 +11,4 @@ export {
   NO_NEW_FUNCTION_RULE,
   UNIVERSAL_SECURITY_RULES,
 } from './universal-rules.js';
+export { NO_V_HTML_RULE } from './vue-rules.js';
