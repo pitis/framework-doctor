@@ -13,6 +13,7 @@ export interface ProjectInfo {
 
 export type {
   Diagnostic,
+  DiffInfo,
   IgnoreConfig,
   ScoreGuardrailInput,
   ScoreResult,
@@ -31,6 +32,24 @@ export interface ScanResult {
   diagnostics: Diagnostic[];
   scoreResult: ScoreResult;
   skippedChecks: string[];
+  projectInfo: ProjectInfo;
+}
+
+export interface WorkspacePackage {
+  name: string;
+  directory: string;
+}
+
+export interface HandleErrorOptions {
+  shouldExit: boolean;
+}
+
+export interface PackageJson {
+  name?: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  workspaces?: string[] | { packages: string[] };
 }
 
 export interface SvelteDoctorConfig extends BaseDoctorConfig {

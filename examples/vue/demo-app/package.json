@@ -1,0 +1,20 @@
+{
+  "name": "framework-doctor-vue-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo Vue app for Framework Doctor - includes intentional issues",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0",
+    "vue": "^3.0.0",
+    "vue-tsc": "^2.1.10"
+  },
+  "packageManager": "pnpm@10.30.0"
+}

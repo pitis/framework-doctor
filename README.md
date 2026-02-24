@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@framework-doctor/cli.svg)](https://www.npmjs.com/package/@framework-doctor/cli)
 [![npm downloads](https://img.shields.io/npm/dm/@framework-doctor/cli.svg)](https://www.npmjs.com/package/@framework-doctor/cli)
 
-Framework Doctor auto-detects your framework and runs the right health check. Supports **Svelte** and **React**; Vue and Angular coming soon.
+Framework Doctor auto-detects your framework and runs the right health check. Supports **Svelte**, **React**, and **Vue**; Angular coming soon.
 
 ## Quick start
 
@@ -18,6 +18,7 @@ Or run a specific doctor directly:
 ```bash
 npx -y @framework-doctor/react .    # React
 npx -y @framework-doctor/svelte .   # Svelte
+npx -y @framework-doctor/vue .      # Vue
 ```
 
 ## Try it
@@ -46,6 +47,14 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 - `npx -y @framework-doctor/react ./path/to/project` - scan a specific project directory
 - `npx -y @framework-doctor/react . --verbose` - include file and line details
 - `npx -y @framework-doctor/react . --score` - print only the numeric score (CI-friendly)
+
+**Vue (direct):**
+
+- `npx -y @framework-doctor/vue .` - run a full scan
+- `npx -y @framework-doctor/vue . --verbose` - include file and line details
+- `npx -y @framework-doctor/vue . --score` - print only the numeric score (CI-friendly)
+- `npx -y @framework-doctor/vue . --diff main` - scan only files changed against `main`.
+- `npx -y @framework-doctor/vue . --project web` - select a specific workspace package.
 
 **Svelte (direct):**
 
@@ -79,7 +88,7 @@ Options:
   -h, --help          display help for command
 ```
 
-React doctor options: `--no-lint`, `--no-dead-code`, `--verbose`, `--score`, `--no-analytics`, `--project`, `--diff`. See [packages/react-doctor/README.md](packages/react-doctor/README.md).
+React doctor options: `--no-lint`, `--no-dead-code`, `--verbose`, `--score`, `--no-analytics`, `--project`, `--diff`, `--offline`. See [packages/react-doctor/README.md](packages/react-doctor/README.md).
 
 ## Security checks
 

@@ -1,9 +1,11 @@
 import type { Diagnostic, ScanOptions, ScanResult, SvelteDoctorConfig } from './types.js';
+import { checkReducedMotion } from './utils/check-reduced-motion.js';
 import { discoverProject } from './utils/discover-project.js';
 import { filterIgnoredDiagnostics } from './utils/filter-diagnostics.js';
 import { loadConfig } from './utils/load-config.js';
 import { runKnip } from './utils/run-knip.js';
 import { runOxlint } from './utils/run-oxlint.js';
+import { runSecurityScan } from './utils/run-security-scan.js';
 import { runSvelteCheck } from './utils/run-svelte-check.js';
 import { calculateScore } from './utils/score.js';
 
@@ -69,17 +71,42 @@ export const scan = async (directory: string, options: ScanOptions = {}): Promis
     }
   }
 
+  let securityDiagnostics: Diagnostic[] = [];
+  if (resolved.lint) {
+    try {
+      securityDiagnostics = await runSecurityScan(directory, resolved.includePaths);
+    } catch {
+      skippedChecks.push('security');
+    }
+  }
+
+  const reducedMotionDiagnostics =
+    resolved.includePaths.length === 0 ? checkReducedMotion(directory) : [];
+
   const diagnostics = filterIgnoredDiagnostics(
-    [...lintDiagnostics, ...jsTsLintDiagnostics, ...deadCodeDiagnostics],
+    [
+      ...lintDiagnostics,
+      ...jsTsLintDiagnostics,
+      ...deadCodeDiagnostics,
+      ...securityDiagnostics,
+      ...reducedMotionDiagnostics,
+    ],
     userConfig,
   );
 
   const totalFilesScanned =
     resolved.includePaths.length > 0 ? resolved.includePaths.length : projectInfo.sourceFileCount;
 
+  const hasHighOrCriticalSecurityFindings = diagnostics.some(
+    (diagnostic) => diagnostic.category === 'security' && diagnostic.severity === 'error',
+  );
+
   return {
     diagnostics,
-    scoreResult: calculateScore(diagnostics, totalFilesScanned),
+    scoreResult: calculateScore(diagnostics, totalFilesScanned, {
+      hasHighOrCriticalSecurityFindings,
+    }),
     skippedChecks,
+    projectInfo,
   };
 };

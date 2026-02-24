@@ -2,7 +2,9 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { GIT_LS_FILES_MAX_BUFFER_BYTES } from '../constants.js';
-const SOURCE_FILE_PATTERN_FULL = /\.(svelte|ts|tsx|js|jsx|mts|cts|mjs|cjs)$/;
+export const SOURCE_FILE_PATTERN_FULL = /\.(svelte|ts|tsx|js|jsx|mts|cts|mjs|cjs)$/;
+
+export const SOURCE_FILE_PATTERN_WITH_VUE = /\.(vue|svelte|ts|tsx|js|jsx|mts|cts|mjs|cjs)$/;
 
 export const getFilesToScan = (
   rootDirectory: string,

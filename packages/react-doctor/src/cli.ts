@@ -31,6 +31,7 @@ interface CliFlags {
   analytics: boolean;
   project?: string;
   diff?: boolean | string;
+  offline?: boolean;
 }
 
 const exitWithCancelHint = () => {
@@ -105,7 +106,8 @@ const program = new Command()
   .option('--score', 'output only the score')
   .option('-y, --yes', 'skip prompts, scan all workspace projects')
   .option('--project <name>', 'select workspace project (comma-separated for multiple)')
-  .option('--diff [base]', 'scan only files changed vs base branch');
+  .option('--diff [base]', 'scan only files changed vs base branch')
+  .option('--offline', 'skip remote scoring (local score only)');
 
 addAnalyticsOption(program);
 

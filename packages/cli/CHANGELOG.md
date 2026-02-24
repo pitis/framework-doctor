@@ -1,5 +1,22 @@
 # @framework-doctor/cli
 
+## 1.0.3
+
+### Patch Changes
+
+- vue doctor
+- Updated dependencies
+  - @framework-doctor/svelte@1.0.3
+  - @framework-doctor/react@1.0.3
+  - @framework-doctor/vue@1.0.3
+
+## Unreleased
+
+### Minor Changes
+
+- Add Vue support: auto-detect vue/nuxt and run @framework-doctor/vue
+- Remove Vue from "coming soon"; Angular remains coming soon
+
 ## 1.0.2
 
 ### Patch Changes

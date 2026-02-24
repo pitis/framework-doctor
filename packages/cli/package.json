@@ -1,6 +1,6 @@
 {
   "name": "@framework-doctor/cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Auto-detect framework and run the right doctor",
   "author": {
     "name": "Pitis Radu",
@@ -46,7 +46,8 @@
   },
   "dependencies": {
     "@framework-doctor/svelte": "workspace:*",
-    "@framework-doctor/react": "workspace:*"
+    "@framework-doctor/react": "workspace:*",
+    "@framework-doctor/vue": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Diagnostic } from '../types.js';
-import { getFilesToScan } from './get-files-to-scan.js';
+import { getFilesToScan, SOURCE_FILE_PATTERN_FULL } from './get-files-to-scan.js';
 import type { SecurityRule } from './rule.js';
 
 const findMatches = (content: string, regex: RegExp): Array<{ line: number; column: number }> => {
@@ -26,6 +26,7 @@ const ruleAppliesToFile = (rule: SecurityRule, filePath: string): boolean => {
 export interface RunSecurityScanOptions {
   plugin: string;
   rules: SecurityRule[];
+  filePattern?: RegExp;
 }
 
 export const runSecurityScan = async (
@@ -33,7 +34,8 @@ export const runSecurityScan = async (
   includePaths: string[],
   options: RunSecurityScanOptions,
 ): Promise<Diagnostic[]> => {
-  const files = getFilesToScan(rootDirectory, includePaths);
+  const pattern = options.filePattern ?? SOURCE_FILE_PATTERN_FULL;
+  const files = getFilesToScan(rootDirectory, includePaths, pattern);
   const diagnostics: Diagnostic[] = [];
 
   for (const filePath of files) {
