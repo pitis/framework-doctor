@@ -1,16 +1,17 @@
-import { execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import type { DiffInfo } from './types.js';
 
 const DEFAULT_BRANCH_CANDIDATES = ['main', 'master'];
 
 const getCurrentBranch = (directory: string): string | null => {
   try {
-    const branch = execSync('git rev-parse --abbrev-ref HEAD', {
+    const result = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
       cwd: directory,
+      encoding: 'utf-8',
       stdio: 'pipe',
-    })
-      .toString()
-      .trim();
+    });
+    if (result.status !== 0 || result.error) return null;
+    const branch = result.stdout?.trim() ?? '';
     return branch === 'HEAD' ? null : branch;
   } catch {
     return null;
@@ -19,45 +20,54 @@ const getCurrentBranch = (directory: string): string | null => {
 
 const detectDefaultBranch = (directory: string): string | null => {
   try {
-    const reference = execSync('git symbolic-ref refs/remotes/origin/HEAD', {
+    const result = spawnSync('git', ['symbolic-ref', 'refs/remotes/origin/HEAD'], {
       cwd: directory,
+      encoding: 'utf-8',
       stdio: 'pipe',
-    })
-      .toString()
-      .trim();
-    return reference.replace('refs/remotes/origin/', '');
-  } catch {
-    for (const candidate of DEFAULT_BRANCH_CANDIDATES) {
-      try {
-        execSync(`git rev-parse --verify ${candidate}`, {
-          cwd: directory,
-          stdio: 'pipe',
-        });
-        return candidate;
-      } catch {
-        // try next candidate
-      }
+    });
+    if (result.status === 0 && !result.error && result.stdout) {
+      return result.stdout.trim().replace('refs/remotes/origin/', '');
     }
-    return null;
+  } catch {
+    // fall through to candidates
   }
+  for (const candidate of DEFAULT_BRANCH_CANDIDATES) {
+    try {
+      const verifyResult = spawnSync('git', ['rev-parse', '--verify', candidate], {
+        cwd: directory,
+        stdio: 'pipe',
+      });
+      if (verifyResult.status === 0 && !verifyResult.error) return candidate;
+    } catch {
+      // try next candidate
+    }
+  }
+  return null;
 };
 
 const getChangedFilesSinceBranch = (directory: string, baseBranch: string): string[] => {
   try {
-    const mergeBase = execSync(`git merge-base ${baseBranch} HEAD`, {
+    const mergeBaseResult = spawnSync('git', ['merge-base', baseBranch, 'HEAD'], {
       cwd: directory,
+      encoding: 'utf-8',
       stdio: 'pipe',
-    })
-      .toString()
-      .trim();
+    });
+    if (mergeBaseResult.status !== 0 || mergeBaseResult.error || !mergeBaseResult.stdout) {
+      return [];
+    }
+    const mergeBase = mergeBaseResult.stdout.trim();
 
-    const output = execSync(`git diff --name-only --diff-filter=ACMR --relative ${mergeBase}`, {
-      cwd: directory,
-      stdio: 'pipe',
-    })
-      .toString()
-      .trim();
-
+    const diffResult = spawnSync(
+      'git',
+      ['diff', '--name-only', '--diff-filter=ACMR', '--relative', mergeBase],
+      {
+        cwd: directory,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      },
+    );
+    if (diffResult.status !== 0 || diffResult.error) return [];
+    const output = diffResult.stdout?.trim() ?? '';
     if (!output) return [];
     return output.split('\n').filter(Boolean);
   } catch {
@@ -67,12 +77,17 @@ const getChangedFilesSinceBranch = (directory: string, baseBranch: string): stri
 
 const getUncommittedChangedFiles = (directory: string): string[] => {
   try {
-    const output = execSync('git diff --name-only --diff-filter=ACMR --relative HEAD', {
-      cwd: directory,
-      stdio: 'pipe',
-    })
-      .toString()
-      .trim();
+    const result = spawnSync(
+      'git',
+      ['diff', '--name-only', '--diff-filter=ACMR', '--relative', 'HEAD'],
+      {
+        cwd: directory,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      },
+    );
+    if (result.status !== 0 || result.error) return [];
+    const output = result.stdout?.trim() ?? '';
     if (!output) return [];
     return output.split('\n').filter(Boolean);
   } catch {

@@ -36,10 +36,10 @@ runs:
         INPUT_VERBOSE: ${{ inputs.verbose }}
         INPUT_PROJECT: ${{ inputs.project }}
       run: |
-        FLAGS=""
-        if [ "$INPUT_VERBOSE" = "true" ]; then FLAGS="$FLAGS --verbose"; fi
-        if [ -n "$INPUT_PROJECT" ]; then FLAGS="$FLAGS --project $INPUT_PROJECT"; fi
-        npx -y @framework-doctor/svelte "$INPUT_DIRECTORY" $FLAGS
+        ARGS=("$INPUT_DIRECTORY")
+        if [ "$INPUT_VERBOSE" = "true" ]; then ARGS+=(--verbose); fi
+        if [ -n "$INPUT_PROJECT" ]; then ARGS+=(--project "$INPUT_PROJECT"); fi
+        npx -y @framework-doctor/svelte "${ARGS[@]}"
 
     - id: score
       shell: bash
