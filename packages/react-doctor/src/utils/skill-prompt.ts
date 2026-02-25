@@ -1,5 +1,5 @@
 import { highlighter, logger, readGlobalConfig, writeGlobalConfig } from '@framework-doctor/core';
-import { execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
@@ -69,8 +69,8 @@ const writeSkillFiles = (directory: string): void => {
 const isCommandAvailable = (command: string): boolean => {
   try {
     const whichCommand = process.platform === 'win32' ? 'where' : 'which';
-    execSync(`${whichCommand} ${command}`, { stdio: 'ignore' });
-    return true;
+    const result = spawnSync(whichCommand, [command], { stdio: 'ignore' });
+    return result.status === 0 && !result.error;
   } catch {
     return false;
   }
