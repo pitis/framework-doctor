@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execSync, spawnSync } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -71,7 +71,9 @@ const findCompatibleNvmBinary = (): string | null => {
 
 const getNodeVersionFromBinary = (binaryPath: string): string | null => {
   try {
-    return execSync(`"${binaryPath}" --version`, { encoding: 'utf-8' }).trim();
+    const result = spawnSync(binaryPath, ['--version'], { encoding: 'utf-8' });
+    if (result.status !== 0 || result.error) return null;
+    return result.stdout?.trim() ?? null;
   } catch {
     return null;
   }
@@ -85,8 +87,9 @@ export const installNodeViaNvm = (): boolean => {
   if (!existsSync(nvmScript)) return false;
 
   try {
-    execSync(`bash -c ". '${nvmScript}' && nvm install ${OXLINT_RECOMMENDED_NODE_MAJOR}"`, {
+    execSync(`bash -c '. "$NVM_SCRIPT_PATH" && nvm install ${OXLINT_RECOMMENDED_NODE_MAJOR}'`, {
       stdio: 'inherit',
+      env: { ...process.env, NVM_SCRIPT_PATH: nvmScript },
     });
     return findCompatibleNvmBinary() !== null;
   } catch {

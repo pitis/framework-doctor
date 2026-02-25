@@ -1,0 +1,7 @@
+{
+  "name": "vue-component-library",
+  "private": true,
+  "peerDependencies": {
+    "vue": "^3.0.0 || ^2.0.0"
+  }
+}

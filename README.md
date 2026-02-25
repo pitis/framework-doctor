@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@framework-doctor/cli.svg)](https://www.npmjs.com/package/@framework-doctor/cli)
 [![npm downloads](https://img.shields.io/npm/dm/@framework-doctor/cli.svg)](https://www.npmjs.com/package/@framework-doctor/cli)
 
-Framework Doctor auto-detects your framework and runs the right health check. Supports **Svelte**, **React**, and **Vue**; Angular coming soon.
+Framework Doctor auto-detects your framework and runs the right health check. Supports **Svelte**, **React**, **Vue**, and **Angular**.
 
 ## Quick start
 
@@ -19,6 +19,7 @@ Or run a specific doctor directly:
 npx -y @framework-doctor/react .    # React
 npx -y @framework-doctor/svelte .   # Svelte
 npx -y @framework-doctor/vue .      # Vue
+npx -y @framework-doctor/angular .   # Angular
 ```
 
 ## Try it
@@ -66,6 +67,15 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 - `npx -y @framework-doctor/svelte . --diff main` - scan only files changed against `main`.
 - `npx -y @framework-doctor/svelte . --project web` - select a specific workspace package.
 
+**Angular (direct):**
+
+- `npx -y @framework-doctor/angular .` - run a full scan
+- `npx -y @framework-doctor/angular ./path/to/project` - scan a specific project directory
+- `npx -y @framework-doctor/angular . --verbose` - include file and line details
+- `npx -y @framework-doctor/angular . --score` - print only the numeric score (CI-friendly)
+- `npx -y @framework-doctor/angular . --diff main` - scan only files changed against `main`
+- `npx -y @framework-doctor/angular . --project my-app` - select a specific workspace project
+
 ## Options
 
 Svelte doctor:
@@ -90,6 +100,8 @@ Options:
 
 React doctor options: `--no-lint`, `--no-dead-code`, `--verbose`, `--score`, `--no-analytics`, `--project`, `--diff`, `--offline`. See [packages/react-doctor/README.md](packages/react-doctor/README.md).
 
+Angular doctor options: `--no-lint`, `--no-dead-code`, `--verbose`, `--score`, `--no-analytics`, `--project`, `--diff`, `--offline`. See [packages/angular-doctor/README.md](packages/angular-doctor/README.md).
+
 ## Security checks
 
 Svelte Doctor includes a security scan that flags:
@@ -104,7 +116,7 @@ To ignore a rule: `"svelte-doctor/no-at-html"`, `"svelte-doctor/no-new-function"
 
 ## Analytics
 
-Both doctors optionally send anonymous usage data when you opt in. Data is stored in your Supabase (see [supabase/README.md](supabase/README.md)). If your function enforces `TELEMETRY_KEY`, set `FRAMEWORK_DOCTOR_TELEMETRY_KEY` in the client environment. To disable: `--no-analytics`, `"analytics": false` in config, or `DO_NOT_TRACK=1`.
+The doctors optionally send anonymous usage data when you opt in. Data is stored in your Supabase (see [supabase/README.md](supabase/README.md)). If your function enforces `TELEMETRY_KEY`, set `FRAMEWORK_DOCTOR_TELEMETRY_KEY` in the client environment. To disable: `--no-analytics`, `"analytics": false` in config, or `DO_NOT_TRACK=1`.
 
 ## Configuration
 

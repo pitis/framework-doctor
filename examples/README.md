@@ -40,3 +40,51 @@ npx -y @framework-doctor/cli examples/svelte/demo-app
 - **Score** — A 0–100 health score for the project
 
 Add `--verbose` to see file and line details for each finding.
+
+## Vue: demo-app
+
+A minimal Vue 3 + Vite app with intentional issues. See [vue/demo-app/README.md](vue/demo-app/README.md) for details.
+
+### Run from the repo
+
+```bash
+pnpm build
+pnpm exec framework-doctor examples/vue/demo-app
+# Or: pnpm exec vue-doctor examples/vue/demo-app
+```
+
+### Run with npx
+
+```bash
+npx -y @framework-doctor/cli examples/vue/demo-app
+```
+
+### What to expect
+
+- **Errors** — Security (v-html, eval, new Function, implied eval), accessibility
+- **Warnings** — Dead code, lint issues
+- **Score** — 0–100 health score
+
+## Angular: demo-app
+
+A minimal Angular app with intentional issues. See [angular/demo-app/README.md](angular/demo-app/README.md) for details.
+
+### Run from the repo
+
+```bash
+pnpm build
+pnpm exec framework-doctor examples/angular/demo-app
+# Or: pnpm exec angular-doctor examples/angular/demo-app
+```
+
+### Run with npx
+
+```bash
+npx -y @framework-doctor/cli examples/angular/demo-app
+```
+
+### What to expect
+
+- **Errors** — Security (eval, innerHTML, bypassSecurityTrust*)
+- **Warnings** — Dead code, lint issues
+- **Score** — 0–100 health score

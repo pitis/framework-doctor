@@ -1,0 +1,89 @@
+{
+  "name": "@framework-doctor/angular",
+  "version": "1.0.4",
+  "description": "Diagnose Angular codebase health",
+  "author": {
+    "name": "Pitis Radu",
+    "url": "https://github.com/pitis"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pitis/framework-doctor.git",
+    "directory": "packages/angular-doctor"
+  },
+  "homepage": "https://github.com/pitis/framework-doctor/tree/main/packages/angular-doctor#readme",
+  "bugs": {
+    "url": "https://github.com/pitis/framework-doctor/issues"
+  },
+  "keywords": [
+    "diagnostics",
+    "linter",
+    "angular",
+    "performance",
+    "cli",
+    "code-health",
+    "dead-code",
+    "quality"
+  ],
+  "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/pitis"
+  },
+  "type": "module",
+  "bin": {
+    "angular-doctor": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./api": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "rimraf dist && cross-env NODE_ENV=production tsdown",
+    "lint": "oxlint src tests",
+    "lint:fix": "oxlint --fix src tests",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm build && vitest run",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@framework-doctor/core": "workspace:*",
+    "@eslint/js": "^9.28.0",
+    "angular-eslint": "catalog:",
+    "typescript-eslint": "catalog:",
+    "commander": "catalog:",
+    "eslint": "catalog:",
+    "knip": "catalog:",
+    "ora": "catalog:",
+    "oxlint": "catalog:",
+    "picocolors": "catalog:",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/prompts": "catalog:",
+    "cross-env": "catalog:",
+    "rimraf": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "packageManager": "pnpm@10.30.0"
+}

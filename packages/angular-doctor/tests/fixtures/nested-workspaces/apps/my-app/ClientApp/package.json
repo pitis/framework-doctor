@@ -1,0 +1,6 @@
+{
+  "name": "my-app-client",
+  "dependencies": {
+    "@angular/core": "^19.0.0"
+  }
+}

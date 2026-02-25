@@ -6,6 +6,8 @@ export const SOURCE_FILE_PATTERN_FULL = /\.(svelte|ts|tsx|js|jsx|mts|cts|mjs|cjs
 
 export const SOURCE_FILE_PATTERN_WITH_VUE = /\.(vue|svelte|ts|tsx|js|jsx|mts|cts|mjs|cjs)$/;
 
+export const SOURCE_FILE_PATTERN_WITH_ANGULAR = /\.(html|ts|mts|cts|mjs|cjs)$/;
+
 export const getFilesToScan = (
   rootDirectory: string,
   includePaths: string[],

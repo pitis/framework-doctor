@@ -1,0 +1,6 @@
+{
+  "name": "ui",
+  "dependencies": {
+    "svelte": "^5.0.0"
+  }
+}
