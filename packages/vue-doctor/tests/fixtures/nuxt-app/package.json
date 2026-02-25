@@ -1,0 +1,8 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "dependencies": {
+    "vue": "^3.0.0",
+    "nuxt": "^3.0.0"
+  }
+}

@@ -1,4 +1,9 @@
-export { SOURCE_FILE_PATTERN_WITH_VUE, getFilesToScan } from './get-files-to-scan.js';
+export { NO_BYPASS_SECURITY_TRUST_RULE, NO_INNER_HTML_BINDING_RULE } from './angular-rules.js';
+export {
+  SOURCE_FILE_PATTERN_WITH_ANGULAR,
+  SOURCE_FILE_PATTERN_WITH_VUE,
+  getFilesToScan,
+} from './get-files-to-scan.js';
 export { DANGEROUSLY_SET_INNER_HTML_RULE } from './react-rules.js';
 export type { SecurityRule } from './rule.js';
 export { runSecurityScan } from './run-security-scan.js';

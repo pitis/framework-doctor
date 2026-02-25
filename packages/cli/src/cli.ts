@@ -68,10 +68,13 @@ const runDoctor = (framework: Framework, args: string[]): number => {
   }
 
   if (framework === 'angular') {
-    console.error(
-      `\n  Angular Doctor is coming soon. For now, use the framework-specific package when available.\n`,
-    );
-    return 1;
+    const cliPath = resolveDoctorCli('@framework-doctor/angular');
+    const fullArgs = [dirArg, ...restArgs];
+    const result = spawnSync(process.execPath, [cliPath, ...fullArgs], {
+      stdio: 'inherit',
+      cwd,
+    });
+    return result.status ?? 1;
   }
 
   console.error(`

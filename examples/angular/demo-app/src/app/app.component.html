@@ -1,0 +1,17 @@
+<div class="container">
+  <h1>Framework Doctor Angular Demo</h1>
+  <p>A minimal Angular app with intentional issues for angular-doctor testing.</p>
+
+  <div class="example">
+    <button type="button" (click)="toggleDarkMode()">
+      {{ darkMode ? '☀️ Light' : '🌙 Dark' }}
+    </button>
+  </div>
+
+  <hr />
+  <h2>angular-doctor test section (intentional issues)</h2>
+  <div class="example">
+    <app-doctor-test label="Test" />
+    <div [innerHTML]="userRenderedContent"></div>
+  </div>
+</div>

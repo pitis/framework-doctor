@@ -1,11 +1,15 @@
 packages:
   - packages/*
+  - examples/angular/demo-app
+  - examples/react/demo-app
   - examples/svelte/demo-app
   - examples/vue/demo-app
 
 catalog:
   '@changesets/cli': ^2.29.7
   '@nuxt/eslint-plugin': ^1.15.1
+  angular-eslint: ^19.4.0
+  typescript-eslint: ^8.32.0
   '@types/node': ^25.3.0
   '@types/prompts': ^2.4.9
   commander: ^14.0.3

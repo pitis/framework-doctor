@@ -1,0 +1,6 @@
+{
+  "name": "ui",
+  "dependencies": {
+    "@angular/core": "^19.0.0"
+  }
+}

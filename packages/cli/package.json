@@ -45,8 +45,9 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@framework-doctor/svelte": "workspace:*",
+    "@framework-doctor/angular": "workspace:*",
     "@framework-doctor/react": "workspace:*",
+    "@framework-doctor/svelte": "workspace:*",
     "@framework-doctor/vue": "workspace:*"
   },
   "devDependencies": {

@@ -1,0 +1,6 @@
+{
+  "name": "my-app-client",
+  "dependencies": {
+    "svelte": "^5.0.0"
+  }
+}
