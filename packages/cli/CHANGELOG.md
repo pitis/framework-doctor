@@ -1,5 +1,16 @@
 # @framework-doctor/cli
 
+## 1.0.4
+
+### Patch Changes
+
+- angular doctor
+- Updated dependencies
+  - @framework-doctor/angular@1.0.4
+  - @framework-doctor/svelte@1.0.4
+  - @framework-doctor/react@1.0.4
+  - @framework-doctor/vue@1.0.4
+
 ## 1.0.3
 
 ### Patch Changes

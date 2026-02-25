@@ -1,5 +1,11 @@
 # @framework-doctor/core
 
+## 1.0.4
+
+### Patch Changes
+
+- angular doctor
+
 ## 1.0.3
 
 ### Patch Changes

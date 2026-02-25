@@ -1,6 +1,6 @@
 {
   "name": "@framework-doctor/angular",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Diagnose Angular codebase health",
   "author": {
     "name": "Pitis Radu",
