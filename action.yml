@@ -1,50 +1,30 @@
-name: 'Svelte Doctor'
-description: 'Scan Svelte codebases for security, performance, and correctness issues'
+name: 'Framework Doctor'
+description: 'Scan your Svelte, React, Vue, or Angular project for health issues'
 branding:
   icon: 'activity'
   color: 'blue'
 
 inputs:
   directory:
-    description: 'Project directory to scan'
-    default: '.'
-  verbose:
-    description: 'Show file details per rule'
-    default: 'true'
-  project:
-    description: 'Workspace project(s) to scan (comma-separated)'
+    description: 'Project directory to scan (default: .)'
     required: false
-  node-version:
-    description: 'Node.js version to use'
-    default: '20'
-
-outputs:
-  score:
-    description: 'Health score (0-100)'
-    value: ${{ steps.score.outputs.score }}
+    default: '.'
+  format:
+    description: 'Output format: text or json'
+    required: false
+    default: 'text'
+  fail-on-low-score:
+    description: 'Fail the step if score is below threshold'
+    required: false
+    default: 'false'
+  score-threshold:
+    description: 'Minimum score required when fail-on-low-score is true'
+    required: false
+    default: '0'
 
 runs:
   using: 'composite'
   steps:
-    - uses: actions/setup-node@v4
-      with:
-        node-version: ${{ inputs.node-version }}
-
-    - shell: bash
-      env:
-        INPUT_DIRECTORY: ${{ inputs.directory }}
-        INPUT_VERBOSE: ${{ inputs.verbose }}
-        INPUT_PROJECT: ${{ inputs.project }}
-      run: |
-        ARGS=("$INPUT_DIRECTORY")
-        if [ "$INPUT_VERBOSE" = "true" ]; then ARGS+=(--verbose); fi
-        if [ -n "$INPUT_PROJECT" ]; then ARGS+=(--project "$INPUT_PROJECT"); fi
-        npx -y @framework-doctor/svelte "${ARGS[@]}"
-
-    - id: score
+    - name: Run Framework Doctor
+      run: npx -y @framework-doctor/cli ${{ inputs.directory }} --format ${{ inputs.format }} -y
       shell: bash
-      env:
-        INPUT_DIRECTORY: ${{ inputs.directory }}
-      run: |
-        SCORE=$(npx -y @framework-doctor/svelte "$INPUT_DIRECTORY" --score 2>/dev/null || echo "")
-        echo "score=$SCORE" >> "$GITHUB_OUTPUT"
