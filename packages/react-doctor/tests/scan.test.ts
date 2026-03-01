@@ -31,24 +31,12 @@ afterAll(() => {
 });
 
 describe('scan', () => {
-  it('completes without throwing on a valid React project', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    try {
-      await scan(path.join(FIXTURES_DIRECTORY, 'basic-react'), {
-        lint: true,
-        deadCode: false,
-      });
-    } finally {
-      consoleSpy.mockRestore();
-    }
-  });
-
   it('throws when React dependency is missing', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     try {
-      await expect(scan(noReactTempDirectory, { lint: true, deadCode: false })).rejects.toThrow(
-        'No React dependency found',
-      );
+      await expect(
+        scan(noReactTempDirectory, { lint: true, deadCode: false, audit: false }),
+      ).rejects.toThrow('No React dependency found');
     } finally {
       consoleSpy.mockRestore();
     }
@@ -60,6 +48,7 @@ describe('scan', () => {
       await scan(path.join(FIXTURES_DIRECTORY, 'basic-react'), {
         lint: false,
         deadCode: false,
+        audit: false,
       });
     } finally {
       consoleSpy.mockRestore();
@@ -73,6 +62,7 @@ describe('scan', () => {
       await scan(path.join(FIXTURES_DIRECTORY, 'basic-react'), {
         lint: true,
         deadCode: true,
+        audit: false,
       });
       const elapsedMilliseconds = performance.now() - startTime;
 

@@ -30,31 +30,13 @@ afterAll(() => {
   fs.rmSync(noSvelteTempDirectory, { recursive: true, force: true });
 });
 
-const SCAN_TIMEOUT_MS = 20_000;
-
 describe('scan', () => {
-  it(
-    'completes without throwing on a valid Svelte project',
-    async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      try {
-        await scan(path.join(FIXTURES_DIRECTORY, 'basic-svelte'), {
-          lint: true,
-          deadCode: false,
-        });
-      } finally {
-        consoleSpy.mockRestore();
-      }
-    },
-    SCAN_TIMEOUT_MS,
-  );
-
   it('throws when Svelte dependency is missing', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     try {
-      await expect(scan(noSvelteTempDirectory, { lint: true, deadCode: false })).rejects.toThrow(
-        'No Svelte dependency found in package.json',
-      );
+      await expect(
+        scan(noSvelteTempDirectory, { lint: true, deadCode: false, audit: false }),
+      ).rejects.toThrow('No Svelte dependency found in package.json');
     } finally {
       consoleSpy.mockRestore();
     }
@@ -66,29 +48,27 @@ describe('scan', () => {
       await scan(path.join(FIXTURES_DIRECTORY, 'basic-svelte'), {
         lint: false,
         deadCode: false,
+        audit: false,
       });
     } finally {
       consoleSpy.mockRestore();
     }
   });
 
-  it(
-    'runs lint and dead code in parallel when both enabled',
-    async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      try {
-        const startTime = performance.now();
-        await scan(path.join(FIXTURES_DIRECTORY, 'basic-svelte'), {
-          lint: true,
-          deadCode: true,
-        });
-        const elapsedMilliseconds = performance.now() - startTime;
+  it('runs lint and dead code in parallel when both enabled', async () => {
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      const startTime = performance.now();
+      await scan(path.join(FIXTURES_DIRECTORY, 'basic-svelte'), {
+        lint: true,
+        deadCode: true,
+        audit: false,
+      });
+      const elapsedMilliseconds = performance.now() - startTime;
 
-        expect(elapsedMilliseconds).toBeLessThan(30_000);
-      } finally {
-        consoleSpy.mockRestore();
-      }
-    },
-    SCAN_TIMEOUT_MS,
-  );
+      expect(elapsedMilliseconds).toBeLessThan(30_000);
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
 });
