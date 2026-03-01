@@ -203,3 +203,33 @@ npx -y @framework-doctor/cli . --watch
 ## Dependency audit
 
 By default, the doctor runs `pnpm audit` and reports high or critical vulnerabilities. Use `--no-audit` to skip.
+
+## GitHub Action
+
+Add Framework Doctor to your CI. Other projects can use the action or reusable workflow on their PRs:
+
+**Action** (checkout required beforehand):
+
+```yaml
+- uses: actions/checkout@v4
+- uses: pitis/framework-doctor@main
+  with:
+    directory: .
+    fail-on-low-score: 'true'
+    score-threshold: '80'
+    post-to-pr: 'true'
+```
+
+**Reusable workflow** (checks out repo, runs `npx @framework-doctor/cli .`):
+
+```yaml
+jobs:
+  framework-doctor:
+    uses: pitis/framework-doctor/.github/workflows/framework-doctor-scan.yml@main
+    with:
+      post-to-pr: 'true'
+      fail-on-low-score: 'true'
+      score-threshold: '80'
+```
+
+Options: `directory`, `fail-on-low-score`, `score-threshold`, `post-to-pr`.
