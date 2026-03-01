@@ -30,6 +30,8 @@ Options:
   -v, --version       display the version number
   --no-lint           skip linting
   --no-dead-code      skip dead code detection
+  --no-audit          skip dependency vulnerability audit
+  --format <format>   output format: text or json
   --verbose           show file details per rule
   --score             output only the score (CI-friendly)
   -y, --yes           skip prompts, scan all workspace projects
@@ -52,6 +54,7 @@ Create `angular-doctor.config.json`:
   },
   "lint": true,
   "deadCode": true,
+  "audit": true,
   "verbose": false,
   "diff": false,
   "analytics": true
@@ -68,6 +71,18 @@ Or use the `angularDoctor` key in `package.json`:
   }
 }
 ```
+
+Angular Doctor also supports unified config via `framework-doctor.config.json` with an `angularDoctor` section. Framework-specific config overrides unified options.
+
+## Checks
+
+Angular Doctor runs:
+
+- **ESLint** — angular-eslint with recommended rules
+- **Knip** — Dead code detection
+- **Security** — eval, new Function, implied eval, innerHTML, bypassSecurityTrust\*
+- **checkReducedMotion** — Accessibility (WCAG 2.3.3) when motion libraries are used
+- **Dependency audit** — High/critical vulnerabilities via `pnpm audit` (use `--no-audit` to skip)
 
 ## Security checks
 

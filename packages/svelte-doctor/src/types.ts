@@ -23,8 +23,10 @@ export interface ScanOptions {
   lint?: boolean;
   jsTsLint?: boolean;
   deadCode?: boolean;
+  audit?: boolean;
   verbose?: boolean;
   scoreOnly?: boolean;
+  fix?: boolean;
   includePaths?: string[];
 }
 

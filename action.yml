@@ -1,50 +1,95 @@
-name: 'Svelte Doctor'
-description: 'Scan Svelte codebases for security, performance, and correctness issues'
+name: 'Framework Doctor'
+description: 'Scan your Svelte, React, Vue, or Angular project for health issues'
 branding:
   icon: 'activity'
   color: 'blue'
 
 inputs:
   directory:
-    description: 'Project directory to scan'
-    default: '.'
-  verbose:
-    description: 'Show file details per rule'
-    default: 'true'
-  project:
-    description: 'Workspace project(s) to scan (comma-separated)'
+    description: 'Project directory to scan (default: .)'
     required: false
-  node-version:
-    description: 'Node.js version to use'
-    default: '20'
-
-outputs:
-  score:
-    description: 'Health score (0-100)'
-    value: ${{ steps.score.outputs.score }}
+    default: '.'
+  format:
+    description: 'Output format: text or json'
+    required: false
+    default: 'text'
+  fail-on-low-score:
+    description: 'Fail the step if score is below threshold'
+    required: false
+    default: 'false'
+  score-threshold:
+    description: 'Minimum score required when fail-on-low-score is true'
+    required: false
+    default: '0'
+  post-to-pr:
+    description: 'Post scan score to PR comment (pull_request only)'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
   steps:
-    - uses: actions/setup-node@v4
-      with:
-        node-version: ${{ inputs.node-version }}
-
-    - shell: bash
+    - name: Run Framework Doctor
+      id: scan
       env:
-        INPUT_DIRECTORY: ${{ inputs.directory }}
-        INPUT_VERBOSE: ${{ inputs.verbose }}
-        INPUT_PROJECT: ${{ inputs.project }}
+        OUTPUT_FILE: ${{ runner.temp }}/framework-doctor-output.json
       run: |
-        ARGS=("$INPUT_DIRECTORY")
-        if [ "$INPUT_VERBOSE" = "true" ]; then ARGS+=(--verbose); fi
-        if [ -n "$INPUT_PROJECT" ]; then ARGS+=(--project "$INPUT_PROJECT"); fi
-        npx -y @framework-doctor/svelte "${ARGS[@]}"
-
-    - id: score
+        USE_JSON=${{ inputs.post-to-pr == 'true' || inputs.fail-on-low-score == 'true' }}
+        if [ "$USE_JSON" = "true" ]; then
+          npx -y @framework-doctor/cli "${{ inputs.directory }}" --format json -y 2>&1 | tee "$OUTPUT_FILE"
+        else
+          npx -y @framework-doctor/cli "${{ inputs.directory }}" --format ${{ inputs.format }} -y
+        fi
       shell: bash
+
+    - name: Post score to PR
+      if: inputs.post-to-pr == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = '${{ runner.temp }}/framework-doctor-output.json';
+          let data;
+          try {
+            data = JSON.parse(fs.readFileSync(path, 'utf8'));
+          } catch {
+            core.warning('Could not read Framework Doctor output');
+            return;
+          }
+          const scoreResult = data.scoreResult;
+          const score = scoreResult ? scoreResult.score : 'N/A';
+          const label = scoreResult ? scoreResult.label : '-';
+          const body = `## Framework Doctor
+
+          **Score:** ${score}/100 (${label})
+          **Framework:** ${data.doctor || 'unknown'}
+          **Files scanned:** ${data.totalFilesScanned ?? '-'}
+          **Time:** ${data.elapsedMilliseconds ? (data.elapsedMilliseconds / 1000).toFixed(1) + 's' : '-'}
+          `;
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: body.replace(/^          /gm, '')
+          });
+
+    - name: Check score threshold
+      if: inputs.fail-on-low-score == 'true'
       env:
-        INPUT_DIRECTORY: ${{ inputs.directory }}
+        OUTPUT_FILE: ${{ runner.temp }}/framework-doctor-output.json
+        THRESHOLD: ${{ inputs.score-threshold }}
       run: |
-        SCORE=$(npx -y @framework-doctor/svelte "$INPUT_DIRECTORY" --score 2>/dev/null || echo "")
-        echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+        if [ ! -f "$OUTPUT_FILE" ]; then
+          echo "Framework Doctor did not produce JSON output"
+          exit 1
+        fi
+        SCORE=$(node -e "
+          const d = require(process.env.OUTPUT_FILE);
+          const s = d?.scoreResult?.score;
+          console.log(s != null ? s : 0);
+        ")
+        if [ "$SCORE" -lt "$THRESHOLD" ]; then
+          echo "Score $SCORE is below threshold $THRESHOLD"
+          exit 1
+        fi
+      shell: bash

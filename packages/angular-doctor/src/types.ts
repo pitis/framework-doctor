@@ -19,8 +19,10 @@ export type {
 export interface ScanOptions {
   lint?: boolean;
   deadCode?: boolean;
+  audit?: boolean;
   verbose?: boolean;
   scoreOnly?: boolean;
+  format?: 'text' | 'json';
   includePaths?: string[];
 }
 

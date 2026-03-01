@@ -31,24 +31,12 @@ afterAll(() => {
 });
 
 describe('scan', () => {
-  it('completes without throwing on a valid Angular project', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    try {
-      await scan(path.join(FIXTURES_DIRECTORY, 'basic-angular'), {
-        lint: true,
-        deadCode: false,
-      });
-    } finally {
-      consoleSpy.mockRestore();
-    }
-  });
-
   it('throws when Angular dependency is missing', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     try {
-      await expect(scan(noAngularTempDirectory, { lint: true, deadCode: false })).rejects.toThrow(
-        'No Angular dependency found in package.json',
-      );
+      await expect(
+        scan(noAngularTempDirectory, { lint: true, deadCode: false, audit: false }),
+      ).rejects.toThrow('No Angular dependency found in package.json');
     } finally {
       consoleSpy.mockRestore();
     }
@@ -60,6 +48,7 @@ describe('scan', () => {
       await scan(path.join(FIXTURES_DIRECTORY, 'basic-angular'), {
         lint: false,
         deadCode: false,
+        audit: false,
       });
     } finally {
       consoleSpy.mockRestore();
@@ -73,6 +62,7 @@ describe('scan', () => {
       await scan(path.join(FIXTURES_DIRECTORY, 'basic-angular'), {
         lint: true,
         deadCode: true,
+        audit: false,
       });
       const elapsedMilliseconds = performance.now() - startTime;
 

@@ -1,6 +1,6 @@
 {
   "name": "@framework-doctor/core",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Shared utilities for Framework Doctor (telemetry, config)",
   "author": {
     "name": "Pitis Radu",

@@ -54,7 +54,18 @@ export interface BaseDoctorConfig {
   ignore?: IgnoreConfig;
   lint?: boolean;
   deadCode?: boolean;
+  audit?: boolean;
   verbose?: boolean;
   diff?: boolean | string;
   analytics?: boolean;
+}
+
+export interface FrameworkDoctorJsonOutput {
+  doctor: string;
+  version: string;
+  diagnostics: Diagnostic[];
+  scoreResult: ScoreResult | null;
+  totalFilesScanned: number;
+  elapsedMilliseconds: number;
+  skippedChecks: string[];
 }

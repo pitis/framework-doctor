@@ -32,4 +32,4 @@ npx -y @framework-doctor/react .
 
 ## Flags
 
-See [commands.md](./commands.md) for --verbose, --diff, --score, and other options.
+See [commands.md](./commands.md) for --verbose, --diff, --score, --format json, --watch, --fix, --no-audit, and other options.

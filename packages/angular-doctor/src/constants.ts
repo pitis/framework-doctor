@@ -13,3 +13,10 @@ export {
 export const SOURCE_FILE_PATTERN = /\.(html|ts|mts|cts|mjs|cjs)$/;
 
 export const OFFLINE_FLAG_MESSAGE = 'Score not available.';
+
+export const ANGULAR_MOTION_LIBRARIES = new Set([
+  '@angular/animations',
+  'framer-motion',
+  'motion',
+  'ng-animate',
+]);

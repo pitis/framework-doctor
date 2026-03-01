@@ -3,6 +3,7 @@ import {
   buildCountsSummaryLine,
   buildScoreBar,
   buildScoreBreakdownLines,
+  calculateScore,
   colorizeByScore,
   createFramedLine,
   getDoctorFace,
@@ -44,10 +45,13 @@ interface CliFlags {
   lint: boolean;
   jsTsLint: boolean;
   deadCode: boolean;
+  audit: boolean;
   verbose: boolean;
   score: boolean;
   yes: boolean;
   analytics: boolean;
+  format: string;
+  fix: boolean;
   project?: string;
   diff?: boolean | string;
   offline?: boolean;
@@ -198,7 +202,9 @@ const resolveScanOptions = (
     lint: fromCli('lint') ? flags.lint : (config?.lint ?? flags.lint),
     jsTsLint: fromCli('jsTsLint') ? flags.jsTsLint : (config?.jsTsLint ?? flags.jsTsLint),
     deadCode: fromCli('deadCode') ? flags.deadCode : (config?.deadCode ?? flags.deadCode),
+    audit: fromCli('audit') ? flags.audit : (config?.audit ?? flags.audit),
     verbose: fromCli('verbose') ? flags.verbose : (config?.verbose ?? flags.verbose),
+    fix: flags.fix,
   };
 };
 
@@ -220,6 +226,8 @@ const main = new Command()
   .option('--no-lint', 'skip lint diagnostics')
   .option('--no-js-ts-lint', 'skip JavaScript/TypeScript lint diagnostics')
   .option('--no-dead-code', 'skip dead code detection')
+  .option('--no-audit', 'skip dependency vulnerability audit')
+  .option('--fix', 'auto-fix lint issues where possible')
   .option('--verbose', 'show file details per rule')
   .option('--score', 'output only the score')
   .option('-y, --yes', 'skip prompts, scan all workspace projects');
@@ -227,6 +235,7 @@ const main = new Command()
 addAnalyticsOption(main);
 
 main
+  .option('--format <format>', 'output format: text or json', 'text')
   .option('--project <name>', 'select workspace project (comma-separated)')
   .option('--diff [base]', 'scan only files changed vs base branch')
   .option('--offline', 'skip remote scoring (local score only)')
@@ -241,7 +250,7 @@ main
       const isAutomated = isAutomatedEnvironment();
       const shouldSkipPrompts = flags.yes || isAutomated || !process.stdin.isTTY;
 
-      if (!isScoreOnly) {
+      if (!isScoreOnly && flags.format !== 'json') {
         logger.log(`svelte-doctor v${VERSION}`);
         logger.break();
       }
@@ -263,7 +272,7 @@ main
         isScoreOnly,
       );
 
-      if (isDiffMode && diffInfo && !isScoreOnly) {
+      if (isDiffMode && diffInfo && !isScoreOnly && flags.format !== 'json') {
         if (diffInfo.isCurrentChanges) {
           logger.log('Scanning uncommitted changes');
         } else {
@@ -274,11 +283,16 @@ main
         logger.break();
       }
 
-      if (!isScoreOnly && !isAutomated && !flags.yes) {
+      const isJsonFormat = flags.format === 'json';
+
+      if (!isScoreOnly && !isAutomated && !flags.yes && !isJsonFormat) {
         await maybePromptAnalyticsConsent(shouldSkipPrompts);
       }
 
       const allDiagnostics: Diagnostic[] = [];
+      let totalElapsedMs = 0;
+      let totalFilesScanned = 0;
+      const allSkippedChecks = new Set<string>();
       const telemetryUrl = process.env.FRAMEWORK_DOCTOR_TELEMETRY_URL ?? '';
 
       for (const projectDirectory of projectDirectories) {
@@ -288,7 +302,7 @@ main
           if (projectDiffInfo) {
             const changedSourceFiles = filterSourceFiles(projectDiffInfo.changedFiles);
             if (changedSourceFiles.length === 0) {
-              if (!isScoreOnly) {
+              if (!isScoreOnly && !isJsonFormat) {
                 logger.dim(`No changed source files in ${projectDirectory}, skipping.`);
                 logger.break();
               }
@@ -298,7 +312,7 @@ main
           }
         }
 
-        if (!isScoreOnly) {
+        if (!isScoreOnly && !isJsonFormat) {
           logger.dim(`Scanning ${projectDirectory}...`);
           logger.break();
         }
@@ -311,6 +325,14 @@ main
         const elapsedMs = performance.now() - startTime;
 
         allDiagnostics.push(...result.diagnostics);
+        totalElapsedMs += elapsedMs;
+        totalFilesScanned +=
+          (includePaths?.length ?? 0) > 0
+            ? (includePaths?.length ?? 0)
+            : result.projectInfo.sourceFileCount;
+        for (const skipped of result.skippedChecks) {
+          allSkippedChecks.add(skipped);
+        }
 
         if (
           telemetryUrl &&
@@ -333,10 +355,14 @@ main
           );
         }
 
-        if (flags.score) {
+        if (flags.score && !isJsonFormat) {
           if (result.scoreResult) {
             logger.log(`${result.scoreResult.score}`);
           }
+          continue;
+        }
+
+        if (isJsonFormat) {
           continue;
         }
 
@@ -370,6 +396,29 @@ main
         if (!isScoreOnly) {
           logger.break();
         }
+      }
+
+      if (isJsonFormat) {
+        const hasHighOrCriticalSecurityFindings = allDiagnostics.some(
+          (d) => d.category === 'security' && d.severity === 'error',
+        );
+        const scoreResult =
+          totalFilesScanned > 0
+            ? calculateScore(allDiagnostics, totalFilesScanned, {
+                hasHighOrCriticalSecurityFindings,
+              })
+            : { score: 100, label: 'Great', breakdown: undefined };
+        const output = {
+          doctor: 'svelte-doctor',
+          version: VERSION,
+          diagnostics: allDiagnostics,
+          scoreResult,
+          totalFilesScanned,
+          elapsedMilliseconds: totalElapsedMs,
+          skippedChecks: [...allSkippedChecks],
+        };
+        logger.log(JSON.stringify(output, null, 2));
+        return;
       }
 
       if (!isScoreOnly && !shouldSkipPrompts) {

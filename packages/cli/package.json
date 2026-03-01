@@ -1,6 +1,6 @@
 {
   "name": "@framework-doctor/cli",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Auto-detect framework and run the right doctor",
   "author": {
     "name": "Pitis Radu",
@@ -48,7 +48,8 @@
     "@framework-doctor/angular": "workspace:*",
     "@framework-doctor/react": "workspace:*",
     "@framework-doctor/svelte": "workspace:*",
-    "@framework-doctor/vue": "workspace:*"
+    "@framework-doctor/vue": "workspace:*",
+    "chokidar": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",

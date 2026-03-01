@@ -1,0 +1,42 @@
+name: Framework Doctor Scan
+
+on:
+  workflow_call:
+    inputs:
+      directory:
+        type: string
+        description: 'Project directory to scan'
+        required: false
+        default: '.'
+      fail-on-low-score:
+        type: string
+        description: 'Fail if score below threshold'
+        required: false
+        default: 'false'
+      score-threshold:
+        type: string
+        description: 'Minimum score when fail-on-low-score is true'
+        required: false
+        default: '0'
+      post-to-pr:
+        type: string
+        description: 'Post score to PR comment'
+        required: false
+        default: 'false'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Framework Doctor
+        uses: pitis/framework-doctor@main
+        with:
+          directory: ${{ inputs.directory }}
+          fail-on-low-score: ${{ inputs.fail-on-low-score }}
+          score-threshold: ${{ inputs.score-threshold }}
+          post-to-pr: ${{ inputs.post-to-pr }}

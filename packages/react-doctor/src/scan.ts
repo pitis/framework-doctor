@@ -320,8 +320,11 @@ const resolveOxlintNode = async (
 interface ResolvedScanOptions {
   lint: boolean;
   deadCode: boolean;
+  audit: boolean;
   verbose: boolean;
   scoreOnly: boolean;
+  format: 'text' | 'json';
+  fix: boolean;
   includePaths: string[];
 }
 
@@ -331,8 +334,11 @@ const mergeScanOptions = (
 ): ResolvedScanOptions => ({
   lint: inputOptions.lint ?? userConfig?.lint ?? true,
   deadCode: inputOptions.deadCode ?? userConfig?.deadCode ?? true,
+  audit: inputOptions.audit ?? userConfig?.audit ?? true,
   verbose: inputOptions.verbose ?? userConfig?.verbose ?? false,
   scoreOnly: inputOptions.scoreOnly ?? false,
+  format: inputOptions.format ?? 'text',
+  fix: inputOptions.fix ?? false,
   includePaths: inputOptions.includePaths ?? [],
 });
 
@@ -386,7 +392,7 @@ export const scan = async (
     throw new Error('No React dependency found in package.json');
   }
 
-  if (!options.scoreOnly) {
+  if (!options.scoreOnly && options.format !== 'json') {
     printProjectDetection(projectInfo, userConfig, isDiffMode, includePaths);
   }
 
@@ -395,12 +401,18 @@ export const scan = async (
   let didLintFail = false;
   let didDeadCodeFail = false;
 
-  const resolvedNodeBinaryPath = await resolveOxlintNode(options.lint, options.scoreOnly);
+  const resolvedNodeBinaryPath = await resolveOxlintNode(
+    options.lint,
+    options.scoreOnly || options.format === 'json',
+  );
   if (options.lint && !resolvedNodeBinaryPath) didLintFail = true;
 
   const lintPromise = resolvedNodeBinaryPath
     ? (async () => {
-        const lintSpinner = options.scoreOnly ? null : spinner('Running lint checks...').start();
+        const lintSpinner =
+          options.scoreOnly || options.format === 'json'
+            ? null
+            : spinner('Running lint checks...').start();
         try {
           const lintDiagnostics = await runOxlint(
             directory,
@@ -409,6 +421,7 @@ export const scan = async (
             projectInfo.hasReactCompiler,
             jsxIncludePaths,
             resolvedNodeBinaryPath,
+            options.fix,
           );
           lintSpinner?.succeed('Running lint checks.');
           return lintDiagnostics;
@@ -436,9 +449,10 @@ export const scan = async (
   const deadCodePromise =
     options.deadCode && !isDiffMode
       ? (async () => {
-          const deadCodeSpinner = options.scoreOnly
-            ? null
-            : spinner('Detecting dead code...').start();
+          const deadCodeSpinner =
+            options.scoreOnly || options.format === 'json'
+              ? null
+              : spinner('Detecting dead code...').start();
           try {
             const knipDiagnostics = await runKnip(directory);
             deadCodeSpinner?.succeed('Detecting dead code.');
@@ -468,6 +482,7 @@ export const scan = async (
     directory,
     isDiffMode,
     userConfig,
+    options.audit,
   );
 
   const elapsedMilliseconds = performance.now() - startTime;
@@ -483,11 +498,13 @@ export const scan = async (
   });
   const noScoreMessage = OFFLINE_FLAG_MESSAGE;
 
-  if (options.scoreOnly) {
-    if (scoreResult) {
-      logger.log(`${scoreResult.score}`);
-    } else {
-      logger.dim(noScoreMessage);
+  if (options.scoreOnly || options.format === 'json') {
+    if (options.scoreOnly && options.format !== 'json') {
+      if (scoreResult) {
+        logger.log(`${scoreResult.score}`);
+      } else {
+        logger.dim(noScoreMessage);
+      }
     }
     return { diagnostics, scoreResult, skippedChecks, projectInfo };
   }

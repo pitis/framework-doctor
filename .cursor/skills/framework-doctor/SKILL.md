@@ -14,7 +14,7 @@ metadata:
 
 Scans your frontend codebase for security, performance, correctness, and architecture issues. Auto-detects Svelte or React from `package.json`. Outputs a 0-100 score with actionable diagnostics.
 
-**Supported:** Svelte, React, Vue (Angular coming soon)
+**Supported:** Svelte, React, Vue, Angular
 
 ## IMPORTANT: Run After Making Changes
 
@@ -30,7 +30,10 @@ Scan project?
 ├─ Svelte only → npx -y @framework-doctor/svelte . --verbose --diff
 ├─ React only → npx -y @framework-doctor/react . --verbose --diff
 ├─ Vue only → npx -y @framework-doctor/vue . --verbose --diff
-├─ Flags (verbose, diff, score) → references/cli/commands.md
+├─ CI / tooling → npx -y @framework-doctor/cli . --format json -y
+├─ Watch mode → npx -y @framework-doctor/cli . --watch
+├─ Auto-fix (Svelte, React) → npx -y @framework-doctor/svelte . --fix
+├─ Flags (verbose, diff, score, format, fix, audit) → references/cli/commands.md
 └─ What gets checked → references/checks/RULE.md
 ```
 
@@ -113,14 +116,14 @@ setTimeout(refreshData, 5000);
 
 ## Reference Index
 
-| Topic                                                     | Purpose                                                       |
-| --------------------------------------------------------- | ------------------------------------------------------------- |
-| [cli/RULE.md](./references/cli/RULE.md)                   | Usage overview, unified vs framework-specific CLI             |
-| [cli/commands.md](./references/cli/commands.md)           | Flags: --verbose, --diff, --score                             |
-| [checks/RULE.md](./references/checks/RULE.md)             | What the doctor checks (security, svelte-check, knip, oxlint) |
-| [security/RULE.md](./references/security/RULE.md)         | Security patterns overview                                    |
-| [security/svelte.md](./references/security/svelte.md)     | Svelte-specific security ({@html}, javascript: URLs)          |
-| [security/patterns.md](./references/security/patterns.md) | WRONG/CORRECT patterns (eval, URLs, sanitization)             |
-| [svelte/RULE.md](./references/svelte/RULE.md)             | Svelte guidance overview                                      |
-| [svelte/migration.md](./references/svelte/migration.md)   | Svelte 5 migration ($props, $effect, {@render})               |
-| [react/RULE.md](./references/react/RULE.md)               | React guidance overview                                       |
+| Topic                                                     | Purpose                                                                      |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [cli/RULE.md](./references/cli/RULE.md)                   | Usage overview, unified vs framework-specific CLI                            |
+| [cli/commands.md](./references/cli/commands.md)           | Flags: --verbose, --diff, --score, --format json, --watch, --fix, --no-audit |
+| [checks/RULE.md](./references/checks/RULE.md)             | What the doctor checks (security, svelte-check, knip, oxlint)                |
+| [security/RULE.md](./references/security/RULE.md)         | Security patterns overview                                                   |
+| [security/svelte.md](./references/security/svelte.md)     | Svelte-specific security ({@html}, javascript: URLs)                         |
+| [security/patterns.md](./references/security/patterns.md) | WRONG/CORRECT patterns (eval, URLs, sanitization)                            |
+| [svelte/RULE.md](./references/svelte/RULE.md)             | Svelte guidance overview                                                     |
+| [svelte/migration.md](./references/svelte/migration.md)   | Svelte 5 migration ($props, $effect, {@render})                              |
+| [react/RULE.md](./references/react/RULE.md)               | React guidance overview                                                      |

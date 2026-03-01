@@ -1,6 +1,8 @@
+import chokidar from 'chokidar';
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import path from 'node:path';
+import { WATCH_DEBOUNCE_MS } from './constants.js';
 
 type Framework = 'svelte' | 'react' | 'vue' | 'angular' | null;
 
@@ -80,7 +82,7 @@ const runDoctor = (framework: Framework, args: string[]): number => {
   console.error(`
   Could not detect a supported framework in ${dirArg}.
 
-  Supported: Svelte, React, Vue, Angular (coming soon)
+  Supported: Svelte, React, Vue, Angular
 
   Make sure you're in a project root with a package.json that includes:
   - Svelte: "svelte" or "@sveltejs/kit"
@@ -96,15 +98,97 @@ const runDoctor = (framework: Framework, args: string[]): number => {
   return 1;
 };
 
+const filterWatchArgs = (args: string[]): { args: string[]; watch: boolean } => {
+  const watchIndex = args.findIndex((a) => a === '--watch' || a === '-w');
+  const watch = watchIndex >= 0;
+  const argsWithoutWatch =
+    watchIndex >= 0 ? [...args.slice(0, watchIndex), ...args.slice(watchIndex + 1)] : args;
+  return { args: argsWithoutWatch, watch };
+};
+
 const main = (): number => {
   const rawArgs = process.argv.slice(2);
-  const dirIndex = rawArgs.findIndex((a) => !a.startsWith('-'));
-  const dirArg = dirIndex >= 0 ? path.resolve(process.cwd(), rawArgs[dirIndex]) : process.cwd();
+  const { args: processedArgs, watch } = filterWatchArgs(rawArgs);
+  const dirIndex = processedArgs.findIndex((a) => !a.startsWith('-'));
+  const dirArg =
+    dirIndex >= 0 ? path.resolve(process.cwd(), processedArgs[dirIndex]) : process.cwd();
   const restArgs =
-    dirIndex >= 0 ? [...rawArgs.slice(0, dirIndex), ...rawArgs.slice(dirIndex + 1)] : rawArgs;
+    dirIndex >= 0
+      ? [...processedArgs.slice(0, dirIndex), ...processedArgs.slice(dirIndex + 1)]
+      : processedArgs;
+  const doctorArgs = restArgs.length > 0 ? [dirArg, ...restArgs] : [dirArg];
 
   const framework = detectFramework(dirArg);
-  return runDoctor(framework, restArgs.length > 0 ? [dirArg, ...restArgs] : [dirArg]);
+  if (!framework) {
+    console.error(`
+  Could not detect a supported framework in ${dirArg}.
+
+  Supported: Svelte, React, Vue, Angular
+
+  Make sure you're in a project root with a package.json that includes:
+  - Svelte: "svelte" or "@sveltejs/kit"
+  - React: "react", "next", or "remix"
+  - Vue: "vue" or "nuxt"
+  - Angular: "@angular/core"
+
+  Or run a specific doctor directly:
+  - npx @framework-doctor/svelte .
+  - npx @framework-doctor/react .
+  - npx @framework-doctor/vue .
+`);
+    return 1;
+  }
+
+  if (!watch) {
+    return runDoctor(framework, doctorArgs);
+  }
+
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  const runScan = () => {
+    runDoctor(framework, doctorArgs);
+  };
+
+  runScan();
+  console.log('\nWatching for changes... (Ctrl+C to stop)\n');
+
+  const watcher = chokidar.watch(dirArg, {
+    ignored: [
+      /(^|[/\\])\../,
+      /node_modules/,
+      /dist/,
+      /\.git/,
+      /\.turbo/,
+      /coverage/,
+      /\.next/,
+      /\.svelte-kit/,
+    ],
+  });
+
+  watcher.on('change', () => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      runScan();
+    }, WATCH_DEBOUNCE_MS);
+  });
+
+  watcher.on('add', () => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      runScan();
+    }, WATCH_DEBOUNCE_MS);
+  });
+
+  watcher.on('unlink', () => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      runScan();
+    }, WATCH_DEBOUNCE_MS);
+  });
+
+  return 0;
 };
 
 process.exit(main());
