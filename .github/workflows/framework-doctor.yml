@@ -1,0 +1,35 @@
+name: Framework Doctor
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  scan-examples:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example: [svelte/demo-app, react/demo-app, vue/demo-app, angular/demo-app]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run Framework Doctor (${{ matrix.example }})
+        run: pnpm exec framework-doctor examples/${{ matrix.example }} --format json -y

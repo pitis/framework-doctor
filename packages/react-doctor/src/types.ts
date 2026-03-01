@@ -84,8 +84,11 @@ export interface ScanResult {
 export interface ScanOptions {
   lint?: boolean;
   deadCode?: boolean;
+  audit?: boolean;
   verbose?: boolean;
   scoreOnly?: boolean;
+  format?: 'text' | 'json';
+  fix?: boolean;
   includePaths?: string[];
 }
 

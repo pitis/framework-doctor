@@ -41,6 +41,7 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 
 - `npx -y @framework-doctor/cli .` - auto-detect framework and run the right doctor
 - `npx -y @framework-doctor/cli ./path/to/project` - scan a specific project directory
+- `npx -y @framework-doctor/cli . --watch` - re-scan on file changes
 
 **React (direct):**
 
@@ -48,12 +49,15 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 - `npx -y @framework-doctor/react ./path/to/project` - scan a specific project directory
 - `npx -y @framework-doctor/react . --verbose` - include file and line details
 - `npx -y @framework-doctor/react . --score` - print only the numeric score (CI-friendly)
+- `npx -y @framework-doctor/react . --format json` - machine-readable output
+- `npx -y @framework-doctor/react . --fix` - auto-fix lint issues
 
 **Vue (direct):**
 
 - `npx -y @framework-doctor/vue .` - run a full scan
 - `npx -y @framework-doctor/vue . --verbose` - include file and line details
 - `npx -y @framework-doctor/vue . --score` - print only the numeric score (CI-friendly)
+- `npx -y @framework-doctor/vue . --format json` - machine-readable output
 - `npx -y @framework-doctor/vue . --diff main` - scan only files changed against `main`.
 - `npx -y @framework-doctor/vue . --project web` - select a specific workspace package.
 
@@ -63,6 +67,8 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 - `npx -y @framework-doctor/svelte ./path/to/project` - scan a specific project directory
 - `npx -y @framework-doctor/svelte . --verbose` - include file and line details.
 - `npx -y @framework-doctor/svelte . --score` - print only the numeric score (CI-friendly).
+- `npx -y @framework-doctor/svelte . --format json` - machine-readable output.
+- `npx -y @framework-doctor/svelte . --fix` - auto-fix JS/TS lint issues.
 - `npx -y @framework-doctor/svelte . --no-js-ts-lint` - only run Svelte checks (skip JS/TS linting).
 - `npx -y @framework-doctor/svelte . --diff main` - scan only files changed against `main`.
 - `npx -y @framework-doctor/svelte . --project web` - select a specific workspace package.
@@ -73,6 +79,7 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 - `npx -y @framework-doctor/angular ./path/to/project` - scan a specific project directory
 - `npx -y @framework-doctor/angular . --verbose` - include file and line details
 - `npx -y @framework-doctor/angular . --score` - print only the numeric score (CI-friendly)
+- `npx -y @framework-doctor/angular . --format json` - machine-readable output
 - `npx -y @framework-doctor/angular . --diff main` - scan only files changed against `main`
 - `npx -y @framework-doctor/angular . --project my-app` - select a specific workspace project
 
@@ -88,6 +95,9 @@ Options:
   --no-lint           skip lint diagnostics
   --no-js-ts-lint     skip JavaScript/TypeScript lint diagnostics
   --no-dead-code      skip dead code detection
+  --no-audit          skip dependency vulnerability audit
+  --fix               auto-fix lint issues where possible
+  --format <format>   output format: text or json
   --verbose           show file details per rule
   --score             output only the score
   -y, --yes           skip prompts
@@ -98,9 +108,11 @@ Options:
   -h, --help          display help for command
 ```
 
-React doctor options: `--no-lint`, `--no-dead-code`, `--verbose`, `--score`, `--no-analytics`, `--project`, `--diff`, `--offline`. See [packages/react-doctor/README.md](packages/react-doctor/README.md).
+React doctor options: `--no-lint`, `--no-dead-code`, `--no-audit`, `--fix`, `--format json`, `--verbose`, `--score`, `--no-analytics`, `--project`, `--diff`, `--offline`. See [packages/react-doctor/README.md](packages/react-doctor/README.md).
 
-Angular doctor options: `--no-lint`, `--no-dead-code`, `--verbose`, `--score`, `--no-analytics`, `--project`, `--diff`, `--offline`. See [packages/angular-doctor/README.md](packages/angular-doctor/README.md).
+Vue doctor options: `--no-lint`, `--no-dead-code`, `--no-audit`, `--format json`, `--verbose`, `--score`, `--no-analytics`, `--project`, `--diff`, `--offline`. See [packages/vue-doctor/README.md](packages/vue-doctor/README.md).
+
+Angular doctor options: `--no-lint`, `--no-dead-code`, `--no-audit`, `--format json`, `--verbose`, `--score`, `--no-analytics`, `--project`, `--diff`, `--offline`. See [packages/angular-doctor/README.md](packages/angular-doctor/README.md).
 
 ## Security checks
 
@@ -120,7 +132,27 @@ The doctors optionally send anonymous usage data when you opt in. Data is stored
 
 ## Configuration
 
-Create `svelte-doctor.config.json`:
+### Unified config (`framework-doctor.config.json`)
+
+Shared config for monorepos with multiple frameworks. Supports top-level shared options and framework sections:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**"]
+  },
+  "verbose": false,
+  "analytics": true,
+  "svelteDoctor": { "jsTsLint": false },
+  "reactDoctor": { "lint": true },
+  "vueDoctor": {},
+  "angularDoctor": {}
+}
+```
+
+### Framework-specific config
+
+Create `svelte-doctor.config.json` (or `vue-doctor.config.json`, etc.):
 
 ```json
 {
@@ -131,6 +163,7 @@ Create `svelte-doctor.config.json`:
   "lint": true,
   "jsTsLint": true,
   "deadCode": true,
+  "audit": true,
   "verbose": false,
   "diff": false,
   "analytics": true
@@ -146,3 +179,27 @@ Or use `package.json`:
   }
 }
 ```
+
+Framework-specific config overrides the unified config.
+
+## Machine-readable output
+
+Use `--format json` for CI or tooling integration:
+
+```bash
+npx -y @framework-doctor/cli . --format json -y
+```
+
+Output includes: `doctor`, `version`, `diagnostics`, `scoreResult`, `totalFilesScanned`, `elapsedMilliseconds`, `skippedChecks`.
+
+## Watch mode
+
+Re-scan on file changes during development:
+
+```bash
+npx -y @framework-doctor/cli . --watch
+```
+
+## Dependency audit
+
+By default, the doctor runs `pnpm audit` and reports high or critical vulnerabilities. Use `--no-audit` to skip.

@@ -35,7 +35,8 @@ export {
   writeGlobalConfig,
   type FrameworkDoctorConfig,
 } from './global-config.js';
-export { loadConfig } from './load-config.js';
+export { loadConfig, loadConfigWithUnified, loadUnifiedConfig } from './load-config.js';
+export { runAudit, type AuditResult } from './run-audit.js';
 export {
   DANGEROUSLY_SET_INNER_HTML_RULE,
   NO_AT_HTML_RULE,
@@ -61,6 +62,7 @@ export type {
   BaseDoctorConfig,
   Diagnostic,
   DiffInfo,
+  FrameworkDoctorJsonOutput,
   IgnoreConfig,
   ScoreBreakdown,
   ScoreGuardrailInput,
