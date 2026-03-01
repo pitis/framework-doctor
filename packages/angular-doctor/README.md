@@ -74,6 +74,16 @@ Or use the `angularDoctor` key in `package.json`:
 
 Angular Doctor also supports unified config via `framework-doctor.config.json` with an `angularDoctor` section. Framework-specific config overrides unified options.
 
+## Checks
+
+Angular Doctor runs:
+
+- **ESLint** — angular-eslint with recommended rules
+- **Knip** — Dead code detection
+- **Security** — eval, new Function, implied eval, innerHTML, bypassSecurityTrust\*
+- **checkReducedMotion** — Accessibility (WCAG 2.3.3) when motion libraries are used
+- **Dependency audit** — High/critical vulnerabilities via `pnpm audit` (use `--no-audit` to skip)
+
 ## Security checks
 
 Angular Doctor flags:
@@ -83,8 +93,6 @@ Angular Doctor flags:
 - **`setTimeout("string")` / `setInterval("string")`** — Implied eval
 - **`innerHTML` binding** — Raw HTML can lead to XSS if content is unsanitized
 - **`bypassSecurityTrust*`** — Bypassing Angular’s sanitizer can lead to XSS
-
-Angular Doctor also runs a dependency audit (`pnpm audit`) and reports high/critical vulnerabilities. Use `--no-audit` to skip.
 
 ## Analytics
 
