@@ -30,6 +30,8 @@ Options:
   -v, --version       display the version number
   --no-lint           skip linting
   --no-dead-code      skip dead code detection
+  --no-audit          skip dependency vulnerability audit
+  --format <format>   output format: text or json
   --verbose           show file details per rule
   --score             output only the score (CI-friendly)
   -y, --yes           skip prompts, scan all workspace projects
@@ -52,6 +54,7 @@ Create `vue-doctor.config.json`:
   },
   "lint": true,
   "deadCode": true,
+  "audit": true,
   "verbose": false,
   "diff": false,
   "analytics": true
@@ -68,6 +71,8 @@ Or use the `vueDoctor` key in `package.json`:
   }
 }
 ```
+
+Vue Doctor also supports unified config via `framework-doctor.config.json` with a `vueDoctor` section. Framework-specific config overrides unified options.
 
 ## Programmatic API
 
@@ -95,6 +100,7 @@ Vue Doctor runs:
 - **Security** — v-html, eval, new Function, implied eval
 - **Knip** — Dead code detection
 - **checkReducedMotion** — Accessibility (WCAG 2.3.3) when motion libraries are used
+- **Dependency audit** — High/critical vulnerabilities via `pnpm audit` (use `--no-audit` to skip)
 
 ## Security checks
 

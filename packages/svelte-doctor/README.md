@@ -31,6 +31,9 @@ Options:
   --no-lint           skip lint diagnostics
   --no-js-ts-lint     skip JavaScript/TypeScript lint diagnostics
   --no-dead-code      skip dead code detection
+  --no-audit          skip dependency vulnerability audit
+  --fix               auto-fix JS/TS lint issues where possible
+  --format <format>   output format: text or json
   --verbose           show file details per rule
   --score             output only the score (CI-friendly)
   -y, --yes           skip prompts
@@ -54,11 +57,14 @@ Create `svelte-doctor.config.json`:
   "lint": true,
   "jsTsLint": true,
   "deadCode": true,
+  "audit": true,
   "verbose": false,
   "diff": false,
   "analytics": true
 }
 ```
+
+Svelte Doctor also supports unified config via `framework-doctor.config.json` with a `svelteDoctor` section. Framework-specific config overrides unified options.
 
 Or use the `svelteDoctor` key in `package.json`:
 
@@ -82,6 +88,8 @@ Svelte Doctor flags:
 Plus oxlint's `no-eval` and svelte-check's `a11y_invalid_attribute` (e.g. `javascript:` URLs in `href`).
 
 To ignore a rule: `"svelte-doctor/no-at-html"`, `"svelte-doctor/no-new-function"`, `"svelte-doctor/no-implied-eval"`.
+
+Svelte Doctor also runs a dependency audit (`pnpm audit`) and reports high/critical vulnerabilities. Use `--no-audit` to skip.
 
 ## Analytics
 

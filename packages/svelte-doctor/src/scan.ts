@@ -1,3 +1,4 @@
+import { runAudit } from '@framework-doctor/core';
 import type { Diagnostic, ScanOptions, ScanResult, SvelteDoctorConfig } from './types.js';
 import { checkReducedMotion } from './utils/check-reduced-motion.js';
 import { discoverProject } from './utils/discover-project.js';
@@ -13,6 +14,8 @@ interface ResolvedScanOptions {
   lint: boolean;
   jsTsLint: boolean;
   deadCode: boolean;
+  audit: boolean;
+  fix: boolean;
   includePaths: string[];
 }
 
@@ -23,6 +26,8 @@ const resolveOptions = (
   lint: options.lint ?? userConfig?.lint ?? true,
   jsTsLint: options.jsTsLint ?? userConfig?.jsTsLint ?? true,
   deadCode: options.deadCode ?? userConfig?.deadCode ?? true,
+  audit: options.audit ?? userConfig?.audit ?? true,
+  fix: options.fix ?? false,
   includePaths: options.includePaths ?? [],
 });
 
@@ -56,6 +61,7 @@ export const scan = async (directory: string, options: ScanOptions = {}): Promis
         directory,
         projectInfo.hasTypeScript,
         resolved.includePaths,
+        resolved.fix,
       );
     } catch {
       skippedChecks.push('js/ts lint');
@@ -83,6 +89,9 @@ export const scan = async (directory: string, options: ScanOptions = {}): Promis
   const reducedMotionDiagnostics =
     resolved.includePaths.length === 0 ? checkReducedMotion(directory) : [];
 
+  const auditDiagnostics =
+    resolved.audit && resolved.includePaths.length === 0 ? runAudit(directory).diagnostics : [];
+
   const diagnostics = filterIgnoredDiagnostics(
     [
       ...lintDiagnostics,
@@ -90,6 +99,7 @@ export const scan = async (directory: string, options: ScanOptions = {}): Promis
       ...deadCodeDiagnostics,
       ...securityDiagnostics,
       ...reducedMotionDiagnostics,
+      ...auditDiagnostics,
     ],
     userConfig,
   );

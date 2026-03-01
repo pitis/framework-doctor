@@ -1,3 +1,4 @@
+import { runAudit } from '@framework-doctor/core';
 import { JSX_FILE_PATTERN } from '../constants.js';
 import type { Diagnostic, ReactDoctorConfig } from '../types.js';
 import { checkReducedMotion } from './check-reduced-motion.js';
@@ -15,12 +16,14 @@ export const combineDiagnostics = (
   directory: string,
   isDiffMode: boolean,
   userConfig: ReactDoctorConfig | null,
+  audit: boolean = true,
 ): Diagnostic[] => {
   const allDiagnostics = [
     ...lintDiagnostics,
     ...deadCodeDiagnostics,
     ...securityDiagnostics,
     ...(isDiffMode ? [] : checkReducedMotion(directory)),
+    ...(audit && !isDiffMode ? runAudit(directory).diagnostics : []),
   ];
   return userConfig ? filterIgnoredDiagnostics(allDiagnostics, userConfig) : allDiagnostics;
 };

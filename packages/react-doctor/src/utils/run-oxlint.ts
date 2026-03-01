@@ -354,6 +354,7 @@ export const runOxlint = async (
   hasReactCompiler: boolean,
   includePaths?: string[],
   nodeBinaryPath: string = process.execPath,
+  fix: boolean = false,
 ): Promise<Diagnostic[]> => {
   if (includePaths !== undefined && includePaths.length === 0) {
     return [];
@@ -369,6 +370,7 @@ export const runOxlint = async (
 
     const oxlintBinary = resolveOxlintBinary();
     const baseArgs = [oxlintBinary, '-c', configPath, '--format', 'json'];
+    if (fix) baseArgs.push('--fix');
 
     if (hasTypeScript) {
       baseArgs.push('--tsconfig', './tsconfig.json');

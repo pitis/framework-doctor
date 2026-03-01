@@ -30,6 +30,8 @@ Options:
   -v, --version       display the version number
   --no-lint           skip linting
   --no-dead-code      skip dead code detection
+  --no-audit          skip dependency vulnerability audit
+  --format <format>   output format: text or json
   --verbose           show file details per rule
   --score             output only the score (CI-friendly)
   -y, --yes           skip prompts, scan all workspace projects
@@ -52,6 +54,7 @@ Create `angular-doctor.config.json`:
   },
   "lint": true,
   "deadCode": true,
+  "audit": true,
   "verbose": false,
   "diff": false,
   "analytics": true
@@ -69,6 +72,8 @@ Or use the `angularDoctor` key in `package.json`:
 }
 ```
 
+Angular Doctor also supports unified config via `framework-doctor.config.json` with an `angularDoctor` section. Framework-specific config overrides unified options.
+
 ## Security checks
 
 Angular Doctor flags:
@@ -78,6 +83,8 @@ Angular Doctor flags:
 - **`setTimeout("string")` / `setInterval("string")`** — Implied eval
 - **`innerHTML` binding** — Raw HTML can lead to XSS if content is unsanitized
 - **`bypassSecurityTrust*`** — Bypassing Angular’s sanitizer can lead to XSS
+
+Angular Doctor also runs a dependency audit (`pnpm audit`) and reports high/critical vulnerabilities. Use `--no-audit` to skip.
 
 ## Analytics
 

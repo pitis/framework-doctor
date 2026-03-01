@@ -35,3 +35,43 @@ export const loadConfig = <T extends object>(
     return null;
   }
 };
+
+const UNIFIED_CONFIG_FILENAME = 'framework-doctor.config.json';
+const UNIFIED_PACKAGE_JSON_KEY = 'frameworkDoctor';
+
+const SHARED_OPTIONS = ['ignore', 'verbose', 'diff', 'analytics'] as const;
+
+export const loadUnifiedConfig = (rootDirectory: string): Record<string, unknown> | null => {
+  const unified = loadConfig<Record<string, unknown>>(
+    rootDirectory,
+    UNIFIED_CONFIG_FILENAME,
+    UNIFIED_PACKAGE_JSON_KEY,
+  );
+  return unified;
+};
+
+export const loadConfigWithUnified = <T extends object>(
+  rootDirectory: string,
+  configFilename: string,
+  packageJsonKey: string,
+  unifiedFrameworkKey: string,
+): T | null => {
+  const frameworkConfig = loadConfig<T>(rootDirectory, configFilename, packageJsonKey);
+  const unified = loadUnifiedConfig(rootDirectory);
+  if (!frameworkConfig && !unified) return null;
+
+  const merged: Record<string, unknown> = {};
+  if (unified) {
+    for (const key of SHARED_OPTIONS) {
+      if (key in unified) merged[key] = unified[key];
+    }
+    const frameworkSection = unified[unifiedFrameworkKey];
+    if (isPlainObject(frameworkSection)) {
+      Object.assign(merged, frameworkSection);
+    }
+  }
+  if (frameworkConfig && typeof frameworkConfig === 'object') {
+    Object.assign(merged, frameworkConfig as Record<string, unknown>);
+  }
+  return Object.keys(merged).length > 0 ? (merged as T) : null;
+};

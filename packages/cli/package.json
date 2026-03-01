@@ -48,7 +48,8 @@
     "@framework-doctor/angular": "workspace:*",
     "@framework-doctor/react": "workspace:*",
     "@framework-doctor/svelte": "workspace:*",
-    "@framework-doctor/vue": "workspace:*"
+    "@framework-doctor/vue": "workspace:*",
+    "chokidar": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",

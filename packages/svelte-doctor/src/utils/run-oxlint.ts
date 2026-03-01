@@ -57,6 +57,7 @@ export const runOxlint = async (
   rootDirectory: string,
   hasTypeScript: boolean,
   includePaths: string[],
+  fix: boolean = false,
 ): Promise<Diagnostic[]> => {
   const selectedPaths =
     includePaths.length > 0
@@ -66,6 +67,7 @@ export const runOxlint = async (
   if (selectedPaths.length === 0) return [];
 
   const args = ['oxlint', '--format', 'json'];
+  if (fix) args.push('--fix');
   if (hasTypeScript) {
     args.push('--tsconfig', './tsconfig.json');
   }

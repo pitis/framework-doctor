@@ -1,11 +1,13 @@
 import {
   addAnalyticsOption,
+  calculateScore,
   highlighter,
   isAutomatedEnvironment,
   logger,
 } from '@framework-doctor/core';
 import { Command } from 'commander';
 import path from 'node:path';
+import { performance } from 'node:perf_hooks';
 import prompts from 'prompts';
 import { scan } from './scan.js';
 import type { Diagnostic, DiffInfo, ScanOptions, VueDoctorConfig } from './types.js';
@@ -25,10 +27,12 @@ const VERSION = process.env.VERSION ?? '0.0.0';
 interface CliFlags {
   lint: boolean;
   deadCode: boolean;
+  audit: boolean;
   verbose: boolean;
   score: boolean;
   yes: boolean;
   analytics: boolean;
+  format: string;
   project?: string;
   diff?: boolean | string;
   offline?: boolean;
@@ -55,8 +59,10 @@ const resolveCliScanOptions = (
   return {
     lint: isCliOverride('lint') ? flags.lint : (userConfig?.lint ?? flags.lint),
     deadCode: isCliOverride('deadCode') ? flags.deadCode : (userConfig?.deadCode ?? flags.deadCode),
+    audit: isCliOverride('audit') ? flags.audit : (userConfig?.audit ?? flags.audit),
     verbose: isCliOverride('verbose') ? Boolean(flags.verbose) : (userConfig?.verbose ?? false),
     scoreOnly: flags.score,
+    format: (flags.format === 'json' ? 'json' : 'text') as 'text' | 'json',
   };
 };
 
@@ -112,8 +118,10 @@ const program = new Command()
   .argument('[directory]', 'project directory to scan', '.')
   .option('--no-lint', 'skip linting')
   .option('--no-dead-code', 'skip dead code detection')
+  .option('--no-audit', 'skip dependency vulnerability audit')
   .option('--verbose', 'show file details per rule')
   .option('--score', 'output only the score')
+  .option('--format <format>', 'output format: text or json', 'text')
   .option('-y, --yes', 'skip prompts, scan all workspace projects')
   .option('--project <name>', 'select workspace project (comma-separated for multiple)')
   .option('--diff [base]', 'scan only files changed vs base branch')
@@ -124,12 +132,13 @@ addAnalyticsOption(program);
 program
   .action(async (directory: string, flags: CliFlags) => {
     const isScoreOnly = flags.score;
+    const isJsonFormat = flags.format === 'json';
 
     try {
       const resolvedDirectory = path.resolve(directory);
       const userConfig = loadConfig(resolvedDirectory);
 
-      if (!isScoreOnly) {
+      if (!isScoreOnly && !isJsonFormat) {
         logger.log(`vue-doctor v${VERSION}`);
         logger.break();
       }
@@ -153,7 +162,7 @@ program
         isScoreOnly,
       );
 
-      if (isDiffMode && diffInfo && !isScoreOnly) {
+      if (isDiffMode && diffInfo && !isScoreOnly && !isJsonFormat) {
         if (diffInfo.isCurrentChanges) {
           logger.log('Scanning uncommitted changes');
         } else {
@@ -165,10 +174,13 @@ program
       }
 
       const allDiagnostics: Diagnostic[] = [];
+      let totalElapsedMs = 0;
+      let totalFilesScanned = 0;
+      const allSkippedChecks = new Set<string>();
       const telemetryUrl = process.env.FRAMEWORK_DOCTOR_TELEMETRY_URL ?? '';
       const isAutomated = isAutomatedEnvironment();
 
-      if (!isScoreOnly && !isAutomated && !flags.yes) {
+      if (!isScoreOnly && !isAutomated && !flags.yes && !isJsonFormat) {
         await maybePromptAnalyticsConsent(shouldSkipPrompts);
       }
 
@@ -179,7 +191,7 @@ program
           if (projectDiffInfo) {
             const changedSourceFiles = filterSourceFiles(projectDiffInfo.changedFiles);
             if (changedSourceFiles.length === 0) {
-              if (!isScoreOnly) {
+              if (!isScoreOnly && !isJsonFormat) {
                 logger.dim(`No changed source files in ${projectDirectory}, skipping.`);
                 logger.break();
               }
@@ -189,12 +201,27 @@ program
           }
         }
 
-        if (!isScoreOnly) {
+        if (!isScoreOnly && !isJsonFormat) {
           logger.dim(`Scanning ${projectDirectory}...`);
           logger.break();
         }
-        const scanResult = await scan(projectDirectory, { ...scanOptions, includePaths });
+        const scanStart = performance.now();
+        const scanResult = await scan(projectDirectory, {
+          ...scanOptions,
+          includePaths,
+          format: isJsonFormat ? 'json' : 'text',
+        });
+        const scanElapsed = performance.now() - scanStart;
+
         allDiagnostics.push(...scanResult.diagnostics);
+        totalElapsedMs += scanElapsed;
+        totalFilesScanned +=
+          (includePaths?.length ?? 0) > 0
+            ? (includePaths?.length ?? 0)
+            : scanResult.projectInfo.sourceFileCount;
+        for (const skipped of scanResult.skippedChecks) {
+          allSkippedChecks.add(skipped);
+        }
 
         if (
           telemetryUrl &&
@@ -217,9 +244,32 @@ program
           );
         }
 
-        if (!isScoreOnly) {
+        if (!isScoreOnly && !isJsonFormat) {
           logger.break();
         }
+      }
+
+      if (isJsonFormat) {
+        const hasHighOrCriticalSecurityFindings = allDiagnostics.some(
+          (d) => d.category === 'security' && d.severity === 'error',
+        );
+        const scoreResult =
+          totalFilesScanned > 0
+            ? calculateScore(allDiagnostics, totalFilesScanned, {
+                hasHighOrCriticalSecurityFindings,
+              })
+            : { score: 100, label: 'Great', breakdown: undefined };
+        const output = {
+          doctor: 'vue-doctor',
+          version: VERSION,
+          diagnostics: allDiagnostics,
+          scoreResult,
+          totalFilesScanned,
+          elapsedMilliseconds: totalElapsedMs,
+          skippedChecks: [...allSkippedChecks],
+        };
+        logger.log(JSON.stringify(output, null, 2));
+        return;
       }
 
       if (!isScoreOnly && !shouldSkipPrompts) {

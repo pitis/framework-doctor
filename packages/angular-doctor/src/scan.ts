@@ -231,8 +231,10 @@ const printSummary = (
 interface ResolvedScanOptions {
   lint: boolean;
   deadCode: boolean;
+  audit: boolean;
   verbose: boolean;
   scoreOnly: boolean;
+  format: 'text' | 'json';
   includePaths: string[];
 }
 
@@ -242,8 +244,10 @@ const mergeScanOptions = (
 ): ResolvedScanOptions => ({
   lint: inputOptions.lint ?? userConfig?.lint ?? true,
   deadCode: inputOptions.deadCode ?? userConfig?.deadCode ?? true,
+  audit: inputOptions.audit ?? userConfig?.audit ?? true,
   verbose: inputOptions.verbose ?? userConfig?.verbose ?? false,
   scoreOnly: inputOptions.scoreOnly ?? false,
+  format: inputOptions.format ?? 'text',
   includePaths: inputOptions.includePaths ?? [],
 });
 
@@ -262,7 +266,7 @@ export const scan = async (
     throw new Error('No Angular dependency found in package.json');
   }
 
-  if (!options.scoreOnly) {
+  if (!options.scoreOnly && options.format !== 'json') {
     printProjectDetection(projectInfo, userConfig, isDiffMode, includePaths);
   }
 
@@ -273,7 +277,10 @@ export const scan = async (
 
   const lintPromise = options.lint
     ? (async () => {
-        const lintSpinner = options.scoreOnly ? null : spinner('Running lint checks...').start();
+        const lintSpinner =
+          options.scoreOnly || options.format === 'json'
+            ? null
+            : spinner('Running lint checks...').start();
         try {
           const lintDiagnostics = await runEslint(directory, angularIncludePaths);
           lintSpinner?.succeed('Running lint checks.');
@@ -290,9 +297,10 @@ export const scan = async (
   const deadCodePromise =
     options.deadCode && !isDiffMode
       ? (async () => {
-          const deadCodeSpinner = options.scoreOnly
-            ? null
-            : spinner('Detecting dead code...').start();
+          const deadCodeSpinner =
+            options.scoreOnly || options.format === 'json'
+              ? null
+              : spinner('Detecting dead code...').start();
           try {
             const knipDiagnostics = await runKnip(directory);
             deadCodeSpinner?.succeed('Detecting dead code.');
@@ -323,6 +331,7 @@ export const scan = async (
     directory,
     isDiffMode,
     userConfig,
+    options.audit,
   );
 
   const elapsedMilliseconds = performance.now() - startTime;
@@ -338,11 +347,13 @@ export const scan = async (
   });
   const noScoreMessage = OFFLINE_FLAG_MESSAGE;
 
-  if (options.scoreOnly) {
-    if (scoreResult) {
-      logger.log(`${scoreResult.score}`);
-    } else {
-      logger.dim(noScoreMessage);
+  if (options.scoreOnly || options.format === 'json') {
+    if (options.scoreOnly && options.format !== 'json') {
+      if (scoreResult) {
+        logger.log(`${scoreResult.score}`);
+      } else {
+        logger.dim(noScoreMessage);
+      }
     }
     return { diagnostics, scoreResult, skippedChecks, projectInfo };
   }

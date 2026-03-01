@@ -13,6 +13,7 @@ React Doctor detects your framework (Next.js, Vite, Remix, etc.), React version,
 
 1. **Lint**: Checks 60+ rules across state & effects, performance, architecture, bundle size, security, correctness, accessibility, and framework-specific categories (Next.js, React Native). Rules are toggled automatically based on your project setup.
 2. **Dead code**: Detects unused files, exports, types, and duplicates.
+3. **Dependency audit**: Runs `pnpm audit` and reports high/critical vulnerabilities (use `--no-audit` to skip).
 
 Diagnostics are filtered through your config, then scored by severity (errors weigh more than warnings) to produce a **0–100 health score** (75+ Great, 50–74 Needs work, <50 Critical).
 
@@ -48,6 +49,9 @@ Options:
   -v, --version     display the version number
   --no-lint         skip linting
   --no-dead-code    skip dead code detection
+  --no-audit        skip dependency vulnerability audit
+  --fix             auto-fix lint issues where possible
+  --format <fmt>    output format: text or json
   --verbose         show file details per rule
   --score           output only the score
   -y, --yes         skip prompts, scan all workspace projects
@@ -82,7 +86,7 @@ You can also use the `"reactDoctor"` key in your `package.json` instead:
 }
 ```
 
-If both exist, `react-doctor.config.json` takes precedence.
+If both exist, `react-doctor.config.json` takes precedence. React Doctor also supports unified config via `framework-doctor.config.json` with a `reactDoctor` section. Framework-specific config overrides unified options.
 
 ### Config options
 
@@ -92,6 +96,7 @@ If both exist, `react-doctor.config.json` takes precedence.
 | `ignore.files` | `string[]`          | `[]`    | File paths to exclude, supports glob patterns (`src/generated/**`, `**/*.test.tsx`)                                                 |
 | `lint`         | `boolean`           | `true`  | Enable/disable lint checks (same as `--no-lint`)                                                                                    |
 | `deadCode`     | `boolean`           | `true`  | Enable/disable dead code detection (same as `--no-dead-code`)                                                                       |
+| `audit`        | `boolean`           | `true`  | Enable/disable dependency vulnerability audit (same as `--no-audit`)                                                                |
 | `verbose`      | `boolean`           | `false` | Show file details per rule (same as `--verbose`)                                                                                    |
 | `diff`         | `boolean \| string` | —       | Force diff mode (`true`) or pin a base branch (`"main"`). Set to `false` to disable auto-detection.                                 |
 | `analytics`    | `boolean`           | `true`  | Enable/disable anonymous analytics (same as `--no-analytics`)                                                                       |
