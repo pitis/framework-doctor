@@ -315,7 +315,7 @@ export const scan = async (
       : Promise.resolve<Diagnostic[]>([]);
 
   const securityPromise = options.lint
-    ? runSecurityScan(directory, includePaths)
+    ? runSecurityScan(directory, includePaths, 'angular')
     : Promise.resolve<Diagnostic[]>([]);
 
   const [lintDiagnostics, deadCodeDiagnostics, securityDiagnostics] = await Promise.all([

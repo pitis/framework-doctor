@@ -339,7 +339,7 @@ export const scan = async (
       : Promise.resolve<Diagnostic[]>([]);
 
   const securityPromise = options.lint
-    ? runSecurityScan(directory, includePaths)
+    ? runSecurityScan(directory, includePaths, projectInfo.framework)
     : Promise.resolve<Diagnostic[]>([]);
 
   const [vueTscDiagnostics, lintDiagnostics, deadCodeDiagnostics, securityDiagnostics] =
