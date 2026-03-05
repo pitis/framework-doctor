@@ -75,7 +75,7 @@ export const diagnose = async (
       : Promise.resolve(emptyDiagnostics);
 
   const securityPromise = effectiveLint
-    ? runSecurityScan(resolvedDirectory, includePaths)
+    ? runSecurityScan(resolvedDirectory, includePaths, projectInfo.framework)
     : Promise.resolve(emptyDiagnostics);
 
   const [lintDiagnostics, deadCodeDiagnostics, securityDiagnostics] = await Promise.all([

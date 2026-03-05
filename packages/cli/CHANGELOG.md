@@ -1,5 +1,16 @@
 # @framework-doctor/cli
 
+## 1.1.1
+
+### Patch Changes
+
+- included more security rules
+- Updated dependencies
+  - @framework-doctor/angular@1.1.1
+  - @framework-doctor/svelte@1.1.1
+  - @framework-doctor/react@1.1.1
+  - @framework-doctor/vue@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes

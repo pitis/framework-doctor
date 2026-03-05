@@ -1,5 +1,11 @@
 # react-doctor
 
+## 1.1.1
+
+### Patch Changes
+
+- included more security rules
+
 ## 1.1.0
 
 ### Minor Changes

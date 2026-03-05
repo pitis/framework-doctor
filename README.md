@@ -5,6 +5,52 @@
 
 Framework Doctor auto-detects your framework and runs the right health check. Supports **Svelte**, **React**, **Vue**, and **Angular**.
 
+## Why this project exists
+
+Framework teams usually rely on separate tools for linting, dead-code cleanup, dependency audits, and framework-specific checks. That creates fragmented output and slow feedback loops, especially in monorepos.
+
+Framework Doctor was built to unify that workflow into one command:
+
+- detect the framework automatically
+- run the most relevant checks for that framework
+- normalize findings into one diagnostic model
+- compute a simple, comparable 0-100 score
+
+The goal is pragmatic: give teams one health snapshot they can run locally, in PRs, or in CI without wiring several tools manually.
+
+## Architecture overview
+
+This repository is a TypeScript monorepo organized into framework-specific doctors plus shared core logic.
+
+- `packages/core`
+  - shared scoring engine, shared diagnostic types, UI output helpers, security scan primitives, and telemetry helpers
+- `packages/cli`
+  - unified entrypoint (`framework-doctor`) that detects or accepts a forced framework and dispatches to the matching doctor
+- `packages/react-doctor`, `packages/vue-doctor`, `packages/svelte-doctor`, `packages/angular-doctor`
+  - framework adapters that run framework-relevant checks, map results to normalized diagnostics, and render output consistently
+- `examples/`
+  - intentionally flawed sample apps for each framework
+- `supabase/`
+  - optional telemetry backend schema and function
+
+Each framework doctor follows the same high-level pipeline:
+
+1. Discover project(s) and load config.
+2. Run selected checks (lint/type/framework/security/dead-code/audit).
+3. Normalize findings into common diagnostic fields.
+4. Compute score with penalties by severity and volume.
+5. Print text or JSON output and optionally emit telemetry.
+
+## Feature highlights
+
+- unified CLI with auto-detection and watch mode
+- forced framework selection via `--framework <svelte|react|vue|angular>`
+- monorepo project targeting with `--project`
+- diff-only scanning via `--diff [base]`
+- CI-friendly machine output with `--format json` and `--score`
+- framework-aware checks plus common security and dependency audit checks
+- optional, anonymous telemetry routed to your own Supabase endpoint
+
 ## Quick start
 
 Run in a project root (auto-detects Svelte, React, Vue, Angular from `package.json`):
@@ -42,6 +88,7 @@ See [examples/README.md](examples/README.md) for more demo projects and commands
 - `npx -y @framework-doctor/cli .` - auto-detect framework and run the right doctor
 - `npx -y @framework-doctor/cli ./path/to/project` - scan a specific project directory
 - `npx -y @framework-doctor/cli . --watch` - re-scan on file changes
+- `npx -y @framework-doctor/cli . --framework react` - force a framework when detection is ambiguous or unavailable
 
 **React (direct):**
 

@@ -5,4 +5,5 @@ export interface SecurityRule {
   help: string;
   severity: 'error' | 'warning';
   fileExtensions: string[];
+  skipCommentOnlyLines?: boolean;
 }

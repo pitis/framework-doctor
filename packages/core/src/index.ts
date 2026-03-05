@@ -39,6 +39,7 @@ export { loadConfig, loadConfigWithUnified, loadUnifiedConfig } from './load-con
 export { runAudit, type AuditResult } from './run-audit.js';
 export {
   DANGEROUSLY_SET_INNER_HTML_RULE,
+  HARDCODED_SECRET_RULES,
   NO_AT_HTML_RULE,
   NO_BYPASS_SECURITY_TRUST_RULE,
   NO_INNER_HTML_BINDING_RULE,
@@ -47,9 +48,15 @@ export {
   SOURCE_FILE_PATTERN_WITH_VUE,
   UNIVERSAL_SECURITY_RULES,
   getFilesToScan,
+  getFrameworkProfile,
+  runProjectSecurityScan,
   runSecurityScan,
 } from './security/index.js';
-export type { RunSecurityScanOptions, SecurityRule } from './security/index.js';
+export type {
+  FrameworkSecurityProfile,
+  RunSecurityScanOptions,
+  SecurityRule,
+} from './security/index.js';
 export {
   isAutomatedEnvironment,
   maybePromptAnalyticsConsent,

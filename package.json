@@ -22,7 +22,7 @@
     "typecheck": "turbo run typecheck --filter=./packages/*",
     "test": "turbo run test --filter=./packages/*",
     "test:doctor": "turbo run test --filter=@framework-doctor/svelte --concurrency=1",
-    "quality:check": "turbo run format:check lint typecheck test --filter=!./examples/*",
+    "quality:check": "turbo run format:check lint typecheck test --filter=./packages/*",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "pnpm build && changeset publish",

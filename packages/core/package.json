@@ -25,7 +25,8 @@
     "build": "rimraf dist && cross-env NODE_ENV=production tsdown",
     "lint": "oxlint src",
     "lint:fix": "oxlint --fix src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm build && vitest run"
   },
   "devDependencies": {
     "@types/node": "catalog:",
@@ -33,7 +34,8 @@
     "oxlint": "catalog:",
     "rimraf": "catalog:",
     "tsdown": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "packageManager": "pnpm@10.30.0",
   "dependencies": {

@@ -1,18 +1,38 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Diagnostic } from '../types.js';
+import { COMMENT_ONLY_LINE_PATTERN } from './constants.js';
 import { getFilesToScan, SOURCE_FILE_PATTERN_FULL } from './get-files-to-scan.js';
 import type { SecurityRule } from './rule.js';
 
-const findMatches = (content: string, regex: RegExp): Array<{ line: number; column: number }> => {
-  const results: Array<{ line: number; column: number }> = [];
+interface MatchLocation {
+  line: number;
+  column: number;
+}
+
+const findMatches = (
+  content: string,
+  regex: RegExp,
+  skipCommentOnlyLines = false,
+): MatchLocation[] => {
+  const results: MatchLocation[] = [];
   const lines = content.split('\n');
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
     const line = lines[lineIndex];
+    if (skipCommentOnlyLines && COMMENT_ONLY_LINE_PATTERN.test(line)) {
+      continue;
+    }
     const regexCopy = new RegExp(regex.source, regex.flags);
+    const isGlobalRegex = regexCopy.global || regexCopy.sticky;
     let match: RegExpExecArray | null;
     while ((match = regexCopy.exec(line)) !== null) {
       results.push({ line: lineIndex + 1, column: match.index });
+      if (!isGlobalRegex) {
+        break;
+      }
+      if (match[0].length === 0) {
+        regexCopy.lastIndex += 1;
+      }
     }
   }
   return results;
@@ -43,7 +63,7 @@ export const runSecurityScan = async (
       const content = fs.readFileSync(filePath, 'utf-8');
       for (const rule of options.rules) {
         if (!ruleAppliesToFile(rule, filePath)) continue;
-        const matches = findMatches(content, rule.pattern);
+        const matches = findMatches(content, rule.pattern, rule.skipCommentOnlyLines === true);
         for (const { line, column } of matches) {
           diagnostics.push({
             filePath,

@@ -2,11 +2,16 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { GIT_LS_FILES_MAX_BUFFER_BYTES } from '../constants.js';
+import { EXCLUDED_FILE_PATTERNS } from './constants.js';
+
 export const SOURCE_FILE_PATTERN_FULL = /\.(svelte|ts|tsx|js|jsx|mts|cts|mjs|cjs)$/;
 
 export const SOURCE_FILE_PATTERN_WITH_VUE = /\.(vue|svelte|ts|tsx|js|jsx|mts|cts|mjs|cjs)$/;
 
 export const SOURCE_FILE_PATTERN_WITH_ANGULAR = /\.(html|ts|mts|cts|mjs|cjs)$/;
+
+const isExcludedFile = (filePath: string): boolean =>
+  EXCLUDED_FILE_PATTERNS.some((pattern) => pattern.test(filePath));
 
 export const getFilesToScan = (
   rootDirectory: string,
@@ -18,7 +23,9 @@ export const getFilesToScan = (
       .map((filePath) => path.resolve(rootDirectory, filePath))
       .filter((resolvedPath) => {
         const relative = path.relative(rootDirectory, resolvedPath);
-        return !relative.startsWith('..') && pattern.test(resolvedPath);
+        return (
+          !relative.startsWith('..') && pattern.test(resolvedPath) && !isExcludedFile(relative)
+        );
       });
   }
 
@@ -32,7 +39,7 @@ export const getFilesToScan = (
     return gitResult.stdout
       .split('\n')
       .map((line) => line.trim())
-      .filter((line) => line.length > 0 && pattern.test(line))
+      .filter((line) => line.length > 0 && pattern.test(line) && !isExcludedFile(line))
       .map((line) => path.resolve(rootDirectory, line));
   }
 
@@ -46,7 +53,11 @@ export const getFilesToScan = (
         if (entry.name !== 'node_modules' && entry.name !== 'dist' && entry.name !== '.git') {
           walk(fullPath);
         }
-      } else if (entry.isFile() && pattern.test(entry.name)) {
+      } else if (
+        entry.isFile() &&
+        pattern.test(entry.name) &&
+        !isExcludedFile(path.relative(rootDirectory, fullPath))
+      ) {
         collectedFiles.push(fullPath);
       }
     }

@@ -80,7 +80,11 @@ export const scan = async (directory: string, options: ScanOptions = {}): Promis
   let securityDiagnostics: Diagnostic[] = [];
   if (resolved.lint) {
     try {
-      securityDiagnostics = await runSecurityScan(directory, resolved.includePaths);
+      securityDiagnostics = await runSecurityScan(
+        directory,
+        resolved.includePaths,
+        projectInfo.framework,
+      );
     } catch {
       skippedChecks.push('security');
     }
