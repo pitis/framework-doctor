@@ -42,10 +42,6 @@ export interface WorkspacePackage {
   directory: string;
 }
 
-export interface HandleErrorOptions {
-  shouldExit: boolean;
-}
-
 export interface PackageJson {
   name?: string;
   dependencies?: Record<string, string>;

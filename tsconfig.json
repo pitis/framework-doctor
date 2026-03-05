@@ -4,6 +4,15 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@framework-doctor/angular": ["packages/angular-doctor/src/index.ts"],
+      "@framework-doctor/cli": ["packages/cli/src/cli.ts"],
+      "@framework-doctor/core": ["packages/core/src/index.ts"],
+      "@framework-doctor/react": ["packages/react-doctor/src/index.ts"],
+      "@framework-doctor/svelte": ["packages/svelte-doctor/src/index.ts"],
+      "@framework-doctor/vue": ["packages/vue-doctor/src/index.ts"]
+    },
     "declaration": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

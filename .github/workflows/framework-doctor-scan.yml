@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Framework Doctor
-        uses: pitis/framework-doctor@main
+        uses: pitis/framework-doctor@v1
         with:
           directory: ${{ inputs.directory }}
           fail-on-low-score: ${{ inputs.fail-on-low-score }}

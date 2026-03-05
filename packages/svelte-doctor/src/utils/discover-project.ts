@@ -1,8 +1,8 @@
+import { readPackageJson } from '@framework-doctor/core';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { PackageJson, ProjectInfo, SvelteFramework, WorkspacePackage } from '../types.js';
-import { readPackageJson } from './read-package-json.js';
 
 const SOURCE_FILE_PATTERN = /\.(svelte|ts|tsx|js|jsx|mts|cts|mjs|cjs)$/;
 

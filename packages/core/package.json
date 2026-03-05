@@ -26,7 +26,8 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint --fix src",
     "typecheck": "tsc --noEmit",
-    "test": "pnpm build && vitest run"
+    "test": "pnpm build && vitest run",
+    "coverage": "pnpm build && vitest run --coverage"
   },
   "devDependencies": {
     "@types/node": "catalog:",
@@ -35,7 +36,8 @@
     "rimraf": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:"
   },
   "packageManager": "pnpm@10.30.0",
   "dependencies": {

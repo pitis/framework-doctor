@@ -1,8 +1,8 @@
+import { readPackageJson } from '@framework-doctor/core';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Diagnostic } from '../types.js';
-import { readPackageJson } from './read-package-json.js';
 
 const MOTION_LIBRARY_PACKAGES = new Set(['framer-motion', 'motion']);
 const REDUCED_MOTION_GREP_PATTERN = 'prefers-reduced-motion|useReducedMotion';

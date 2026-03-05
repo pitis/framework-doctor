@@ -92,10 +92,6 @@ export interface ScanOptions {
   includePaths?: string[];
 }
 
-export interface HandleErrorOptions {
-  shouldExit: boolean;
-}
-
 export interface WorkspacePackage {
   name: string;
   directory: string;

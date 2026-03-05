@@ -1,9 +1,9 @@
+import { readPackageJson } from '@framework-doctor/core';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { SOURCE_FILE_PATTERN } from '../constants.js';
 import type { PackageJson, ProjectInfo, VueFramework, WorkspacePackage } from '../types.js';
-import { readPackageJson } from './read-package-json.js';
 
 const collectDependencies = (packageJson: PackageJson): Record<string, string> => ({
   ...packageJson.peerDependencies,

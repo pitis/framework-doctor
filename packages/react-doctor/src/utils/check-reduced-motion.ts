@@ -1,9 +1,9 @@
+import { readPackageJson } from '@framework-doctor/core';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { MOTION_LIBRARY_PACKAGES } from '../plugin/constants.js';
 import type { Diagnostic } from '../types.js';
-import { readPackageJson } from './read-package-json.js';
 
 const REDUCED_MOTION_GREP_PATTERN = 'prefers-reduced-motion|useReducedMotion';
 const REDUCED_MOTION_FILE_GLOBS = ['*.ts', '*.tsx', '*.js', '*.jsx', '*.css', '*.scss'] as const;
