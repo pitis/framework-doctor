@@ -28,7 +28,8 @@
     "release": "pnpm build && changeset publish",
     "prepare": "husky",
     "demo:angular": "pnpm build && pnpm exec framework-doctor examples/angular/demo-app",
-    "demo:react": "pnpm build && pnpm exec framework-doctor examples/react/demo-app"
+    "demo:react": "pnpm build && pnpm exec framework-doctor examples/react/demo-app",
+    "coverage:check": "turbo run coverage --filter=./packages/*"
   },
   "devDependencies": {
     "@framework-doctor/cli": "workspace:*",

@@ -13,6 +13,10 @@ inputs:
     description: 'Output format: text or json'
     required: false
     default: 'text'
+  cli-version:
+    description: 'Version of @framework-doctor/cli to run'
+    required: false
+    default: '1.1.0'
   fail-on-low-score:
     description: 'Fail the step if score is below threshold'
     required: false
@@ -36,9 +40,9 @@ runs:
       run: |
         USE_JSON=${{ inputs.post-to-pr == 'true' || inputs.fail-on-low-score == 'true' }}
         if [ "$USE_JSON" = "true" ]; then
-          npx -y @framework-doctor/cli "${{ inputs.directory }}" --format json -y 2>&1 | tee "$OUTPUT_FILE"
+          npx -y @framework-doctor/cli@${{ inputs.cli-version }} "${{ inputs.directory }}" --format json -y 2>&1 | tee "$OUTPUT_FILE"
         else
-          npx -y @framework-doctor/cli "${{ inputs.directory }}" --format ${{ inputs.format }} -y
+          npx -y @framework-doctor/cli@${{ inputs.cli-version }} "${{ inputs.directory }}" --format ${{ inputs.format }} -y
         fi
       shell: bash
 

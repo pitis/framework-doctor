@@ -61,7 +61,8 @@
     "lint:fix": "oxlint --fix src tests",
     "typecheck": "tsc --noEmit",
     "test": "pnpm build && vitest run",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "coverage": "pnpm build && vitest run --coverage"
   },
   "dependencies": {
     "@framework-doctor/core": "workspace:*",
@@ -83,7 +84,8 @@
     "rimraf": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:"
   },
   "packageManager": "pnpm@10.30.0"
 }

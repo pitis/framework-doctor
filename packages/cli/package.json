@@ -41,7 +41,11 @@
   ],
   "scripts": {
     "build": "rimraf dist && cross-env NODE_ENV=production tsdown",
+    "lint": "oxlint src tests",
+    "lint:fix": "oxlint --fix src tests",
     "typecheck": "tsc --noEmit",
+    "test": "pnpm build && vitest run",
+    "coverage": "pnpm build && vitest run --coverage",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
@@ -52,11 +56,13 @@
     "chokidar": "^4.0.0"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "catalog:",
     "@types/node": "catalog:",
     "cross-env": "catalog:",
     "rimraf": "catalog:",
     "tsdown": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "packageManager": "pnpm@10.30.0"
 }

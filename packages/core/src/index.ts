@@ -35,8 +35,11 @@ export {
   writeGlobalConfig,
   type FrameworkDoctorConfig,
 } from './global-config.js';
+export { handleError, type HandleErrorOptions } from './handle-error.js';
 export { loadConfig, loadConfigWithUnified, loadUnifiedConfig } from './load-config.js';
+export { readPackageJson, type PackageJsonLike } from './read-package-json.js';
 export { runAudit, type AuditResult } from './run-audit.js';
+export { runKnipJson } from './run-knip-json.js';
 export {
   DANGEROUSLY_SET_INNER_HTML_RULE,
   HARDCODED_SECRET_RULES,

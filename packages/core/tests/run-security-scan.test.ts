@@ -5,6 +5,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { HARDCODED_SECRET_RULES, runSecurityScan } from '../src/security/index.js';
 
 describe('runSecurityScan', () => {
+  const MAX_SECURITY_SCAN_DURATION_MS = 5_000;
   const tempDirectory = fs.mkdtempSync(
     path.join(os.tmpdir(), 'framework-doctor-security-regex-test-'),
   );
@@ -40,5 +41,21 @@ describe('runSecurityScan', () => {
 
     expect(stripeDiagnostics.length).toBe(1);
     expect(stripeDiagnostics[0].line).toBe(3);
+  });
+
+  it('completes regex security scan within performance budget', async () => {
+    const filePath = path.join(tempDirectory, 'security-large.ts');
+    const lines = Array.from({ length: 2_500 }, (_, lineIndex) => `const safe${lineIndex} = true;`);
+    fs.writeFileSync(filePath, lines.join('\n'));
+
+    const startTime = performance.now();
+    const diagnostics = await runSecurityScan(tempDirectory, [], {
+      plugin: 'react-doctor',
+      rules: HARDCODED_SECRET_RULES,
+    });
+    const elapsedMilliseconds = performance.now() - startTime;
+
+    expect(diagnostics).toHaveLength(0);
+    expect(elapsedMilliseconds).toBeLessThan(MAX_SECURITY_SCAN_DURATION_MS);
   });
 });
